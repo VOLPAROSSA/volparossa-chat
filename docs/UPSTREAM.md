@@ -1,6 +1,6 @@
 # Signal upstream provenance
 
-Checked on 2026-09-29. This is a pinned source investigation, not a built or working Signal fork. No upstream source tree or dependency binaries have been imported by this slice. Machine-readable pins are in [upstream-lock.json](../upstream-lock.json).
+Checked on 2026-09-29. The initial investigation is now followed by a [workspace-only backup candidate](BACKUP_CONNECTOR.md), not a built or working Signal fork. The exact Desktop source has been staged and every Git blob/tree verified; a pinned official Node runtime runs the narrow connector tests. Full Signal dependencies and Electron/native execution remain pending. Machine-readable upstream pins are unchanged in [upstream-lock.json](../upstream-lock.json), with staging evidence in [source-staging.json](../provenance/source-staging.json).
 
 ## Desktop first
 

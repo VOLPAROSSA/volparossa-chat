@@ -1,6 +1,6 @@
 # Signal / VOLPAROSSA integration contract
 
-**Status: requirements and inspected seams, not implemented functionality.** Source versions and primary references are in [UPSTREAM.md](UPSTREAM.md). The goal is to preserve normal Signal while adding authenticated VOLPAROSSA delivery between compatible clients, voice/video calling over VOLPAROSSA and reciprocal storage of encrypted backups. A proxy setting cannot make an unmodified Signal client deliver messages through another messaging network or prove that its native call media uses that proxy.
+**Status: message/calling requirements and an executable, not yet native-runtime-proven backup candidate.** Source versions and primary references are in [UPSTREAM.md](UPSTREAM.md); the [backup connector](BACKUP_CONNECTOR.md) records its narrower passing checks and remaining proof. The goal is to preserve normal Signal while adding authenticated VOLPAROSSA delivery between compatible clients, voice/video calling over VOLPAROSSA and reciprocal storage of encrypted backups. A proxy setting cannot make an unmodified Signal client deliver messages through another messaging network or prove that its native call media uses that proxy.
 
 ## Keep Signal's identities and cryptography
 

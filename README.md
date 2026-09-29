@@ -6,7 +6,7 @@ Keep the familiar Signal experience, with decentralized messaging, voice/video c
 
 ## Development status
 
-Integration is starting with Signal Desktop on Linux. This repository does **not yet contain a working modified Signal client**. The source baseline, integration boundaries and backup requirements are being established before changing the actual encrypted send/receive path. Existing core messages are not already Signal messages.
+Integration is starting with Signal Desktop on Linux. This repository does **not yet contain a working modified Signal client**. A reproducible [encrypted-backup connector candidate](docs/BACKUP_CONNECTOR.md) now targets the exact upstream exporter, attachment encryption and native importer, using the core's retained replica storage. Its bounded file/process tests pass; the combined Electron, Signal-crypto and real-core test has not run. Existing core messages are not already Signal messages.
 
 ## Messages: Signal encryption, another delivery path
 
@@ -35,6 +35,7 @@ Private leases, durable capacity accounting, restart recovery, renewal, expiry, 
 ## Architecture and upstream
 
 - [Signal integration contract](docs/SIGNAL_INTEGRATION.md): actual send/receive seams, compatibility and remaining work.
+- [Executable backup candidate](docs/BACKUP_CONNECTOR.md): source staging, connector boundaries and the pending native proof.
 - [Upstream provenance](docs/UPSTREAM.md): pinned Signal Desktop/libsignal versions and licenses.
 - [Core](https://github.com/VOLPAROSSA/volparossa): network transport, private storage and application interfaces.
 - [Browser](https://github.com/VOLPAROSSA/volparossa-browser): a separate client of that same core.

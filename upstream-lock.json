@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "checked_at": "2026-09-29",
-  "status": "source-audit-only-not-imported-built-or-integrated",
+  "status": "source-staged-verified-backup-connector-candidate-not-native-runtime-proven",
   "initial_target": "debian-13-amd64-desktop",
   "signal_desktop": {
     "repository": "https://github.com/signalapp/Signal-Desktop",
@@ -37,6 +37,8 @@
     "license_bytes_hashed": true,
     "tag_signatures_independently_verified": false,
     "source_tree_imported": false,
+    "source_tree_staged_and_all_git_hashes_verified": true,
+    "backup_overlay_applied_to_separate_candidate": true,
     "dependency_artifacts_verified": false,
     "source_build_completed": false,
     "direct_message_runtime_proven": false,

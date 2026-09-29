@@ -1,0 +1,33 @@
+  it('exports and imports a VOLPAROSSA replicated encrypted backup', async function () {
+    const config = process.env.VOLPAROSSA_BACKUP_CONFIG;
+    const work = process.env.VOLPAROSSA_BACKUP_WORK;
+    if (!config || !work) {
+      this.skip();
+      return;
+    }
+    this.timeout(40 * durations.MINUTE);
+    let snapshotDir: string;
+    await generateTestDataThenRestoreBackup(
+      this,
+      async () => {
+        const window = await app.getWindow();
+        await window.evaluate(async ({ directory, configPath }) => {
+          if (!window.SignalCI) { throw new Error('Signal CI bridge unavailable'); }
+          await window.SignalCI.volparossaBackupExport(directory, configPath);
+        }, { directory: work, configPath: config });
+        // The connector has already discarded its native export and unwrapped container.
+        // Remove the remaining LOCAL ciphertext too: restoration must use the real core.
+        await fs.unlink(join(work, 'archive.signal'));
+        const restore = join(work, 'restored');
+        await fs.mkdir(restore, { mode: 0o700 });
+        snapshotDir = await window.evaluate(async ({ directory, configPath, destination }) => {
+          if (!window.SignalCI) { throw new Error('Signal CI bridge unavailable'); }
+          return window.SignalCI.volparossaBackupRestore(directory, configPath, destination);
+        }, { directory: work, configPath: config, destination: restore });
+      },
+      () => ({ localBackup: snapshotDir })
+    );
+    // Upstream helper erased the old profile/CDN, relinked, imported, and compared native
+    // messages and decrypted attachment hashes. Retained journals/recovery stay private;
+    // explicit owner cleanup is separate and never consumes a backup merely by reading it.
+  });
