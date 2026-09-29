@@ -2,7 +2,7 @@
 
 A Signal-based client for **VOLPAROSSA — the Decentralized Intelligent Cooperative Network**.
 
-Keep the familiar Signal experience, with an additional decentralized delivery path and private, cooperative backup storage supplied by the reusable [VOLPAROSSA core](https://github.com/VOLPAROSSA/volparossa).
+Keep the familiar Signal experience, with decentralized messaging, voice/video calling and private, cooperative backup storage supplied by the reusable [VOLPAROSSA core](https://github.com/VOLPAROSSA/volparossa).
 
 ## Development status
 
@@ -16,11 +16,19 @@ Ordinary Signal use remains available. Routing must account for every recipient 
 
 Interrupted or ambiguous delivery must not silently create a second message or consume a second ratchet state. Delivery acknowledgements, retries, attachments, receipts, groups and offline recipients need explicit integration, not plaintext injection into the conversation UI.
 
+## Calls: familiar controls, protected network paths
+
+Voice and video calls are part of the requested integration, including one-to-one and group conversations. Both call setup and encrypted media need a VOLPAROSSA path; delivering a call invitation through the network alone is not enough. Keep Signal's existing call cryptography and ordinary calling compatibility, and distinguish fully decentralized calls from mixed or Signal-backed calls.
+
+Call media, private signaling and contact associations are not public-cache or training inputs. Group forwarding and connection fallback require their own integration and privacy checks. This is planned functionality, not a working calling feature in this repository yet.
+
 ## Backups: private, distributed and reciprocal
 
 Backup storage belongs in the core, so applications beyond Signal can use it. Signal's encrypted backup archive is split into opaque chunks, stored on other participants and reconstructed for the authorized owner. It is **private retained storage**, separate from the public content cache and agent-training data. Storage peers do not receive recovery keys.
 
 The agreed contribution rule counts **actual remotely stored bytes, including recovery copies and their overhead**. A participant using 1 GB of remote storage must make at least 1 GB available for other users; a 1 GB archive with two full copies requires about 2 GB plus overhead. Offered capacity is not unlimited free disk, and a self-reported number is not proof that remote storage exists.
+
+The contribution target follows usage down as well as up. Reducing actual remote use from 2 GB to 1 GB should reduce that target to 1 GB. Other users' live fragments must first move to verified replacement holders before their occupied space is released; insufficient replacement capacity remains a visible pending reduction, not silent data loss. This adaptive controller belongs in the core and is not implemented by the current local store.
 
 Private leases, durable capacity accounting, restart recovery, renewal, expiry, deletion and complete backup restore must work before this is presented as cloud backup. Replication mitigates unavailable peers; it is not a promise of permanent availability. Chunk checksums are not encryption or authorization, and removing a lease cannot prove that an untrusted peer erased its bytes.
 
