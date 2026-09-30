@@ -1,8 +1,46 @@
 # Signal upstream provenance
 
-Checked on 2026-09-29. The initial investigation is now followed by a [workspace-only backup candidate](BACKUP_CONNECTOR.md), not a built or working Signal fork. The exact Desktop source has been staged and every Git blob/tree verified; a pinned official Node runtime runs the narrow connector tests. Full Signal dependencies and Electron/native execution remain pending. Machine-readable upstream pins are unchanged in [upstream-lock.json](../upstream-lock.json), with staging evidence in [source-staging.json](../provenance/source-staging.json).
+Source audit checked on 2026-09-29; build evidence updated on 2026-09-30. The
+[workspace-only backup candidate](BACKUP_CONNECTOR.md) now has installed locked dependencies,
+materialized native inputs and passing offline preparatory compilation. It is **not yet a
+working Signal fork or proven native backup round trip**: no Electron app/preload-cache or
+native export/import test has run. Every original staged Git blob/tree was verified;
+the final build preserves all 4,573 original candidate files and the lock. Upstream pins remain
+in [upstream-lock.json](../upstream-lock.json); [source-staging.json](../provenance/source-staging.json)
+is the historical source-only snapshot, and [build-staging.json](../provenance/build-staging.json)
+records the later measured results without reclassifying failed attempts.
 
 ## Desktop first
+
+### Workspace build tools staged on 2026-09-30
+
+The exact official Node **24.19.0** archive recorded in
+`provenance/source-staging.json` also supplies npm **11.17.0**. A separate local runtime
+now retains that complete bundled npm and its notices; Node, npm and npx version checks
+pass. The original node-only runtime remains untouched.
+
+Signal's lockfile pins pnpm **11.24.0**. The explicitly staged
+[registry archive](https://registry.npmjs.org/pnpm/-/pnpm-11.24.0.tgz) matches the lock's
+SHA-512 integrity and has SHA-256
+`d1eab2433172661cc36a18ec85fce93f771db1962717329cc01ec9c2824ca24f`.
+Its MIT license is retained unchanged. The reviewed source lockfile has SHA-256
+`bc06486a375791ed118b10f10c33428b0fefa37ce22e6c2cf56c2bf37dd11040`.
+Tool staging does not automatically install dependencies or run package lifecycles.
+The subsequent explicit frozen, scripts-disabled installation added 2,023 platform-selected
+packages. Electron 44.1.0 and RingRTC 2.71.0 archives were separately checksum-bound to their
+SRI-verified npm packages and materialized offline, preserving notices and ordinary permissions.
+Their source builds and runtime compatibility have not been proven.
+
+All four preparatory compile steps pass: workspace types, windows-ucv, mock-server and the
+selected app assets. The successful receipt records 20 required outputs, exact original
+source/lock preservation and completed child cleanup. Builds run without network in a
+Bubblewrap environment with a read-only host root and explicit workspace-only writable paths;
+`SOURCE_DATE_EPOCH=1790198897` avoids borrowing the enclosing repository's Git timestamp.
+No root postinstall, native app, preload-cache or real-core backup test is included in this
+result. See the [explicit build boundary](BACKUP_CONNECTOR.md#verified-build-staging--2026-09-30)
+and [sanitized receipt hashes](../provenance/build-staging.json).
+
+### Selected application source
 
 The initial target is Debian 13 amd64, matching the reusable VOLPAROSSA core. The selected stable release is [Signal Desktop v8.28.0](https://github.com/signalapp/Signal-Desktop/releases/tag/v8.28.0), published 2026-09-23. Its annotated tag resolves to commit `ef3872cb0249ec939d8aff857568a0e87a6b5075`.
 
@@ -22,7 +60,7 @@ The same Desktop manifest pins **`@signalapp/ringrtc` 2.71.0**, Signal's native 
 
 That RingRTC source specifies **Signal WebRTC `7871f`** in `config/version.properties`. Its annotated tag object `3eca51d5a8c223be309dbb81e073b7f312a1046b` resolves to **`3a5cb5f6ea8d223a7b05e4e22ce3f9b77a740f8a`**; the upstream API reports that tag unsigned. RingRTC's Rust lockfile separately pins `zkgroup`/`libsignal-core` through libsignal **v0.99.1**, commit **`97801d22dcf9f5bf714f7b8fa3212cdc973ae1c8`**. That transitive source is distinct from Desktop's selected `@signalapp/libsignal-client` 0.100.0; preserve the dependency graph rather than silently aligning the versions. [WebRTC selector](https://github.com/signalapp/ringrtc/blob/4c5fdb312d3c0d6b8e4091e4be5271c020f5792d/config/version.properties), [WebRTC tag object](https://api.github.com/repos/signalapp/webrtc/git/tags/3eca51d5a8c223be309dbb81e073b7f312a1046b), [RingRTC Cargo lock](https://github.com/signalapp/ringrtc/blob/4c5fdb312d3c0d6b8e4091e4be5271c020f5792d/Cargo.lock).
 
-RingRTC identifies its source/package as **AGPL-3.0-only**; the selected WebRTC root license has BSD three-clause terms, with additional dependency notices to preserve. RingRTC's Node package normally runs `scripts/fetch-prebuild.js` during install. No installer, downloaded native artifact, source import or build was run for this audit; resolving tags does not verify a prebuilt binary or reproduce its build. Before importing/building, record these calling dependencies in the machine-readable lock and preserve their full licenses and third-party acknowledgements. The existing `upstream-lock.json` still records only the earlier Desktop/libsignal investigation. [RingRTC package/license declaration](https://github.com/signalapp/ringrtc/blob/4c5fdb312d3c0d6b8e4091e4be5271c020f5792d/src/node/package.json), [WebRTC license](https://github.com/signalapp/webrtc/blob/3a5cb5f6ea8d223a7b05e4e22ce3f9b77a740f8a/LICENSE).
+RingRTC identifies its source/package as **AGPL-3.0-only**; the selected WebRTC root license has BSD three-clause terms, with additional dependency notices to preserve. RingRTC's Node package normally runs `scripts/fetch-prebuild.js` during install; that download-capable lifecycle script was not run. The original audit resolved source references only. Later explicit archive verification and offline materialization are recorded in [build-staging.json](../provenance/build-staging.json), including retained acknowledgements; neither reproduces the upstream native build. The existing `upstream-lock.json` still records only the earlier Desktop/libsignal investigation, while the exact Signal dependency lock and native-input evidence bind this build's selected artifacts. [RingRTC package/license declaration](https://github.com/signalapp/ringrtc/blob/4c5fdb312d3c0d6b8e4091e4be5271c020f5792d/src/node/package.json), [WebRTC license](https://github.com/signalapp/webrtc/blob/3a5cb5f6ea8d223a7b05e4e22ce3f9b77a740f8a/LICENSE).
 
 ### Inspected calling seams
 

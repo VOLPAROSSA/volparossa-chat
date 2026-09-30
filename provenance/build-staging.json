@@ -1,0 +1,266 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-09-30",
+  "scope": "workspace preparatory compilation; not a native Signal backup runtime proof",
+  "signal_desktop": {
+    "version": "8.28.0",
+    "commit": "ef3872cb0249ec939d8aff857568a0e87a6b5075",
+    "lock_sha256": "bc06486a375791ed118b10f10c33428b0fefa37ce22e6c2cf56c2bf37dd11040",
+    "immutable_candidate_file_count": 4573
+  },
+  "toolchain": {
+    "node": {
+      "version": "24.19.0",
+      "archive_sha256": "14b342e71204f811bde6153be8e04b62aef63c236fef92b55f9c83154b409647",
+      "receipt": {
+        "file": "build/node-npm-runtime-report.json",
+        "sha256": "d6b30f108b33e96d75f2a20916b24c90f3dd2cf674961405fe15ba891c7ce597"
+      }
+    },
+    "npm": {
+      "version": "11.17.0",
+      "source": "bundled in the same verified Node archive"
+    },
+    "pnpm": {
+      "version": "11.24.0",
+      "archive_sha256": "d1eab2433172661cc36a18ec85fce93f771db1962717329cc01ec9c2824ca24f",
+      "integrity": "sha512-vSfjRel23LC+C3oSKCF7BJqBfiGx81XJDb59xGZxiVqLwebQbCRVRQXqk+oLRfSJon7Bv7yN5qlln8oPFvoAAA==",
+      "receipt": {
+        "file": "build/pnpm-runtime-report.json",
+        "sha256": "885dbe6aaa25783a7c66d4ad03128ca4c7b875c9487defee1c2168a60e94ae4e"
+      }
+    }
+  },
+  "dependencies": {
+    "receipt": {
+      "file": "build/signal-dependencies/attempt-2489b2b9294244648a0f25d3f94fe969.json",
+      "sha256": "6a1b67fa8caa17e6031e3ad10238d0976af10b73bf5dbfd52f0d927acc6958b2"
+    },
+    "succeeded": true,
+    "frozen_lockfile": true,
+    "package_lifecycle_scripts_enabled": false,
+    "manager_or_runtime_auto_download_enabled": false,
+    "source_and_lock_unchanged": true,
+    "process_group_joined": true,
+    "platform_selected_packages_added": 2023,
+    "package_count_log": {
+      "file": "build/signal-dependencies/attempt-ff8f250abe2548c5b6a8bbecf54a3b89.log",
+      "sha256": "0c865871a981f326eec922d845e3da446a18f33aae0ac4c7a58c659ead059003"
+    },
+    "measured_allocated_bytes": 3615031296,
+    "measurement_scope": "candidate plus dependency state at successful installation; not the total build directory"
+  },
+  "native_inputs": {
+    "electron": {
+      "version": "44.1.0",
+      "license": "MIT",
+      "input_receipt": {
+        "file": "build/native-inputs/electron-44.1.0-linux-x64/provenance.json",
+        "sha256": "84dfad527df9ed0f5c4d05d34d2e325d8cdb798db946c3873815d4ff61f7b780"
+      },
+      "npm_integrity": "sha512-kmLg8axOg22DC3fXx5NCwBYW8fx0rK2zzJ3Tf67GjNCkxfoxEcd+yo0QfDjlBtHJs3xeA8fTg64b6iVzFTVErg==",
+      "npm_archive_sha256": "221e4ba37f43319c178922911258a6c1a7074866b53f818002ca3bd0afb50d82",
+      "native_archive_sha256": "9cea932df41cb6e68122ecd32f814db5a7544592f3091983b959f4f7e0d6fd88",
+      "native_archive_bytes": 122591871,
+      "native_expanded_bytes": 295221748,
+      "native_archive_member_count": 72,
+      "checksum_bound_to_verified_npm_package": true,
+      "offline_materialization_completed": true,
+      "materialization_receipt_saved": false,
+      "materialization_evidence": "successful tool execution plus current output hashes; selected binary bytes compared with exact archive members",
+      "materialized_files_relative_to": "build/signal-backup-candidate",
+      "materialized_files": {
+        "node_modules/electron/dist/electron": {
+          "sha256": "353895c51de01a5871dc0af9cd8bde08bd41fa907402885465569347dfc3c2b2",
+          "bytes": 227532104,
+          "mode": "0755"
+        },
+        "node_modules/electron/dist/chrome-sandbox": {
+          "sha256": "a4f6dfd7325ddd55f94ddc0c487d22726d40ef099ded6475d5dffe236e277896",
+          "bytes": 15232,
+          "mode": "0755"
+        },
+        "node_modules/electron/dist/LICENSE": {
+          "sha256": "5154e165bd6c2cc0cfbcd8916498c7abab0497923bafcd5cb07673fe8480087d",
+          "bytes": 1096,
+          "mode": "0644"
+        },
+        "node_modules/electron/dist/LICENSES.chromium.html": {
+          "sha256": "4cbde8e3e7b29f451c78a44491fb32e2202884826fef47786a9cda5a36110525",
+          "bytes": 20111206,
+          "mode": "0644"
+        },
+        "node_modules/electron/path.txt": {
+          "sha256": "88b1deea6a18cfd0d1df1f0048d0946332fe61d1adc2bacb25e5f6a774b56cc5",
+          "bytes": 8,
+          "mode": "0644"
+        }
+      },
+      "upstream_notices_retained": true,
+      "package_lifecycle_scripts_executed": false,
+      "native_code_executed": false,
+      "host_install_or_permissions_changed": false
+    },
+    "ringrtc": {
+      "version": "2.71.0",
+      "license": "AGPL-3.0-only",
+      "input_receipt": {
+        "file": "build/native-inputs/ringrtc-2.71.0/provenance.json",
+        "sha256": "ba94c4e2ac948c12cb493759bcf093fc595b361a1b6dfd1737a765dcddd7edfb"
+      },
+      "npm_integrity": "sha512-F75ix86XyYoA14x3yPoPwxr6TUq4pdWKhHLcPfZxRR/0xxrvo8PXHvDw5d95YOoi8BJfE0by6DxgrwG9DyvE0Q==",
+      "npm_archive_sha256": "d1d19a4081a6ce498bbd29d48953701300f4de5f4733af422774bdccb4a04c05",
+      "native_archive_sha256": "0b5b0560d00e090070ecac783e7869bd49412786ce8a3aac01b87ae88ea8d66f",
+      "native_archive_bytes": 34753889,
+      "native_expanded_bytes": 79387624,
+      "native_archive_member_count": 10,
+      "checksum_bound_to_verified_npm_package": true,
+      "offline_materialization_completed": true,
+      "materialization_receipt_saved": false,
+      "materialization_evidence": "successful tool execution plus current output hashes; selected binary bytes compared with exact archive members",
+      "materialized_files_relative_to": "build/signal-backup-candidate",
+      "materialized_files": {
+        "node_modules/@signalapp/ringrtc/build/linux/libringrtc-x64.node": {
+          "sha256": "550cf1fd40e0c4a5a096e73684f27f8b51608d53ef858981572dfca2230d5162",
+          "bytes": 14540848,
+          "mode": "0644"
+        },
+        "node_modules/@signalapp/ringrtc/scripts/prebuild.tar.gz": {
+          "sha256": "0b5b0560d00e090070ecac783e7869bd49412786ce8a3aac01b87ae88ea8d66f",
+          "bytes": 34753889,
+          "mode": "0644"
+        }
+      },
+      "upstream_notices_retained": true,
+      "package_lifecycle_scripts_executed": false,
+      "native_code_executed": false,
+      "host_install_or_permissions_changed": false
+    }
+  },
+  "compilation": {
+    "receipt": {
+      "file": "build/signal-candidate-build/attempt-1f732d5abbfd48ea861f8862b5d2b7d9.json",
+      "sha256": "ef714db7e526ddef56f47620bfb0385c416d4390b85373b2f12485b2fa513aae"
+    },
+    "succeeded": true,
+    "source_date_epoch": 1790198897,
+    "network_access": false,
+    "host_root_read_only": true,
+    "writable_paths": [
+      "build/signal-backup-candidate",
+      "build/signal-candidate-build"
+    ],
+    "cpu_affinity_count": 2,
+    "kernel_per_file_bound_bytes": 536870912,
+    "measured_disk_stop_threshold_bytes": 8589934592,
+    "disk_threshold_is_filesystem_quota": false,
+    "required_output_count": 20,
+    "output_paths_relative_to": "build/signal-backup-candidate",
+    "steps": [
+      {
+        "name": "types",
+        "result": "COMPILED",
+        "exit_code": 0,
+        "elapsed_seconds": 5.679,
+        "timeout_seconds": 300,
+        "original_source_and_lock_unchanged": true,
+        "process_group_joined": true,
+        "output_sha256": {
+          "packages/types/dist/index.std.cjs": "5b9dd7c5b8f66d6c36a566f2f4c36b017d33bb587524ddfa083d012bdf4b22aa",
+          "packages/types/dist/index.std.mjs": "34a6faa5c70ed73bc6eebf78785357c19912c2e2a36e8afa19fe9ffd1d7642ef"
+        }
+      },
+      {
+        "name": "windows-ucv",
+        "result": "COMPILED",
+        "exit_code": 0,
+        "elapsed_seconds": 5.102,
+        "timeout_seconds": 300,
+        "original_source_and_lock_unchanged": true,
+        "process_group_joined": true,
+        "output_sha256": {
+          "packages/windows-ucv/dist/index.js": "9a1fc96f8aa9babb5f2239f5c492eb670a3d27ce54e4dece60580fa52647de1d"
+        }
+      },
+      {
+        "name": "mock-server",
+        "result": "COMPILED",
+        "exit_code": 0,
+        "elapsed_seconds": 7.725,
+        "timeout_seconds": 600,
+        "original_source_and_lock_unchanged": true,
+        "process_group_joined": true,
+        "output_sha256": {
+          "packages/mock-server/protos/compiled.js": "6d6788228ed0cbd6b18bb7ec3e9dfe456dbee656607e8d87dd9918fb8abed3f2",
+          "packages/mock-server/src/index.js": "d823f5f6fbc2ebd49146da7e69206a1ea7b77d2c9abf8a17584bfef41445d947"
+        }
+      },
+      {
+        "name": "app-assets",
+        "result": "COMPILED",
+        "exit_code": 0,
+        "elapsed_seconds": 17.352,
+        "timeout_seconds": 1200,
+        "original_source_and_lock_unchanged": true,
+        "process_group_joined": true,
+        "output_sha256": {
+          "build/compact-locales/en/values.json": "8d562aadfd90872a0e95b0f46e38944f16a6142cee39e0596a5fae5f08a6514f",
+          "build/compact-locales/keys.json": "faf9683403bdb1cf22c0faba96aee7180b98fd6982e6d73d73fa43e6bd590e98",
+          "build/emoji-data.json": "cd19600ea111fe8a994268ded1f45e68ef35e3bdf9b72852a2697e8a5476bdd5",
+          "build/org.signalapp.enable-backups.policy": "091e7124757f152478e730ab788e2fd7f22538ad8445ff4a2460a72e412bb13e",
+          "build/org.signalapp.plaintext-export.policy": "17262ed8379a9ca8db4cbba3abbc32079d3c7fe71f6e1b7afdf3c6ef33c3e839",
+          "build/org.signalapp.view-aep.policy": "fe19495b9484102797220287965861f4bc3348dc0f6a9adfdbd28ef6a8923cbe",
+          "bundles/main.js": "c9434d6e0b4dfab5ed80e36bb4b45f782125b81b26c90134430d531a04bcf53e",
+          "bundles/preload/main.js": "0850aa155e2f8ad0affb9e34b89f0ad6244af0bc4d78ffb5709b21343f5cb8a3",
+          "bundles/workers/sql.js": "511b8a7df5ea81bc1218ffecbfc37205ae84ed37fa7719acb4ea28793c1f3b99",
+          "config/local-production.json": "e7f90d1f8c07c56904cb9710105e79fa6c0e756d68c6a1bb98d46a34c4f9ac32",
+          "stylesheets/manifest.css": "340b88aa8a706c43a5fa2352ca376e057e5f80ecff586aa8cdfed38b86f35852",
+          "stylesheets/manifest_bridge.css": "5a162c54c3b9960278521ad9de424700d6473595759e5a71620c2fed2e78d56c",
+          "stylesheets/quill.css": "b39663170e0d37cc149892a67ccda7d8a5caaa8d282c6299a5e6e7d672f7b586",
+          "stylesheets/tailwind.css": "6ffd316c27669b57e9415e4aa7f0dd12ac33f4aab2fea8091ab976f611bbe5ae",
+          "ts/protobuf/compiled.std.js": "03d0e3d6a1b73ac1689908a84ee94e8818987a3f5558671c654cf7dfbc5dc10b"
+        }
+      }
+    ]
+  },
+  "historical_failed_attempts": [
+    {
+      "receipt": {
+        "file": "build/signal-dependencies/attempt-b6a71425f5c8461d83ad7f7cd5626011.json",
+        "sha256": "de98902bdd73bc9823870f4bba51a20980ad5b2186e7b74908df9cee8218da97"
+      },
+      "remains_failed": true,
+      "reason": "install command rejected non-command pnpm options"
+    },
+    {
+      "receipt": {
+        "file": "build/signal-dependencies/attempt-ff8f250abe2548c5b6a8bbecf54a3b89.json",
+        "sha256": "701403f804c689f60aebf5cb519becd0eaf4eb35a0cae97acf52f806adea3367"
+      },
+      "remains_failed": true,
+      "reason": "pnpm exited 0 but persisted devEngines.runtime.onFail; source binding correctly failed"
+    },
+    {
+      "receipt": {
+        "file": "build/signal-candidate-build/attempt-13a0545dca5343fb951e5d455f60037b.json",
+        "sha256": "f65549c0dc420b9c88ff31fa45be9f6a7898b3bdfe206603dc0233f28a518f41"
+      },
+      "remains_failed": true,
+      "reason": "first three compile steps passed; run-s chose npm and failed package-manager devEngines"
+    }
+  ],
+  "not_proven": {
+    "full_typescript_typecheck": true,
+    "upstream_native_dependency_source_builds": true,
+    "electron_app_startup": true,
+    "preload_cache_generation": true,
+    "native_signal_backup_export_import": true,
+    "signal_to_real_core_storage_round_trip": true
+  },
+  "source_correction": {
+    "scope": "only the exact unintended package.json devEngines.runtime.onFail error addition was explicitly removed",
+    "corrected_package_json_sha256": "09477bc0bcb5d0dc7fc3387c63cb74d76d1dd28583d84eec561ecf1b906d7eb0",
+    "later_install_uses_runtime_false_not_runtime_on_fail_override": true,
+    "historical_receipts_rewritten": false
+  }
+}

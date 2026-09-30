@@ -1,9 +1,10 @@
 # Encrypted backup connector candidate
 
-This is executable integration source, **not yet a working Signal backup product**. The
-five Node file/process tests and three offline source-staging tests pass. The exact-source
-overlay applies. Electron/native Signal encryption and import, the complete TypeScript
-typecheck, and the combined real-core storage test have **not** run. The process-boundary
+This is a compiled integration candidate, **not yet a working Signal backup product**.
+The narrow connector/source checks pass; the pinned dependencies are installed, Electron
+and RingRTC inputs are materialized, and all four offline preparatory compilation steps
+pass. Signal itself, native backup encryption/import, the complete TypeScript typecheck,
+and the combined real-core storage test have **not** run. The process-boundary
 unit test uses an explicitly test-only CLI substitute; production code always invokes
 the operator-selected real core executable and has no substitute backend.
 
@@ -54,7 +55,9 @@ started, no roles enabled, and no host routing/DNS/firewall changes are made by 
 
 ## Reproduce the narrow checks
 
-Run from this repository; staging refuses existing targets rather than overwriting them:
+Run from this repository before dependency installation/building; staging refuses existing
+targets rather than overwriting them. After compilation, generated files are expected and
+the build's original-source hash binding replaces the clean-tree overlay check:
 
 ```sh
 python3 scripts/stage_signal_source.py --download
@@ -73,8 +76,9 @@ Signal-targeted overlay code is AGPL-3.0-only. The Node staging keeps its upstre
 
 Measured downloads: **48,865,481 bytes** of Signal source and **31,633,904 bytes** of Node.
 The checked source is 96,820,148 bytes; extracted Node plus its license is 126,147,070 bytes.
-The current pristine source, patched source and runtime together occupy approximately
-334 MiB on disk. See [exact artifact provenance](../provenance/source-staging.json).
+The initial source-only staging occupied approximately 334 MiB, **before** dependencies
+and native inputs were added. See [initial artifact provenance](../provenance/source-staging.json)
+and [current build evidence](../provenance/build-staging.json).
 Git content hashes and official HTTPS checksums were verified; no independently verified
 upstream release-signature claim is made.
 
@@ -96,11 +100,89 @@ Provider capacity must cover the complete encrypted fixture, not just one chunk.
 copies and recovery files are deliberately left for explicit fixture/operator cleanup.
 
 Run that proof only in a disposable integration environment with actual policy-authorized
-providers and an established protected core route. Required build inputs are pinned upstream
-Node 24.19.0, pnpm 11.24.0, Electron 44.1.0 and its native libsignal/SQLCipher/RingRTC graph.
-The lockfile contains over 2,300 artifact-resolution entries; the total download/build size
-has not yet been measured. No large dependency installation, package lifecycle scripts or
-Electron download is authorized or performed by the staging tools. Those inputs need a
-separate bounded provisioning plan before `pnpm generate` and the targeted native test.
+providers and an established protected core route. Generating the preload cache and actually
+starting/importing through Electron remain next steps; compilation is not that proof.
+
+## Verified build staging — 2026-09-30
+
+The build uses Node 24.19.0, npm 11.17.0, pnpm 11.24.0, Electron 44.1.0 and the pinned
+native libsignal/SQLCipher/RingRTC graph. The lockfile contains over 2,300 resolution entries;
+the platform-selected installation added **2,023 packages**. Source/tool staging, dependency
+installation, native extraction and compilation are explicit separate operations.
+The first prerequisite can now be staged explicitly with
+`python3 scripts/stage_node.py --with-npm`. It verifies the same pinned Node archive and
+creates **`build/node-v24.19.0-linux-x64-with-npm`**, leaving the existing node-only runtime
+and its report untouched. The complete bundled npm package and licenses are retained;
+local `bin/npm` and `bin/npx` launchers invoke that runtime's exact Node and adjust PATH
+only for their own child processes. Run either entrypoint with `--version` to inspect
+the staged package without installing dependencies. Staging bounds the archive to 64 MiB
+compressed, 20,000 entries and 512 MiB expanded, selects at most 256 MiB, and rejects
+unsafe paths, unsupported links or existing output targets. Four offline synthetic
+archive/launcher checks pass, including a conflicting Node on PATH. Actual staging on
+2026-09-30 retained 1,923 files / 138,226,804 bytes; the exact Node reports 24.19.0 and
+both bundled npm/npx entrypoints report **11.17.0**. The local
+`build/node-npm-runtime-report.json` records those bytes and the pinned archive hash.
+
+`python3 scripts/stage_pnpm.py --download` separately stages **pnpm 11.24.0**, using the
+integrity value from the exact Signal lockfile. Actual staging retained 455 members /
+20,095,957 bytes from a 5,071,766-byte archive, including the MIT license. The exact
+Node/pnpm combination reports 11.24.0. Four offline archive/integrity checks pass.
+Its local receipt is `build/pnpm-runtime-report.json`. These two steps install no
+project dependencies, run no package lifecycle scripts and change no global configuration.
+
+`python3 scripts/stage_signal_dependencies.py --download` installs the exact candidate graph
+with `--frozen-lockfile --ignore-scripts`, integrity checking and no automatic manager/runtime
+download. The final cached retry passed with **all 4,573 original candidate files and the
+lock unchanged**. Its receipt is
+`build/signal-dependencies/attempt-2489b2b9294244648a0f25d3f94fe969.json`.
+The candidate plus dependency state measured 3,615,031,296 allocated bytes at that point.
+Stores, caches, configuration and temporary files stay under `build`; HOME is not overridden.
+The provisioner uses two CPUs, four concurrent network requests, a 30-minute deadline,
+a 512 MiB per-file limit and an 8 GiB measured stop threshold—not a filesystem quota.
+An explicit `--resume` preserves matching owned downloads rather than deleting them.
+
+Native input staging is also explicit:
+
+```sh
+python3 scripts/stage_signal_native.py --download --artifact electron
+python3 scripts/stage_signal_native.py --download --artifact ringrtc
+```
+
+Both completed on 2026-09-30. The Electron archive is 122,591,871 bytes (72 members;
+295,221,748 expanded bytes); RingRTC is 34,753,889 bytes (10 members; 79,387,624 expanded
+bytes). Each archive's checksum is bound to metadata inside its lockfile-SRI-verified npm
+package. Original npm/native archives, Electron licenses and RingRTC acknowledgments are
+retained under `build/native-inputs`, with individual provenance reports. Six offline
+integrity/path/bound checks pass. Archive staging itself does **not** extract or execute native
+code. The subsequent offline materialization also completed:
+
+```sh
+python3 scripts/install_signal_native.py --artifact electron
+python3 scripts/install_signal_native.py --artifact ringrtc
+python3 scripts/build_signal_candidate.py --build
+```
+
+Materialization verifies original installed npm files against their exact archives, then
+creates only Electron's `dist`/`path.txt` and RingRTC's `build`/cached-archive paths inside
+the candidate. Existing outputs are refused. Ordinary permissions and notices are retained;
+`chrome-sandbox` is `0755`, not setuid. This does not reproduce the native dependencies'
+source builds or execute Electron/RingRTC.
+
+The compile wrapper passed **types → windows-ucv → mock-server → app assets**, with
+**20 required output hashes**, unchanged original source/lock and joined child process groups.
+Each step runs in Bubblewrap with no network, a read-only host root, and only the candidate
+and owned build-state directory writable. It deliberately sets `SOURCE_DATE_EPOCH=1790198897`
+and uses the staged pnpm for nested script runners. It does not invoke root postinstall,
+generic rebuild/install, release packaging, preload-cache generation or the Signal app/test.
+The receipt is `build/signal-candidate-build/attempt-1f732d5abbfd48ea861f8862b5d2b7d9.json`;
+the sanitized [build evidence](../provenance/build-staging.json) records its hash and outputs.
+Use `--build --resume` only for this unchanged owned candidate after an interrupted build.
+
+Earlier failed receipts remain failed: unsupported pnpm flags, pnpm's unwanted addition of
+`devEngines.runtime.onFail`, and the asset runner selecting npm. Only that exactly identified
+manifest addition was explicitly removed; the corrected installer disables runtime fetching
+without changing the manifest, and the corrected runner explicitly selects pnpm. The final
+successful receipts—not those earlier failures—support the statements above.
+
 There is no adaptive reciprocal-contribution, automatic provider repair or independent
 failure-domain proof in this connector milestone.
