@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-09-29",
+  "status": "source-staged-verified-backup-connector-candidate-not-native-runtime-proven",
+  "initial_target": "debian-13-amd64-desktop",
+  "signal_desktop": {
+    "repository": "https://github.com/signalapp/Signal-Desktop",
+    "release": "v8.28.0",
+    "release_published_at": "2026-09-23T21:28:17Z",
+    "release_url": "https://github.com/signalapp/Signal-Desktop/releases/tag/v8.28.0",
+    "annotated_tag_object": "b5213e3c3a28dc994476f2a79c24f0fce58eee3f",
+    "commit": "ef3872cb0249ec939d8aff857568a0e87a6b5075",
+    "license": "AGPL-3.0-only",
+    "license_file": "LICENSE",
+    "license_sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
+    "package_json": "https://github.com/signalapp/Signal-Desktop/blob/ef3872cb0249ec939d8aff857568a0e87a6b5075/package.json"
+  },
+  "libsignal": {
+    "repository": "https://github.com/signalapp/libsignal",
+    "selection_reason": "exact dependency of the pinned Signal Desktop package.json",
+    "package": "@signalapp/libsignal-client",
+    "package_version": "0.100.0",
+    "release": "v0.100.0",
+    "annotated_tag_object": "314926075719361a8a6e94dbee063c905d6cb172",
+    "commit": "857c4dca03537dc5e395a5e1eda6bf18f59c3601",
+    "license": "AGPL-3.0-only",
+    "license_file": "LICENSE",
+    "license_sha256": "0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0",
+    "external_use_supported_by_upstream": false,
+    "latest_release_observed_not_selected": {
+      "release": "v0.103.1",
+      "commit": "e8cc2dddd578859b4a029c9c94670b24ce2b616a"
+    }
+  },
+  "verification_scope": {
+    "tag_to_commit_resolved_via_upstream_api": true,
+    "license_bytes_hashed": true,
+    "tag_signatures_independently_verified": false,
+    "source_tree_imported": false,
+    "source_tree_staged_and_all_git_hashes_verified": true,
+    "backup_overlay_applied_to_separate_candidate": true,
+    "dependency_artifacts_verified": false,
+    "source_build_completed": false,
+    "direct_message_runtime_proven": false,
+    "reciprocal_backup_runtime_proven": false
+  }
+}
