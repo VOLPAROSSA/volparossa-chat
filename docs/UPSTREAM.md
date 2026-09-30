@@ -1,10 +1,11 @@
 # Signal upstream provenance
 
-Source audit checked on 2026-09-29; build evidence updated on 2026-09-30. The
+Source audit checked on 2026-09-29; build/runtime evidence updated on 2026-09-30. The
 [workspace-only backup candidate](BACKUP_CONNECTOR.md) now has installed locked dependencies,
-materialized native inputs and passing offline preparatory compilation. It is **not yet a
-working Signal fork or proven native backup round trip**: no Electron app/preload-cache or
-native export/import test has run. Every original staged Git blob/tree was verified;
+materialized native inputs and passing offline preparatory compilation. Its
+[native encrypted-backup round trip](BACKUP_CONNECTOR.md#native-round-trip-proof--2026-09-30)
+now passes with real Electron, Signal crypto/import and protected core storage. This is not
+yet a complete Signal fork or decentralized messaging/calling proof. Every original staged Git blob/tree was verified;
 the final build preserves all 4,573 original candidate files and the lock. Upstream pins remain
 in [upstream-lock.json](../upstream-lock.json); [source-staging.json](../provenance/source-staging.json)
 is the historical source-only snapshot, and [build-staging.json](../provenance/build-staging.json)

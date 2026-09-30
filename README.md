@@ -6,7 +6,7 @@ Keep the familiar Signal experience, with decentralized messaging, voice/video c
 
 ## Development status
 
-Integration is starting with Signal Desktop on Linux. This repository does **not yet contain a working modified Signal client**. A reproducible [encrypted-backup connector candidate](docs/BACKUP_CONNECTOR.md) now targets the exact upstream exporter, attachment encryption and native importer, using the core's retained replica storage. Its bounded file/process tests pass; the combined Electron, Signal-crypto and real-core test has not run. Existing core messages are not already Signal messages.
+Integration starts with Signal Desktop on Linux. The first **native encrypted-backup round trip now passes**: Signal exports and encrypts a snapshot, the original archive is removed, VOLPAROSSA retrieves a retained copy over its protected network, and Signal imports it with message and attachment checks. The [backup connector](docs/BACKUP_CONNECTOR.md#native-round-trip-proof--2026-09-30) records the exact trial and boundaries. This is not yet a complete modified Signal client: decentralized messaging, calling, automatic storage contribution and recovery UX remain unfinished. Existing core messages are not already Signal messages.
 
 ## Messages: Signal encryption, another delivery path
 
@@ -35,7 +35,7 @@ Private leases, durable capacity accounting, restart recovery, renewal, expiry, 
 ## Architecture and upstream
 
 - [Signal integration contract](docs/SIGNAL_INTEGRATION.md): actual send/receive seams, compatibility and remaining work.
-- [Executable backup candidate](docs/BACKUP_CONNECTOR.md): source staging, connector boundaries and the pending native proof.
+- [Encrypted backup integration](docs/BACKUP_CONNECTOR.md): source staging, connector boundaries and the passing native round trip.
 - [Upstream provenance](docs/UPSTREAM.md): pinned Signal Desktop/libsignal versions and licenses.
 - [Core](https://github.com/VOLPAROSSA/volparossa): network transport, private storage and application interfaces.
 - [Browser](https://github.com/VOLPAROSSA/volparossa-browser): a separate client of that same core.

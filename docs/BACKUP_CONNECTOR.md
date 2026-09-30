@@ -1,12 +1,11 @@
-# Encrypted backup connector candidate
+# Encrypted backup connector
 
-This is a compiled integration candidate, **not yet a working Signal backup product**.
-The narrow connector/source checks pass; the pinned dependencies are installed, Electron
-and RingRTC inputs are materialized, and all four offline preparatory compilation steps
-pass. Signal itself, native backup encryption/import, the complete TypeScript typecheck,
-and the combined real-core storage test have **not** run. The process-boundary
-unit test uses an explicitly test-only CLI substitute; production code always invokes
-the operator-selected real core executable and has no substitute backend.
+The first **native Signal encrypted-export/core-storage/import round trip passes** in a
+disposable KVM guest. This remains a development integration, not a complete backup product.
+The narrow connector checks and four preparatory compile steps also pass; a complete
+TypeScript typecheck is not claimed. The process-boundary unit test uses an explicitly
+test-only CLI substitute, while the native trial and production connector invoke the real
+core executable. Production code has no substitute backend.
 
 ## What this slice actually adds
 
@@ -82,7 +81,7 @@ and [current build evidence](../provenance/build-staging.json).
 Git content hashes and official HTTPS checksums were verified; no independently verified
 upstream release-signature claim is made.
 
-## Next: the real combined proof
+## Native round-trip proof — 2026-09-30
 
 The overlay augments `ts/CI.preload.ts` and adds an opt-in upstream test named
 `exports and imports a VOLPAROSSA replicated encrypted backup` in
@@ -90,7 +89,26 @@ The overlay augments `ts/CI.preload.ts` and adds an opt-in upstream test named
 an attachment, erases the original profile/CDN, relinks and compares imported messages and
 attachment plaintext hashes. The new callback exports/deposits through the actual connector,
 removes its local ciphertext, then restores through the configured core. The native testserver
-still handles Signal test registration/linking; a pass would not prove server-free messaging.
+still handles Signal test registration/linking; this does not prove server-free messaging.
+
+[Core run 36742201942](https://github.com/VOLPAROSSA/volparossa/actions/runs/36742201942)
+at core `90dbea789b57efcbc6cab941e54dfb6a5240511e` and this repository's
+`c897667d76bea8140f0bc5f373404e43cbd54552` passes that exact native test: one test, one pass,
+zero failures or pending tests. The 198,352-byte encrypted archive is retained on two real
+providers, charging 396,704 payload bytes. Signal's native import verifies messages,
+attachment hashes and screenshots after the original ciphertext is removed. Both remote
+copies remain until explicit owner deletion; both stores then report zero leases and bytes.
+Twelve real Exit MPTCP/TLS exchanges and two selected WireGuard relay paths carry the work.
+Drained privacy captures, joined native processes, removal of private state and unchanged
+guest-host networking all pass. The original 23-file artifact ZIP has SHA-256
+`8eb0cfa37d26f9864e28ca13c570c7c251736d9e196c97e0c1e000ecfc9df4f2`.
+
+The test app is capless and limited to loopback IP access plus the protected core socket.
+The pinned Playwright Electron launcher disables Chromium sandboxing; its private mounts
+and disposable guest are not an Electron-sandbox claim. The two provider namespaces are not
+independent hardware. This proves real snapshot encryption and import, but not decentralized
+Signal delivery/calling, automatic repair/contribution accounting, production recovery UX
+or the full alpha. Earlier failed startup trials remain recorded in the core status.
 
 The test requires `VOLPAROSSA_BACKUP_CONFIG` (an owner-only JSON file path) and
 `VOLPAROSSA_BACKUP_WORK` (a fresh owner-only directory path). The JSON fields are:
@@ -100,8 +118,8 @@ Provider capacity must cover the complete encrypted fixture, not just one chunk.
 copies and recovery files are deliberately left for explicit fixture/operator cleanup.
 
 Run that proof only in a disposable integration environment with actual policy-authorized
-providers and an established protected core route. Generating the preload cache and actually
-starting/importing through Electron remain next steps; compilation is not that proof.
+providers and an established protected core route. It explicitly generates the preload cache
+and starts/imports through Electron; successful preparatory compilation alone is not proof.
 
 ## Verified build staging — 2026-09-30
 
