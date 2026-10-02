@@ -1,3 +1,5 @@
+![Project VOLPAROSSA Chat — golden lettering over a connected city, with a wolf in the foreground](docs/assets/volparossa-chat-banner.png)
+
 # Project VOLPAROSSA Chat
 
 A Signal-based client for **VOLPAROSSA — the Decentralized Intelligent Cooperative Network**.
