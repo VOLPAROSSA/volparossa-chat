@@ -1,7 +1,10 @@
 # Encrypted backup connector
 
-The first **native Signal encrypted-export/core-storage/import round trip passes** in a
-disposable KVM guest. This remains a development integration, not a complete backup product.
+The **native Signal encrypted-export/core-storage/import round trip passes** in a
+disposable KVM guest, using the core's fragment-placement API across three providers,
+including withdrawal of one provider before restore. The earlier whole-archive replica
+proof is retained separately below. This remains a development integration, not a complete
+backup product.
 The narrow connector checks and four preparatory compile steps also pass; a complete
 TypeScript typecheck is not claimed. The process-boundary unit test uses an explicitly
 test-only CLI substitute, while the native trial and production connector invoke the real
@@ -23,12 +26,23 @@ Upstream `AttachmentCrypto.encryptAttachmentV2` encrypts/authenticates the **who
 including names, metadata and the attachment-reference list. The core sees only that opaque
 ciphertext. No public cache, plaintext deduplication or training publication is involved.
 
-`replicas.node.ts` invokes fixed `volparossa storage replicas` operations without a shell.
-Two to eight independently selected provider identities and their owner-bound grants are
-required. Core receipts, provider TLS and route validation remain in the core's real CLI;
-the connector also checks operation, size, ordered identities, completion and non-consuming
-restore. A partial transfer leaves its original ciphertext and journals for explicit resume;
-it does not regenerate a backup, roll back copies or delete someone else's retained data.
+`fragments.node.ts` invokes fixed `volparossa storage fragments` operations without a shell.
+New deposits require **three to eight** explicitly selected provider identities and their
+owner-bound grants. The core splits the encrypted archive into distinct fragments and retains
+**two copies of each fragment**; it owns that uniform policy, placement, signatures and byte
+accounting. There is no application-selectable copy tier or second ledger. `fragmentBytes`
+optionally bounds a fragment (default 16 MiB, maximum 1 GiB); the actual core plan may split
+smaller to spread the archive across the provider pool. The core limits an encrypted archive
+to 64 GiB and 256 fragments, so larger archives require a sufficiently large fragment bound.
+Distinct identities alone do not prove independent failure domains.
+
+Core receipts, provider TLS and route validation remain in the real CLI. The connector checks
+complete contiguous ranges, two-copy placement, original ordered identities, per-provider
+charges and non-consuming restore. It accepts the core's report v2 for owner-signed repair
+history: replacements may add providers, while unconfirmed old copies remain charged. It does
+not initiate repair or grant renewal. A partial transfer leaves the original ciphertext and
+journals for explicit resume; it does not regenerate a backup, roll back copies, silently
+fall back to full replicas or delete someone else's retained data.
 Each CLI invocation has a finite 30-minute outer bound; cancellation waits for its exact
 child to exit. The core's per-exchange limits are unchanged.
 
@@ -46,6 +60,18 @@ recovery material is still required as well**; the wrapper key does not replace 
 portable recovery/key management and a user interface remain later work. Do not delete the
 descriptor merely because a transfer failed or a window closed.
 
+New descriptors use `version: 2` and `storage: { kind: "fragments", providerKeys: [...] }`;
+the immutable original provider order is retained alongside the ciphertext digest and hash.
+The associated core reconstruction state is `work/fragments`. Retain that complete signed
+manifest/journal tree as well as the descriptor and owner identity: the wrapper key alone is
+not enough to locate and authenticate a backup. Existing `version: 1` descriptors without a
+storage field still resume and restore through `replicas.node.ts` and `work/replicas`, including
+the old two-provider setup. Their bytes are not rewritten or automatically migrated. Unknown
+versions, ambiguous storage discriminators and changed original provider bindings fail closed.
+The historical function names `exportToReplicas`/`restoreFromReplicas` remain for native CI
+compatibility; a **new** export now always chooses fragments. Supplying two providers therefore
+fails before native export rather than creating another legacy archive.
+
 The development connector uses the existing **administrative** core attachment. It is not
 a least-authority multi-application SDK. The app owns its separately encrypted storage-owner
 identity; the CLI reads an explicit `0600` passphrase file. Only private paths—not secret
@@ -62,7 +88,7 @@ the build's original-source hash binding replaces the clean-tree overlay check:
 python3 scripts/stage_signal_source.py --download
 python3 scripts/stage_node.py
 python3 -B tests/test_source_staging.py
-build/node-v24.19.0-linux-x64/bin/node --test tests/backup_connector.test.mjs
+build/node-v24.19.0-linux-x64/bin/node --test tests/backup_connector.test.mjs tests/fragment_backup.test.mjs tests/backup_withdrawal.test.mjs
 python3 scripts/apply_signal_overlay.py
 python3 scripts/apply_signal_overlay.py --check
 ```
@@ -80,6 +106,48 @@ and native inputs were added. See [initial artifact provenance](../provenance/so
 and [current build evidence](../provenance/build-staging.json).
 Git content hashes and official HTTPS checksums were verified; no independently verified
 upstream release-signature claim is made.
+
+Fourteen focused checks pass for the container, legacy recovery, fragment command/report
+contracts, retained v2 descriptor/restart, incomplete-response rejection, child cancellation
+and the optional test rendezvous below. These use synthetic data and an explicitly test-only
+CLI executable; they are **not** real provider, Signal-crypto or native-fragment proof. The
+existing native encryption/import implementation and payload assertions are unchanged. No
+full Signal build or real personal backup is claimed by those narrow checks; the separate
+source-exact native fragment trial below supplies the actual guest evidence.
+
+## Native fragment recovery proof — 2026-10-02
+
+[Core run 37058891559](https://github.com/VOLPAROSSA/volparossa/actions/runs/37058891559)
+passes on core `3964c0916624d4cda35d7820bd44c85c1f728690` and this repository's
+`78d3cb43ba10ce46cb60ea0a4ec18d962e64d190`. It provisions the pinned native Signal
+Desktop build and passes its actual export/import test: one test, one pass, no failures
+or pending tests. Signal encryption, attachment checks and native import are not replaced
+by the connector's synthetic CLI tests.
+
+The 198,352-byte ciphertext becomes four fragments (66,117, 66,117, 66,117 and 1 byte),
+with two copies of each across three provider namespaces. All eight retained copies count:
+396,704 payload bytes, charged as 132,235, 132,235 and 132,234 bytes. After the local
+ciphertext is removed, the fixture actually stops provider A before acknowledging the
+withdrawal rendezvous. B and C supply the fragments for native Signal import, which verifies
+messages, attachment plaintext hashes and screenshots. A second complete hash-verified
+core restore leaves the surviving copies intact. The original stores are reopened without
+replacement, all eight copies are explicitly retired, and final leases and charges are zero.
+
+The original three network-phase reports pass their protected MPTCP/WireGuard route and
+privacy checks. Native processes are joined, private state is removed and owned topology
+objects are gone. Before/after networking snapshots of the disposable guest's root namespace
+are byte-identical (SHA-256 `8c5eb731f1d31b34f27ac13b09e8a1be3d30e7b8209eec747d05fbfdf40c5fe2`).
+The source-exact original evidence/report validators pass independently against the retained
+44-file artifact ZIP, SHA-256
+`398bf7736cc076fe09545d873e3314b7fd21c7feab678c7f6a2770a65da37383`.
+
+This is a scoped backup result, not server-free Signal messaging, mobile backup support,
+automatic repair, reciprocal contribution accounting, erasure coding or full alpha completion.
+The test still uses Signal's local registration/relink mock server. The three provider
+namespaces do not prove independent-hardware availability, and the capless, loopback-restricted
+Electron app does not claim Chromium sandboxing. The earlier provisioning failure in
+[run 37056433170](https://github.com/VOLPAROSSA/volparossa/actions/runs/37056433170)
+remains a failure before native execution, not a passing cleanup or backup result.
 
 ## Native round-trip proof — 2026-09-30
 
@@ -114,8 +182,23 @@ The test requires `VOLPAROSSA_BACKUP_CONFIG` (an owner-only JSON file path) and
 `VOLPAROSSA_BACKUP_WORK` (a fresh owner-only directory path). The JSON fields are:
 `executable`, `controlSocket`, `identity`, `passphraseFile`, `providers` (ordered `{key, grant}`
 pairs) and `lifetimeSeconds`. No secret values belong in these environment variables.
-Provider capacity must cover the complete encrypted fixture, not just one chunk. Retained
+New fragment exports additionally accept optional `fragmentBytes` and require at least three
+providers; the historical 2026-09-30 proof used two whole-archive replicas. Provider
+capacity/lease limits must cover every fragment copy assigned by the core, not merely one
+transfer chunk. Retained
 copies and recovery files are deliberately left for explicit fixture/operator cleanup.
+
+For the **new disposable fragment test only**, `VOLPAROSSA_BACKUP_WITHDRAWAL=1` enables a
+120-second rendezvous after the local encrypted archive is removed and before native restore.
+The test writes owner-only `withdrawal-ready.json` with
+`{ "version": 1, "ready": true, "provider_key": "<first configured provider>" }`.
+The external topology driver must actually stop that provider, verify its stopped status,
+then atomically publish owner-only `withdrawal-confirmed.json` containing exactly
+`{ "version": 1, "provider_stopped": true, "provider_key": "<same provider>" }`.
+Wrong, stale or missing acknowledgements fail the test; the marker itself is not evidence of
+provider loss. The core fixture must independently verify that fact and subsequent recovery.
+Without the explicit environment flag the original native test sequence is unchanged. This
+helper lives exclusively in `ts/test-mock` and cannot authorize a production storage action.
 
 Run that proof only in a disposable integration environment with actual policy-authorized
 providers and an established protected core route. It explicitly generates the preload cache

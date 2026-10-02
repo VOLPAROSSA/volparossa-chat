@@ -6,7 +6,7 @@ Keep the familiar Signal experience, with decentralized messaging, voice/video c
 
 ## Development status
 
-Integration starts with Signal Desktop on Linux. The first **native encrypted-backup round trip now passes**: Signal exports and encrypts a snapshot, the original archive is removed, VOLPAROSSA retrieves a retained copy over its protected network, and Signal imports it with message and attachment checks. The [backup connector](docs/BACKUP_CONNECTOR.md#native-round-trip-proof--2026-09-30) records the exact trial and boundaries. This is not yet a complete modified Signal client: decentralized messaging, calling, automatic storage contribution and recovery UX remain unfinished. Existing core messages are not already Signal messages.
+Integration starts with Signal Desktop on Linux. The **native encrypted-backup round trip now passes with distributed fragments and one storage provider offline**: Signal exports and encrypts a snapshot, the original archive is removed, VOLPAROSSA reconstructs it from surviving fragment copies over its protected network, and Signal imports it with message and attachment checks. The [backup connector](docs/BACKUP_CONNECTOR.md#native-fragment-recovery-proof--2026-10-02) records the exact trial and boundaries. This is not yet a complete modified Signal client: decentralized messaging, calling, automatic storage contribution and recovery UX remain unfinished. Existing core messages are not already Signal messages.
 
 ## Messages: Signal encryption, another delivery path
 
@@ -24,7 +24,7 @@ Call media, private signaling and contact associations are not public-cache or t
 
 ## Backups: private, distributed and reciprocal
 
-Backup storage belongs in the core, so applications beyond Signal can use it. The target is to split Signal's encrypted archive into opaque fragments, spread them across participants and reconstruct them for the authorized owner. The current native connector instead uses the core's **full-archive replica path**: its passing round trip retains two complete encrypted copies. Chunked transfers are not yet distributed fragment placement in this connector; that integration remains in development.
+Backup storage belongs in the core, so applications beyond Signal can use it. New exports now invoke the core's **distributed fragment path**: split Signal's encrypted archive into opaque fragments, spread two copies of each across at least three providers, and reconstruct them for the authorized owner. A real disposable-network trial now passes native export, loss of one of three providers, Signal import, a second non-consuming restore and explicit retirement of all copies. These providers are isolated namespaces in one test machine, not independent hardware. Existing full-archive backups keep their original recovery path.
 
 Both paths are **private retained storage**, separate from the public content cache and agent-training data. Storage peers do not receive recovery keys. New fragment placement follows the core's common redundancy policy, not a separate Signal-specific protection tier; existing backups must remain recoverable.
 
