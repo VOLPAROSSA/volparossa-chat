@@ -11,17 +11,11 @@ import {
 import { backupsService } from '../index.preload.ts';
 import { readLocalBackupFilesList } from '../util/localBackup.node.ts';
 import { bundleSnapshot, privateDirectory, unpackAuthenticatedBundle } from './archive.node.ts';
-import { replicaCommand, validateConfig } from './replicas.node.ts';
-import type { ReplicaConfig, ReplicaReport } from './replicas.node.ts';
-
-type Recovery = {
-  version: 1;
-  keysBase64: string;
-  digestBase64: string;
-  plaintextBytes: number;
-  ciphertextBytes: number;
-  ciphertextSha256: string;
-};
+import { validateConfig } from './replicas.node.ts';
+import type { ReplicaConfig } from './replicas.node.ts';
+import { validateFragmentConfig } from './fragments.node.ts';
+import { readRecovery, storageCommand } from './storage.node.ts';
+import type { Recovery, StorageReport } from './storage.node.ts';
 
 async function hash(path: string): Promise<string> {
   const digest = createHash('sha256');
@@ -31,35 +25,12 @@ async function hash(path: string): Promise<string> {
   return digest.digest('hex');
 }
 
-async function recovery(work: string): Promise<Recovery> {
-  await privateDirectory(work);
-  const path = join(work, 'recovery.json');
-  const file = await open(path, constants.O_RDONLY | constants.O_NOFOLLOW);
-  try {
-    const info = await file.stat();
-    if (!info.isFile() || info.nlink !== 1 || info.uid !== process.getuid?.() || (info.mode & 0o777) !== 0o600 || info.size > 4096) {
-      throw new Error('VOLPAROSSA_BACKUP_RECOVERY_INVALID');
-    }
-    const value = JSON.parse(await file.readFile('utf8')) as Recovery;
-    if (value.version !== 1 || Buffer.from(value.keysBase64, 'base64').length !== 64 ||
-        Buffer.from(value.digestBase64, 'base64').length !== 32 ||
-        !Number.isSafeInteger(value.plaintextBytes) || value.plaintextBytes <= 0 ||
-        !Number.isSafeInteger(value.ciphertextBytes) || value.ciphertextBytes <= 0 ||
-        !/^[a-f0-9]{64}$/.test(value.ciphertextSha256)) {
-      throw new Error('VOLPAROSSA_BACKUP_RECOVERY_INVALID');
-    }
-    return value;
-  } finally {
-    await file.close();
-  }
-}
-
-/** Explicitly invoked local-encrypted export. No send/receive/default behavior is changed. */
+/** Explicit local-encrypted export to fragments; historic name retained for the native CI bridge. */
 export async function exportToReplicas(
   work: string, config: ReplicaConfig, signal = new AbortController().signal
-): Promise<ReplicaReport> {
+): Promise<StorageReport> {
   await privateDirectory(work);
-  await validateConfig(config);
+  await validateFragmentConfig(config);
   if ((await readdir(work)).length !== 0) {
     throw new Error('VOLPAROSSA_BACKUP_NEW_WORK_DIRECTORY_REQUIRED');
   }
@@ -86,7 +57,8 @@ export async function exportToReplicas(
     const encryptedFile = await open(ciphertext, 'r');
     try { await encryptedFile.sync(); } finally { await encryptedFile.close(); }
     const descriptor: Recovery = {
-      version: 1, keysBase64: Buffer.from(key).toString('base64'),
+      version: 2, storage: { kind: 'fragments', providerKeys: config.providers.map(provider => provider.key) },
+      keysBase64: Buffer.from(key).toString('base64'),
       digestBase64: Buffer.from(result.digest).toString('base64'), plaintextBytes,
       ciphertextBytes: result.ciphertextSize, ciphertextSha256: await hash(ciphertext),
     };
@@ -104,8 +76,8 @@ export async function exportToReplicas(
     await rm(bundle, { force: true });
     await rm(native, { recursive: true, force: true });
   }
-  const descriptor = await recovery(work);
-  await replicaCommand(config, 'create', join(work, 'replicas'), descriptor.ciphertextBytes,
+  const descriptor = await readRecovery(work);
+  await storageCommand(config, descriptor, 'create', work,
     ['--input', ciphertext, '--sha256', descriptor.ciphertextSha256, '--already-encrypted'], signal);
   return resumeReplicaDeposit(work, config, signal);
 }
@@ -113,13 +85,13 @@ export async function exportToReplicas(
 /** Retry precisely the same ciphertext and retained set; never regenerate an envelope on ambiguity. */
 export async function resumeReplicaDeposit(
   work: string, config: ReplicaConfig, signal?: AbortSignal
-): Promise<ReplicaReport> {
-  const descriptor = await recovery(work);
+): Promise<StorageReport> {
+  const descriptor = await readRecovery(work);
   const ciphertext = join(work, 'archive.signal');
   if ((await hash(ciphertext)) !== descriptor.ciphertextSha256) {
     throw new Error('VOLPAROSSA_BACKUP_CIPHERTEXT_CHANGED');
   }
-  return replicaCommand(config, 'deposit', join(work, 'replicas'), descriptor.ciphertextBytes,
+  return storageCommand(config, descriptor, 'deposit', work,
     ['--input', ciphertext, '--already-encrypted'], signal);
 }
 
@@ -127,14 +99,14 @@ export async function resumeReplicaDeposit(
 export async function restoreFromReplicas(
   work: string, config: ReplicaConfig, restoreRoot: string, signal?: AbortSignal
 ): Promise<string> {
-  const descriptor = await recovery(work);
+  const descriptor = await readRecovery(work);
   await privateDirectory(restoreRoot);
   if ((await readdir(restoreRoot)).length !== 0) {
     throw new Error('VOLPAROSSA_BACKUP_NEW_RESTORE_DIRECTORY_REQUIRED');
   }
   const ciphertext = join(restoreRoot, 'download.signal');
   const bundle = join(restoreRoot, 'authenticated.bundle');
-  await replicaCommand(config, 'restore', join(work, 'replicas'), descriptor.ciphertextBytes,
+  await storageCommand(config, descriptor, 'restore', work,
     ['--output', ciphertext], signal);
   try {
     if ((await lstat(ciphertext)).size !== descriptor.ciphertextBytes ||

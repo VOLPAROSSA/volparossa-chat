@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { createServer } from 'node:net';
 import { once } from 'node:events';
-import { mkdir, mkdtemp, readFile, writeFile, rm, symlink, chmod, access } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, writeFile, rm, symlink, chmod, access, open } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { bundleSnapshot, unpackAuthenticatedBundle } from '../overlay/ts/services/backups/volparossa/archive.node.ts';
 import { checkedReport, replicaCommand, validateConfig } from '../overlay/ts/services/backups/volparossa/replicas.node.ts';
@@ -103,7 +103,9 @@ async function processFixture(body) {
   await fixture(async f => {
     const socket = join(f.work, 'control.sock');
     const server = createServer();
-    server.listen(socket);
+    const directory = await open(f.work, 'r');
+    // Keep deep worktree fixtures within the workspace despite AF_UNIX's short address limit.
+    server.listen(`/proc/self/fd/${directory.fd}/control.sock`);
     await once(server, 'listening');
     const config = { executable: join(f.work, 'test-cli'), controlSocket: socket,
       identity: join(f.work, 'owner'), passphraseFile: join(f.work, 'passphrase'),
@@ -117,7 +119,7 @@ async function processFixture(body) {
       await chmod(config.executable, 0o700);
     };
     try { await body(f, config, writeCli); }
-    finally { await new Promise(resolve => server.close(resolve)); }
+    finally { await new Promise(resolve => server.close(resolve)); await directory.close(); }
   });
 }
 

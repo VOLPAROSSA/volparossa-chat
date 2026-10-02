@@ -18,6 +18,12 @@
         // The connector has already discarded its native export and unwrapped container.
         // Remove the remaining LOCAL ciphertext too: restoration must use the real core.
         await fs.unlink(join(work, 'archive.signal'));
+        if (process.env.VOLPAROSSA_BACKUP_WITHDRAWAL === '1') {
+          // New fragment topology only: wait for its exact provider-A stop acknowledgement.
+          // Without this explicit opt-in the original native acceptance sequence is unchanged.
+          const { waitForBackupWithdrawal } = await import('./volparossa-withdrawal.node.ts');
+          await waitForBackupWithdrawal(work, config);
+        }
         const restore = join(work, 'restored');
         await fs.mkdir(restore, { mode: 0o700 });
         snapshotDir = await window.evaluate(async ({ directory, configPath, destination }) => {

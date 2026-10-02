@@ -14,6 +14,8 @@ export type ReplicaConfig = {
   passphraseFile: string;
   providers: { key: string; grant: string }[];
   lifetimeSeconds: number;
+  // Used only for new fragment deposits; legacy replica recovery ignores it.
+  fragmentBytes?: number;
 };
 
 export type ReplicaReport = {
@@ -88,6 +90,15 @@ export async function replicaCommand(
     }
     args.push('--lifetime-seconds', String(config.lifetimeSeconds));
   }
+  return runStorageCli(config, args, state, 64 * 1024,
+    value => checkedReport(value, operation, config, bytes), signal);
+}
+
+/** Shared bounded child lifecycle; the caller supplies fixed, validated CLI arguments. */
+export function runStorageCli<T>(
+  config: ReplicaConfig, args: string[], state: string, maximumOutput: number,
+  check: (value: unknown) => T, signal?: AbortSignal
+): Promise<T> {
   return new Promise((resolveResult, reject) => {
     const child = spawn(config.executable, args, {
       shell: false, cwd: dirname(state), env: { LANG: 'C.UTF-8' },
@@ -107,7 +118,7 @@ export async function replicaCommand(
     signal?.addEventListener('abort', stop, { once: true });
     if (signal?.aborted) { stop(); }
     child.stdout.on('data', (chunk: Buffer) => {
-      if (output.length + chunk.length > 64 * 1024) { stop(); return; }
+      if (output.length + chunk.length > maximumOutput) { stop(); return; }
       output = Buffer.concat([output, chunk]);
     });
     child.on('error', stop);
@@ -117,7 +128,7 @@ export async function replicaCommand(
       signal?.removeEventListener('abort', stop);
       try {
         ensure(!stopped && code === 0);
-        resolveResult(checkedReport(JSON.parse(output.toString('utf8')), operation, config, bytes));
+        resolveResult(check(JSON.parse(output.toString('utf8'))));
       } catch {
         reject(new Error('VOLPAROSSA_BACKUP_TRANSFER_INCOMPLETE'));
       }
