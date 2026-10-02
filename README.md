@@ -24,7 +24,9 @@ Call media, private signaling and contact associations are not public-cache or t
 
 ## Backups: private, distributed and reciprocal
 
-Backup storage belongs in the core, so applications beyond Signal can use it. Signal's encrypted backup archive is split into opaque chunks, stored on other participants and reconstructed for the authorized owner. It is **private retained storage**, separate from the public content cache and agent-training data. Storage peers do not receive recovery keys.
+Backup storage belongs in the core, so applications beyond Signal can use it. The target is to split Signal's encrypted archive into opaque fragments, spread them across participants and reconstruct them for the authorized owner. The current native connector instead uses the core's **full-archive replica path**: its passing round trip retains two complete encrypted copies. Chunked transfers are not yet distributed fragment placement in this connector; that integration remains in development.
+
+Both paths are **private retained storage**, separate from the public content cache and agent-training data. Storage peers do not receive recovery keys. New fragment placement follows the core's common redundancy policy, not a separate Signal-specific protection tier; existing backups must remain recoverable.
 
 The agreed contribution rule counts **actual remotely stored bytes, including recovery copies and their overhead**. A participant using 1 GB of remote storage must make at least 1 GB available for other users; a 1 GB archive with two full copies requires about 2 GB plus overhead. Offered capacity is not unlimited free disk, and a self-reported number is not proof that remote storage exists.
 
