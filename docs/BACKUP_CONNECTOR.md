@@ -1,9 +1,10 @@
 # Encrypted backup connector
 
-The first **native Signal encrypted-export/core-storage/import round trip passes** in a
-disposable KVM guest, using the older whole-archive replica connector. New deposits now use
-the core's fragment-placement API; that revised native three-provider round trip is **not yet
-proven**. This remains a development integration, not a complete backup product.
+The **native Signal encrypted-export/core-storage/import round trip passes** in a
+disposable KVM guest, using the core's fragment-placement API across three providers,
+including withdrawal of one provider before restore. The earlier whole-archive replica
+proof is retained separately below. This remains a development integration, not a complete
+backup product.
 The narrow connector checks and four preparatory compile steps also pass; a complete
 TypeScript typecheck is not claimed. The process-boundary unit test uses an explicitly
 test-only CLI substitute, while the native trial and production connector invoke the real
@@ -111,7 +112,42 @@ contracts, retained v2 descriptor/restart, incomplete-response rejection, child 
 and the optional test rendezvous below. These use synthetic data and an explicitly test-only
 CLI executable; they are **not** real provider, Signal-crypto or native-fragment proof. The
 existing native encryption/import implementation and payload assertions are unchanged. No
-full Signal build, real personal backup or guest trial was run for this connector revision.
+full Signal build or real personal backup is claimed by those narrow checks; the separate
+source-exact native fragment trial below supplies the actual guest evidence.
+
+## Native fragment recovery proof — 2026-10-02
+
+[Core run 37058891559](https://github.com/VOLPAROSSA/volparossa/actions/runs/37058891559)
+passes on core `3964c0916624d4cda35d7820bd44c85c1f728690` and this repository's
+`78d3cb43ba10ce46cb60ea0a4ec18d962e64d190`. It provisions the pinned native Signal
+Desktop build and passes its actual export/import test: one test, one pass, no failures
+or pending tests. Signal encryption, attachment checks and native import are not replaced
+by the connector's synthetic CLI tests.
+
+The 198,352-byte ciphertext becomes four fragments (66,117, 66,117, 66,117 and 1 byte),
+with two copies of each across three provider namespaces. All eight retained copies count:
+396,704 payload bytes, charged as 132,235, 132,235 and 132,234 bytes. After the local
+ciphertext is removed, the fixture actually stops provider A before acknowledging the
+withdrawal rendezvous. B and C supply the fragments for native Signal import, which verifies
+messages, attachment plaintext hashes and screenshots. A second complete hash-verified
+core restore leaves the surviving copies intact. The original stores are reopened without
+replacement, all eight copies are explicitly retired, and final leases and charges are zero.
+
+The original three network-phase reports pass their protected MPTCP/WireGuard route and
+privacy checks. Native processes are joined, private state is removed and owned topology
+objects are gone. Before/after networking snapshots of the disposable guest's root namespace
+are byte-identical (SHA-256 `8c5eb731f1d31b34f27ac13b09e8a1be3d30e7b8209eec747d05fbfdf40c5fe2`).
+The source-exact original evidence/report validators pass independently against the retained
+44-file artifact ZIP, SHA-256
+`398bf7736cc076fe09545d873e3314b7fd21c7feab678c7f6a2770a65da37383`.
+
+This is a scoped backup result, not server-free Signal messaging, mobile backup support,
+automatic repair, reciprocal contribution accounting, erasure coding or full alpha completion.
+The test still uses Signal's local registration/relink mock server. The three provider
+namespaces do not prove independent-hardware availability, and the capless, loopback-restricted
+Electron app does not claim Chromium sandboxing. The earlier provisioning failure in
+[run 37056433170](https://github.com/VOLPAROSSA/volparossa/actions/runs/37056433170)
+remains a failure before native execution, not a passing cleanup or backup result.
 
 ## Native round-trip proof — 2026-09-30
 
@@ -147,7 +183,7 @@ The test requires `VOLPAROSSA_BACKUP_CONFIG` (an owner-only JSON file path) and
 `executable`, `controlSocket`, `identity`, `passphraseFile`, `providers` (ordered `{key, grant}`
 pairs) and `lifetimeSeconds`. No secret values belong in these environment variables.
 New fragment exports additionally accept optional `fragmentBytes` and require at least three
-providers; the historical passing proof below used two whole-archive replicas. Provider
+providers; the historical 2026-09-30 proof used two whole-archive replicas. Provider
 capacity/lease limits must cover every fragment copy assigned by the core, not merely one
 transfer chunk. Retained
 copies and recovery files are deliberately left for explicit fixture/operator cleanup.
