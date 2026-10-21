@@ -2,9 +2,20 @@
 
 # Project VOLPAROSSA Chat
 
-A Signal-based client for **VOLPAROSSA — the Decentralized Intelligent Cooperative Network**.
+**Keep your conversations familiar. Build another way to deliver and recover them.**
 
-Keep the familiar Signal experience, with decentralized messaging, voice/video calling and private, cooperative backup storage supplied by the reusable [VOLPAROSSA core](https://github.com/VOLPAROSSA/volparossa).
+A lost device should not mean losing the conversation. VOLPAROSSA Chat builds on
+Signal, starting with encrypted backups that can be recovered from storage peers
+after one provider goes offline. The longer-term goal is messages and calls over
+a cooperative network, while preserving Signal's identities and encryption.
+
+The shared [VOLPAROSSA core](https://github.com/VOLPAROSSA/volparossa) supplies
+transport and private storage so Chat does not need a separate peer network.
+Decentralized message delivery and calling are still unfinished.
+
+Contributors can help turn the [proven backup slice](docs/BACKUP_CONNECTOR.md)
+into usable recovery, and join [Signal delivery](docs/SIGNAL_INTEGRATION.md)
+without breaking ordinary conversations or linked devices.
 
 ## Development status
 
