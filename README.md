@@ -1,6 +1,6 @@
 ![Project VOLPAROSSA Chat — golden lettering over a connected city, with a wolf in the foreground](docs/assets/volparossa-chat-banner.png)
 
-# Project VOLPAROSSA Chat
+# VOLPAROSSA Chat
 
 **Keep your conversations familiar. Build another way to deliver and recover them.**
 
