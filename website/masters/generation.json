@@ -1,0 +1,56 @@
+{
+  "date": "2026-11-01",
+  "tool": "image_gen.imagegen",
+  "references": [
+    "01-salon-original.png",
+    "02-messaging-mesh-replacement.png"
+  ],
+  "scenes": [
+    {
+      "name": "hero-salon",
+      "prompt": "Create a standalone high resolution cinematic photograph for a premium website hero, landscape 2400x1400. Use ONLY the top salon scene in the attached design as architectural/material inspiration. Do NOT reproduce the webpage. A spacious warm walnut conversation salon with antique brass lamps, tall arched windows, burgundy velvet chairs and evening light. Three fictional ordinary adults seated separately and naturally in conversation or reading, different depths through open doorways. A beautifully natural anatomically correct red fox rests on a burgundy rug in the RIGHT foreground, its whole body and single tail visible. Right two thirds contain richly layered salon architecture and adults; LEFT 40 percent is quiet dark walnut panelling and shadow, reserved for HTML headline. Fox not gigantic, believable room scale. Warm amber photographic illumination, exquisite tactile detail, welcoming and spacious, no fantasy gadgets. No text, letters, numbers, logos, watermarks, website panels, screenshots or UI. Generate only this one standalone room photograph.",
+      "original": "/workspace/generated_images/exec-46381898-2638-47e6-bc57-4d5063488d3f.png"
+    },
+    {
+      "name": "mesh-courtyard",
+      "prompt": "Create a standalone cinematic photographic environment for a website section, landscape 2400x1400. Reinterpret the attached garden-courtyard reference with ABSOLUTELY NO TEXT, NO LETTERS, NO LOGOS, NO LIGHT TRAILS, NO CONNECTION LINES, NO UI. View from a warm walnut salon through open doors into a shallow courtyard at dusk. Exactly eight small equal-size brass-and-glass garden pavilions distributed in several staggered rows, no dominant central object, no chest, no tower or main road. Soft amber lanterns and gentle twilight, garden plants, wide calm composition. Far left and far right foreground have separate personal alcoves, a hand holding a closed wax-sealed envelope left and a hand opening one right, no readable contents. Top and bottom edges quiet and dark. The middle should be visible but restrained so an exact node-and-edge SVG can be overlaid later. Every pavilion similarly sized; show branching space, not single row. Deep luxurious photographic material detail matching walnut brass burgundy salon. This is only scenery, not a finished diagram or webpage.",
+      "original": "/workspace/generated_images/exec-3acfc061-440d-4f0d-8617-27000f462456.png"
+    },
+    {
+      "name": "signal-worktable",
+      "prompt": "Create one standalone high resolution cinematic editorial photograph, absolutely no text, letters, numbers, logos, watermarks, web layout, UI, diagrams, wires or glowing route lines. Warm walnut, antique brass, burgundy velvet, ivory and soft amber light. Believable photographic depth and tactile materials. Use the attached salon photograph only for architecture/material continuity. Landscape 2400x1200. An ivory-lit walnut writing desk in a bright corner of this same salon, tall arched windows at the right, a few books, subtle plant and brass object. Left 35 percent is quiet pale ivory plaster in softly lit shadow for semantic HTML. Right 65 percent shows a large beautifully polished clear desk surface with deep room beyond, reserved for a separate Signal screenshot panel. Do not generate any laptop or screen, keep the desk free. Elegant composition with quiet clear middle and photographic detail around edges.",
+      "original": "/workspace/generated_images/exec-87cfb5df-a953-4910-9aaf-89fc433d2bc1.png"
+    },
+    {
+      "name": "calls-surround",
+      "prompt": "Create one standalone high resolution cinematic editorial photograph, absolutely no text, letters, numbers, logos, watermarks, web layout, UI, diagrams, wires or glowing route lines. Warm walnut, antique brass, burgundy velvet, ivory and soft amber light. Believable photographic depth and tactile materials. Use the attached salon photograph only for architecture/material continuity. Landscape 2400x1200. A quiet, light ivory corner of the same salon. Tall arched window, walnut shelves, gentle amber lamp and plant to the far right. Left 35 percent light empty ivory wall for web heading. The broad middle is a clear ivory wall and plain desk surface for a separately overlaid video-call illustration, no devices or people in this background. Soft light, balanced open composition.",
+      "original": "/workspace/generated_images/exec-7cb0f9e7-3cb0-4ff7-9fb9-dd771c2b47bb.png"
+    },
+    {
+      "name": "call-portraits",
+      "prompt": "Create one standalone high resolution cinematic editorial photograph, absolutely no text, letters, numbers, logos, watermarks, web layout, UI, diagrams, wires or glowing route lines. Warm walnut, antique brass, burgundy velvet, ivory and soft amber light. Believable photographic depth and tactile materials. Use the attached salon photograph only for architecture/material continuity. Landscape triptych 2400x1000, three adjacent equal-width photographic portraits with straight vertical boundaries. Three different fictional adults on an informal video call but NO UI: left a smiling curly dark-haired woman in burgundy cardigan in warm walnut room; centre a smiling man with short hair and glasses in a different warm room; right a smiling East Asian woman in cream sweater near plants in a third warmly lit room. Each participant centred in their own third, head and shoulders fully framed, eye-level camera and natural expression, ordinary clothing. No borders, no controls, no text. Three separate photographic portraits only.",
+      "original": "/workspace/generated_images/exec-1359d704-be0f-45b3-a142-ec3b51015900.png"
+    },
+    {
+      "name": "recovery-table",
+      "prompt": "Create one standalone high resolution cinematic editorial photograph, absolutely no text, letters, numbers, logos, watermarks, web layout, UI, diagrams, wires or glowing route lines. Warm walnut, antique brass, burgundy velvet, ivory and soft amber light. Believable photographic depth and tactile materials. Use the attached salon photograph only for architecture/material continuity. Landscape 2400x1200. Dark polished walnut writing table in same salon. Warm highlights, subtle books and amber lamps, many deep layers. Left 35 percent quiet dark wood and shadows for heading. Right two thirds show small CLOSED brass archive boxes in three distinct equal groups on table, each with two compact boxes, plus a dim inactive personal laptop near left of table group and another inactive laptop at far right, plain dark screens with NO UI. No keys, no visible personal data, no marks on boxes. Clear space for exact vector explanatory overlay later. Wide editorial background, not diagram.",
+      "original": "/workspace/generated_images/exec-dd48f60b-ab87-4c05-9b03-bf9c08a6b4ac.png"
+    },
+    {
+      "name": "storage-cabinets",
+      "prompt": "Create one standalone high resolution cinematic editorial photograph, absolutely no text, letters, numbers, logos, watermarks, web layout, UI, diagrams, wires or glowing route lines. Warm walnut, antique brass, burgundy velvet, ivory and soft amber light. Believable photographic depth and tactile materials. Use the attached salon photograph only for architecture/material continuity. Landscape 2400x1200. Warm bright ivory corner of same salon. Three small CLOSED walnut cabinets with fine antique brass trim, of EQUAL importance and size, arranged side by side in the right two thirds. Natural plants, delicate warm sunlight from tall window, burgundy rug. Left third quiet ivory plaster lit softly for semantic web title. Cabinet doors closed, no logos, no letters, no padlock filling scene, no vault, no computer. An inviting domestic salon, not a bank. Leave broad room around cabinets for later vector relationships.",
+      "original": "/workspace/generated_images/exec-d4d3e240-9d4d-448f-9a14-b3568ae5d445.png"
+    },
+    {
+      "name": "closing-fox",
+      "prompt": "Create one standalone high resolution cinematic editorial photograph, absolutely no text, letters, numbers, logos, watermarks, web layout, UI, diagrams, wires or glowing route lines. Warm walnut, antique brass, burgundy velvet, ivory and soft amber light. Believable photographic depth and tactile materials. Use the attached salon photograph only for architecture/material continuity. Landscape 2400x1100. Close warm view of one NATURAL anatomically correct red fox resting sleepily on a burgundy rug near walnut armchair, tasteful books and brass floor lamp in same salon. Right two thirds carry the entire fox curled comfortably with one tail, paws anatomically correct, rich tactile fur and rug, near-floor view. Left third quiet dark wood/shadow for web heading and buttons. Same amber light and room, calm welcoming ending. No other animal.",
+      "original": "/workspace/generated_images/exec-5a791dce-5080-4e4f-bce6-8e2cee9d387c.png"
+    },
+    {
+      "name": "mesh-courtyard",
+      "prompt": "Edit this cinematic courtyard photograph very carefully. Keep all seven existing brass-and-glass pavilions and the two personal envelope alcoves, walnut salon, lighting, dusk sky and planting exactly in the same photographic style. Add ONE additional equal-size modest brass-and-glass pavilion in the lower middle garden area, replacing the little central fountain/pond. It must not dominate the scene: same architecture and modest scale as the other foreground pavilions. The finished courtyard must contain EIGHT distinct equally important pavilions in multiple staggered rows. No connection lines, no text, no logos, no website content. Preserve image dimensions and the overall framing.",
+      "original": "/workspace/generated_images/exec-46f5ede1-38f8-4b2e-9631-bd1e39862890.png",
+      "revision": "Added the eighth equally important courtyard pavilion."
+    }
+  ]
+}
