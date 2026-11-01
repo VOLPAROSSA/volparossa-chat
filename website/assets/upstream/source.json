@@ -1,0 +1,20 @@
+{
+  "date": "2026-11-01",
+  "files": [
+    {
+      "file": "signal.svg",
+      "source": "https://github.com/signalapp/Signal-Desktop/blob/ef3872cb0249ec939d8aff857568a0e87a6b5075/images/signal-logo.svg",
+      "git_blob": "61f00c206601b1bd68cd36343bc2293cb6119e52"
+    },
+    {
+      "file": "SIGNAL-LICENSE.txt",
+      "source": "https://github.com/signalapp/Signal-Desktop/blob/ef3872cb0249ec939d8aff857568a0e87a6b5075/LICENSE",
+      "git_blob": "be3f7b28e564e7dd05eaf59d64adba1a4065ac0e"
+    },
+    {
+      "file": "signal-app.png",
+      "source": "https://github.com/signalapp/Signal-Desktop/blob/ef3872cb0249ec939d8aff857568a0e87a6b5075/images/signal-logo-desktop-linux.png",
+      "git_blob": "866ad19bcdbf32fe07f484232e79f4cacddac9a7"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "conditions": {
+    "tool": "Lighthouse 13.6.0",
+    "url": "http://127.0.0.1:8780/volparossa-chat/",
+    "formFactor": "mobile",
+    "throttling": {
+      "rttMs": 150,
+      "throughputKbps": 1638.4,
+      "requestLatencyMs": 562.5,
+      "downloadThroughputKbps": 1474.5600000000002,
+      "uploadThroughputKbps": 675,
+      "cpuSlowdownMultiplier": 4
+    },
+    "screenEmulation": {
+      "mobile": true,
+      "width": 412,
+      "height": 823,
+      "deviceScaleFactor": 1.75,
+      "disabled": false
+    },
+    "localServer": "Python HTTP server, uncompressed local preview, noindex"
+  },
+  "fetchTime": "2026-11-01T22:44:04.043Z",
+  "scores": {
+    "performance": 0.98,
+    "accessibility": 1,
+    "best-practices": 1,
+    "seo": 0.66
+  },
+  "metrics": {
+    "largest-contentful-paint": {
+      "value": 2402.684331108051,
+      "display": "2.4\u00a0s"
+    },
+    "cumulative-layout-shift": {
+      "value": 3.210672261247983e-05,
+      "display": "0"
+    },
+    "first-contentful-paint": {
+      "value": 1352.147464886441,
+      "display": "1.4\u00a0s"
+    },
+    "total-blocking-time": {
+      "value": 31,
+      "display": "30\u00a0ms"
+    },
+    "total-byte-weight": {
+      "value": 364732,
+      "display": "Total size was 356\u00a0KiB"
+    }
+  }
+}

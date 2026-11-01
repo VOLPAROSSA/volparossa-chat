@@ -1,0 +1,254 @@
+{
+  "hero-salon": {
+    "desktop": [
+      {
+        "stem": "hero-salon-desktop-640",
+        "width": 640,
+        "height": 373
+      },
+      {
+        "stem": "hero-salon-desktop-960",
+        "width": 960,
+        "height": 559
+      },
+      {
+        "stem": "hero-salon-desktop-1440",
+        "width": 1440,
+        "height": 839
+      },
+      {
+        "stem": "hero-salon-desktop-1643",
+        "width": 1643,
+        "height": 957
+      }
+    ],
+    "mobile": [
+      {
+        "stem": "hero-salon-mobile-480",
+        "width": 480,
+        "height": 458
+      },
+      {
+        "stem": "hero-salon-mobile-768",
+        "width": 768,
+        "height": 733
+      }
+    ]
+  },
+  "signal-worktable": {
+    "desktop": [
+      {
+        "stem": "signal-worktable-desktop-640",
+        "width": 640,
+        "height": 320
+      },
+      {
+        "stem": "signal-worktable-desktop-960",
+        "width": 960,
+        "height": 480
+      },
+      {
+        "stem": "signal-worktable-desktop-1440",
+        "width": 1440,
+        "height": 720
+      },
+      {
+        "stem": "signal-worktable-desktop-1774",
+        "width": 1774,
+        "height": 887
+      }
+    ]
+  },
+  "mesh-courtyard": {
+    "desktop": [
+      {
+        "stem": "mesh-courtyard-desktop-640",
+        "width": 640,
+        "height": 373
+      },
+      {
+        "stem": "mesh-courtyard-desktop-960",
+        "width": 960,
+        "height": 560
+      },
+      {
+        "stem": "mesh-courtyard-desktop-1440",
+        "width": 1440,
+        "height": 840
+      },
+      {
+        "stem": "mesh-courtyard-desktop-1642",
+        "width": 1642,
+        "height": 958
+      }
+    ],
+    "mobile": [
+      {
+        "stem": "mesh-courtyard-mobile-480",
+        "width": 480,
+        "height": 613
+      },
+      {
+        "stem": "mesh-courtyard-mobile-750",
+        "width": 750,
+        "height": 958
+      }
+    ]
+  },
+  "calls-surround": {
+    "desktop": [
+      {
+        "stem": "calls-surround-desktop-640",
+        "width": 640,
+        "height": 320
+      },
+      {
+        "stem": "calls-surround-desktop-960",
+        "width": 960,
+        "height": 480
+      },
+      {
+        "stem": "calls-surround-desktop-1440",
+        "width": 1440,
+        "height": 720
+      },
+      {
+        "stem": "calls-surround-desktop-1774",
+        "width": 1774,
+        "height": 887
+      }
+    ]
+  },
+  "call-portraits": {
+    "desktop": [
+      {
+        "stem": "call-portraits-desktop-640",
+        "width": 640,
+        "height": 273
+      },
+      {
+        "stem": "call-portraits-desktop-960",
+        "width": 960,
+        "height": 410
+      },
+      {
+        "stem": "call-portraits-desktop-1440",
+        "width": 1440,
+        "height": 614
+      },
+      {
+        "stem": "call-portraits-desktop-1920",
+        "width": 1920,
+        "height": 819
+      }
+    ]
+  },
+  "recovery-table": {
+    "desktop": [
+      {
+        "stem": "recovery-table-desktop-640",
+        "width": 640,
+        "height": 320
+      },
+      {
+        "stem": "recovery-table-desktop-960",
+        "width": 960,
+        "height": 480
+      },
+      {
+        "stem": "recovery-table-desktop-1440",
+        "width": 1440,
+        "height": 720
+      },
+      {
+        "stem": "recovery-table-desktop-1774",
+        "width": 1774,
+        "height": 887
+      }
+    ],
+    "mobile": [
+      {
+        "stem": "recovery-table-mobile-480",
+        "width": 480,
+        "height": 334
+      },
+      {
+        "stem": "recovery-table-mobile-768",
+        "width": 768,
+        "height": 535
+      }
+    ]
+  },
+  "storage-cabinets": {
+    "desktop": [
+      {
+        "stem": "storage-cabinets-desktop-640",
+        "width": 640,
+        "height": 320
+      },
+      {
+        "stem": "storage-cabinets-desktop-960",
+        "width": 960,
+        "height": 480
+      },
+      {
+        "stem": "storage-cabinets-desktop-1440",
+        "width": 1440,
+        "height": 720
+      },
+      {
+        "stem": "storage-cabinets-desktop-1774",
+        "width": 1774,
+        "height": 887
+      }
+    ],
+    "mobile": [
+      {
+        "stem": "storage-cabinets-mobile-480",
+        "width": 480,
+        "height": 323
+      },
+      {
+        "stem": "storage-cabinets-mobile-768",
+        "width": 768,
+        "height": 517
+      }
+    ]
+  },
+  "closing-fox": {
+    "desktop": [
+      {
+        "stem": "closing-fox-desktop-640",
+        "width": 640,
+        "height": 293
+      },
+      {
+        "stem": "closing-fox-desktop-960",
+        "width": 960,
+        "height": 440
+      },
+      {
+        "stem": "closing-fox-desktop-1440",
+        "width": 1440,
+        "height": 660
+      },
+      {
+        "stem": "closing-fox-desktop-1852",
+        "width": 1852,
+        "height": 849
+      }
+    ],
+    "mobile": [
+      {
+        "stem": "closing-fox-mobile-480",
+        "width": 480,
+        "height": 354
+      },
+      {
+        "stem": "closing-fox-mobile-768",
+        "width": 768,
+        "height": 566
+      }
+    ]
+  }
+}
