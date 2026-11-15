@@ -25,9 +25,9 @@
     "mesh-courtyard": {
       "desktop": [
         0,
-        0,
+        120,
         1642,
-        958
+        820
       ],
       "mobile": [
         440,
@@ -68,10 +68,10 @@
     },
     "storage-cabinets": {
       "desktop": [
-        0,
-        0,
-        1774,
-        887
+        590,
+        230,
+        1620,
+        790
       ],
       "mobile": [
         630,
@@ -517,76 +517,76 @@
       "height": 733
     },
     "assets/chat/mesh-courtyard-desktop-1440.avif": {
-      "bytes": 133051,
-      "sha256": "9aa3c8bad640166e581cab2631ecc29096a6d01b87f942924173c39dcde7deb7",
+      "bytes": 119074,
+      "sha256": "32f97d41ba6c9d7919d3b7bc341816827e27a4bdf3f9a6b011bccd917c0d2a37",
       "width": 1440,
-      "height": 840
+      "height": 614
     },
     "assets/chat/mesh-courtyard-desktop-1440.jpg": {
-      "bytes": 303248,
-      "sha256": "90d754a66e1a93c9850f8033e51d4502b758bc9bbd2f1cb6a26449d52b303d74",
+      "bytes": 260563,
+      "sha256": "032a810b50d2678a2e88f65c5cb2417ca4835ae9fe60b65a1864cd98771ea118",
       "width": 1440,
-      "height": 840
+      "height": 614
     },
     "assets/chat/mesh-courtyard-desktop-1440.webp": {
-      "bytes": 250762,
-      "sha256": "b7d82d47a1f7d9600e4370d8617cfa5816f5c28088a9beef196615a190b62fef",
+      "bytes": 225348,
+      "sha256": "454e44751b1d60847b7bfed3da252db253ccbfd77f565ec63acb66d7f406a21b",
       "width": 1440,
-      "height": 840
+      "height": 614
     },
     "assets/chat/mesh-courtyard-desktop-1642.avif": {
-      "bytes": 157489,
-      "sha256": "09297faeea45953b8018ef541ab76ebb306a679686d1732e7cfb770fb4dbc906",
+      "bytes": 140078,
+      "sha256": "8506b88241fe5501f1cf41f13b27540eacca41610750aa8bc63238749be014a7",
       "width": 1642,
-      "height": 958
+      "height": 700
     },
     "assets/chat/mesh-courtyard-desktop-1642.jpg": {
-      "bytes": 369510,
-      "sha256": "e53ef13ed23f10ef84618ae15310d1def34d5b161629876b06984c212a02de91",
+      "bytes": 317929,
+      "sha256": "436304ded88bbdb428a65505b487d31533a060cd64b32a084a5d51f158a78d6e",
       "width": 1642,
-      "height": 958
+      "height": 700
     },
     "assets/chat/mesh-courtyard-desktop-1642.webp": {
-      "bytes": 299010,
-      "sha256": "5cbbea653beb14486d463be2b22a373e206f90de6bbf25d04ac0732c73a4a19a",
+      "bytes": 265542,
+      "sha256": "52750dd0d495d45bd16c527394c9c6dc2f1701f9dc9fbfeff53a828365858749",
       "width": 1642,
-      "height": 958
+      "height": 700
     },
     "assets/chat/mesh-courtyard-desktop-640.avif": {
-      "bytes": 35938,
-      "sha256": "58708e7fa047d79ff07c3a046540cbba430635165634c1f18f3b7c02d01875ca",
+      "bytes": 30984,
+      "sha256": "7f932e54c9a971471a53f0dea7c08ed4541a27e72b4de2f82efab04f28056522",
       "width": 640,
-      "height": 373
+      "height": 273
     },
     "assets/chat/mesh-courtyard-desktop-640.jpg": {
-      "bytes": 76237,
-      "sha256": "e8c458b3aabb737889f6b834cc348722b732e1c74c5502af1e0237c178d9c337",
+      "bytes": 64542,
+      "sha256": "3eec086b7c5b5ef2df3fba299799bfca69265d5b1c45072feb3bc6d2c6f86c0c",
       "width": 640,
-      "height": 373
+      "height": 273
     },
     "assets/chat/mesh-courtyard-desktop-640.webp": {
-      "bytes": 70042,
-      "sha256": "872aa8726a8993b3b188a49a55d768c888bc0a7e1e254341e71c9ff229349ce6",
+      "bytes": 61532,
+      "sha256": "79a4bb10702d5a74763133a43ed26b74175d8624a22a6a56ef3456f45f7cd3d1",
       "width": 640,
-      "height": 373
+      "height": 273
     },
     "assets/chat/mesh-courtyard-desktop-960.avif": {
-      "bytes": 73282,
-      "sha256": "c353416a304ca21b6e8af5f4ea63a1c05dd67e3f1c118127c834e69e6298a2d9",
+      "bytes": 64222,
+      "sha256": "f9eb6543bfb8fbac5ed13921e4bfe11711a26f14e7bdf92da8c85189759707ef",
       "width": 960,
-      "height": 560
+      "height": 409
     },
     "assets/chat/mesh-courtyard-desktop-960.jpg": {
-      "bytes": 157089,
-      "sha256": "53f3f64e8e12fc6ce5e28e5ad0b74b5521bd3aa8ef2a0ab07330b44878862783",
+      "bytes": 134247,
+      "sha256": "1cf2025f25f6bedc9a81c8ba78e9348bbc878ff60595e6e443798b1f0ebd1a95",
       "width": 960,
-      "height": 560
+      "height": 409
     },
     "assets/chat/mesh-courtyard-desktop-960.webp": {
-      "bytes": 136946,
-      "sha256": "850df5af17171e6bd8642d6735b49dbcb84ac5b7bda8900c5dbeb4b91d14f255",
+      "bytes": 122982,
+      "sha256": "8aac3822fb559c29c20d189c9d13c2fc4b1e7f09907ebd929b7a77eb7a3d89fe",
       "width": 960,
-      "height": 560
+      "height": 409
     },
     "assets/chat/mesh-courtyard-mobile-480.avif": {
       "bytes": 45412,
@@ -810,77 +810,59 @@
       "width": 1200,
       "height": 630
     },
-    "assets/chat/storage-cabinets-desktop-1440.avif": {
-      "bytes": 83646,
-      "sha256": "1e18533779bbd2c0c9e1c619c996f84c27c63e67728cc570876fa6126892d24b",
-      "width": 1440,
-      "height": 720
+    "assets/chat/storage-cabinets-desktop-1030.avif": {
+      "bytes": 52575,
+      "sha256": "9eaca5c96b2268470b6f6a526e7307f5460f60463a72ce72f8877e5e9af11640",
+      "width": 1030,
+      "height": 560
     },
-    "assets/chat/storage-cabinets-desktop-1440.jpg": {
-      "bytes": 222707,
-      "sha256": "948dafff61e28aac83a793aed4cd20d7c3798770f8ce429cff2c4f912194a1e7",
-      "width": 1440,
-      "height": 720
+    "assets/chat/storage-cabinets-desktop-1030.jpg": {
+      "bytes": 140177,
+      "sha256": "3b7130bbb4d984077ab0a18eb5f3a33f0ec4c50e010016fee50d4854d4433621",
+      "width": 1030,
+      "height": 560
     },
-    "assets/chat/storage-cabinets-desktop-1440.webp": {
-      "bytes": 168808,
-      "sha256": "3c31635c50d3b9aff05f1c3b54f0387f613b4ec9bdb6fd5a7851ba85aec4170a",
-      "width": 1440,
-      "height": 720
-    },
-    "assets/chat/storage-cabinets-desktop-1774.avif": {
-      "bytes": 113975,
-      "sha256": "5e41192b8a0cb6c5f25a47f02cae93c410dc3d6264a7ea2971f6060c90c5562e",
-      "width": 1774,
-      "height": 887
-    },
-    "assets/chat/storage-cabinets-desktop-1774.jpg": {
-      "bytes": 311303,
-      "sha256": "6650319278300d30dbf11379d6bfb11e6895096b4bd8589a0539b7355f5583d2",
-      "width": 1774,
-      "height": 887
-    },
-    "assets/chat/storage-cabinets-desktop-1774.webp": {
-      "bytes": 222698,
-      "sha256": "f69126a40ff209a63aadfeb8819c7e6f4a28143209e4112912df60e77e13ce08",
-      "width": 1774,
-      "height": 887
+    "assets/chat/storage-cabinets-desktop-1030.webp": {
+      "bytes": 107668,
+      "sha256": "b565fdefb6ac6289f0234c956e26603f0048c4a4ff31e93cce268f00cc01c6e5",
+      "width": 1030,
+      "height": 560
     },
     "assets/chat/storage-cabinets-desktop-640.avif": {
-      "bytes": 23899,
-      "sha256": "0c4b7c6b1f380cd58f161baca86bdb93e7c78228dd9ce94c80a90bce4e720751",
+      "bytes": 26278,
+      "sha256": "54d6b196d5b8285479e61989ae32a6ac7f06764429d4cfbe94f711800333d2fe",
       "width": 640,
-      "height": 320
+      "height": 348
     },
     "assets/chat/storage-cabinets-desktop-640.jpg": {
-      "bytes": 56551,
-      "sha256": "5dd4649f6fe0f680cd37044764516fe5c6bd7ba4c5e0248f680e3faceb9b4858",
+      "bytes": 63283,
+      "sha256": "b84201ff9e32701c98673e0859fe5ded83ffc5dda535db1cc7fa9a9bfbfcfeee",
       "width": 640,
-      "height": 320
+      "height": 348
     },
     "assets/chat/storage-cabinets-desktop-640.webp": {
-      "bytes": 49274,
-      "sha256": "a284ae012f6bce0ffd75df66c3bda0745a319486ac0247776d391f41b5d4439c",
+      "bytes": 51134,
+      "sha256": "19e5c81f05591b936a62cd8c67153c37dad0a9bdb9fe153d531524f5c59ab32a",
       "width": 640,
-      "height": 320
+      "height": 348
     },
     "assets/chat/storage-cabinets-desktop-960.avif": {
-      "bytes": 45701,
-      "sha256": "1305300222d7804ca48e9156ce06cf7d96806083e3fd0fd783090e4303d240fa",
+      "bytes": 48758,
+      "sha256": "5f96a8f95e53f92f3742f9385a897fc19d7d97e32adb4153a4674dccfe857473",
       "width": 960,
-      "height": 480
+      "height": 522
     },
     "assets/chat/storage-cabinets-desktop-960.jpg": {
-      "bytes": 113597,
-      "sha256": "0da70a5f603d9a84f4625c47dd15cf43cd6d765967dc42ad6782b5eb32fc1da1",
+      "bytes": 125483,
+      "sha256": "7b8c4b245a0c4713b8c7ac84e191aef8c51bd6781dbc1ba7318541752f7dcaaf",
       "width": 960,
-      "height": 480
+      "height": 522
     },
     "assets/chat/storage-cabinets-desktop-960.webp": {
-      "bytes": 93698,
-      "sha256": "794de5d1e6bd896d916a45e75f2fa7b33d4ebf8f43a81f9666f6c853f407664a",
+      "bytes": 98092,
+      "sha256": "c6b71411d1d592b237461197a3596617d2ffb62063d7f09365a3c91a421aeb1a",
       "width": 960,
-      "height": 480
+      "height": 522
     },
     "assets/chat/storage-cabinets-mobile-480.avif": {
       "bytes": 20283,
@@ -919,8 +901,8 @@
       "height": 517
     },
     "assets/chat/variants.json": {
-      "bytes": 4996,
-      "sha256": "d79c4a726b855b4035676a0c158db928914ef9efa548f04f50b88f6e7bdbe6ff"
+      "bytes": 4885,
+      "sha256": "3abd1c41955af7aea926e77115e01d98d1519dd352aa4e27b58590f3f48bea8d"
     },
     "assets/icons/lucide/LICENSE": {
       "bytes": 3208,

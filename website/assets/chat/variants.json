@@ -64,22 +64,22 @@
       {
         "stem": "mesh-courtyard-desktop-640",
         "width": 640,
-        "height": 373
+        "height": 273
       },
       {
         "stem": "mesh-courtyard-desktop-960",
         "width": 960,
-        "height": 560
+        "height": 409
       },
       {
         "stem": "mesh-courtyard-desktop-1440",
         "width": 1440,
-        "height": 840
+        "height": 614
       },
       {
         "stem": "mesh-courtyard-desktop-1642",
         "width": 1642,
-        "height": 958
+        "height": 700
       }
     ],
     "mobile": [
@@ -184,22 +184,17 @@
       {
         "stem": "storage-cabinets-desktop-640",
         "width": 640,
-        "height": 320
+        "height": 348
       },
       {
         "stem": "storage-cabinets-desktop-960",
         "width": 960,
-        "height": 480
+        "height": 522
       },
       {
-        "stem": "storage-cabinets-desktop-1440",
-        "width": 1440,
-        "height": 720
-      },
-      {
-        "stem": "storage-cabinets-desktop-1774",
-        "width": 1774,
-        "height": 887
+        "stem": "storage-cabinets-desktop-1030",
+        "width": 1030,
+        "height": 560
       }
     ],
     "mobile": [

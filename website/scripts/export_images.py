@@ -11,11 +11,11 @@ OUT = ROOT / 'assets/chat'
 COMPOSITIONS = {
  'hero-salon': {'desktop': [0,0,1643,957], 'mobile': [640,0,1643,957]},
  'signal-worktable': {'desktop': [0,0,1774,887]},
- 'mesh-courtyard': {'desktop': [0,0,1642,958], 'mobile': [440,0,1190,958]},
+ 'mesh-courtyard': {'desktop': [0,120,1642,820], 'mobile': [440,0,1190,958]},
  'calls-surround': {'desktop': [0,0,1774,887]},
  'call-portraits': {'desktop': [0,0,1920,819]},
  'recovery-table': {'desktop': [0,0,1774,887], 'mobile': [500,0,1774,887]},
- 'storage-cabinets': {'desktop': [0,0,1774,887], 'mobile': [630,220,1620,887]},
+ 'storage-cabinets': {'desktop': [590,230,1620,790], 'mobile': [630,220,1620,887]},
  'closing-fox': {'desktop': [0,0,1852,849], 'mobile': [700,0,1852,849]}
 }
 
@@ -36,6 +36,8 @@ def inventory():
 
 def export():
     OUT.mkdir(parents=True,exist_ok=True)
+    previous = json.loads((OUT/'variants.json').read_text()) if (OUT/'variants.json').exists() else {}
+    old_stems = {item['stem'] for variants in previous.values() for items in variants.values() for item in items}
     variants = {}
     for name, plan in COMPOSITIONS.items():
         original = Image.open(ROOT/'masters'/f'{name}.png').convert('RGB')
@@ -54,6 +56,10 @@ def export():
                 im.save(OUT/(stem+'.jpg'),quality=84,optimize=True,progressive=True)
                 variants[name][kind].append({'stem':stem,'width':size[0],'height':size[1]})
     (OUT/'variants.json').write_text(json.dumps(variants,indent=2)+'\n')
+    new_stems = {item['stem'] for sizes in variants.values() for items in sizes.values() for item in items}
+    for stem in old_stems - new_stems:
+        for extension in ['avif','webp','jpg']:
+            (OUT/(stem+'.'+extension)).unlink(missing_ok=True)
     # Keep the official original untouched; derive small lossless display sizes.
     mark=Image.open(ROOT/'assets/upstream/signal-app.png')
     for width in [128,256]:

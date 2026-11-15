@@ -6,7 +6,7 @@
   "scripts": {
     "build": "python3 scripts/build_site.py",
     "check": "python3 scripts/check_site.py",
-    "qa": "node scripts/chat_check.mjs"
+    "qa": "node scripts/browser_check.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",

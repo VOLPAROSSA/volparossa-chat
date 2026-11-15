@@ -1,0 +1,54 @@
+{
+  "viewport": [
+    1440,
+    900
+  ],
+  "unit": "CSS px rounded by section screenshots",
+  "sections": [
+    {
+      "section": "top",
+      "before": 738,
+      "after": 666
+    },
+    {
+      "section": "signal",
+      "before": 642,
+      "after": 501
+    },
+    {
+      "section": "messaging",
+      "before": 1385,
+      "after": 930
+    },
+    {
+      "section": "calls",
+      "before": 631,
+      "after": 548
+    },
+    {
+      "section": "recovery",
+      "before": 1135,
+      "after": 742
+    },
+    {
+      "section": "shared-storage",
+      "before": 689,
+      "after": 427
+    },
+    {
+      "section": "privacy",
+      "before": 530,
+      "after": 207
+    },
+    {
+      "section": "development",
+      "before": 355,
+      "after": 307
+    },
+    {
+      "section": "contribute",
+      "before": 441,
+      "after": 361
+    }
+  ]
+}

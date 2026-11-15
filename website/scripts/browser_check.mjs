@@ -68,6 +68,22 @@ for(const engine of (process.env.QA_ENGINES||'chromium,firefox').split(',')){
    }
    await page.screenshot({path:path.join(out,`${engine}-${width}-full.png`),fullPage:true});
    if([390,1440].includes(width))for(const id of sections)await page.locator('#'+id).screenshot({path:path.join(out,`${engine}-${width}-${id}.png`)});
+   // Additional explanations remain usable with the keyboard, without page scripts.
+   if([390,1440].includes(width)){
+    for(const disclosure of await page.locator('main details').all()){
+     await disclosure.locator('summary').focus();await page.keyboard.press('Enter');
+     assert(await disclosure.getAttribute('open')!==null,'Explanation opens with Enter');
+     assert(await disclosure.locator('p').first().isVisible(),'Full explanation is visible');
+    }
+    const expanded=await geometry(page);
+    assert(!expanded.overflow&&!expanded.headerOverlap,'Expanded explanations reflow');
+    if(engine==='chromium'){
+     const a=await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze();
+     accessibility.push({width,expanded:true,violations:a.violations});
+     assert(!a.violations.length,'Expanded explanation axe violations');
+    }
+    await page.screenshot({path:path.join(out,`${engine}-${width}-expanded.png`),fullPage:true});
+   }
    // Keyboard access, native disclosure and shared menu enhancement.
    await page.goto(url,{waitUntil:'networkidle'});await page.keyboard.press('Tab');
    assert(await page.locator('.skip-link').evaluate(e=>e===document.activeElement),'Skip link first');
@@ -91,11 +107,17 @@ for(const engine of (process.env.QA_ENGINES||'chromium,firefox').split(',')){
    if(type!=='images-disabled')await loadAll(page);
    const g=await geometry(page);assert(!g.overflow&&!g.headerOverlap,JSON.stringify({type,...g}));
    if(type==='no-js'){const m=page.locator('.mobile-nav');await m.locator('summary').click();assert(await m.getAttribute('open')!==null,'No-JS menu');await m.locator('summary').click();}
+   if(type==='no-js'){
+    for(const d of await page.locator('main details').all()){
+     await d.locator('summary').click();assert(await d.locator('p').first().isVisible(),'Explanation works without JavaScript');
+    }
+   }
    assert(await page.evaluate(()=>getComputedStyle(document.documentElement).scrollBehavior)==='auto','Reduced-motion scrolling');
    await page.screenshot({path:path.join(out,type+'.png'),fullPage:true});
    results.push({type,...g,passed:true});await context.close();
   }
  }finally{await browser.close();}
 }
+fs.writeFileSync(path.join(out,'accessibility.json'),JSON.stringify(accessibility,null,2)+'\n');
 fs.writeFileSync(path.join(out,'results.json'),JSON.stringify({checkedAt:new Date().toISOString(),url,results,accessibility},null,2)+'\n');
 console.log(JSON.stringify({profiles:results.length,accessibility:accessibility.map(a=>({width:a.width,violations:a.violations.length})),results}));
