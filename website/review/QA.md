@@ -1,5 +1,9 @@
 # Chat website review — 1 November 2026
 
+For the later visual correction and its current screenshots, see the
+[15 November salon refinement review](salon-refinement/REVIEW.md).
+The measurements below describe the original November 1 release.
+
 ## Result
 
 All nine sections are implemented and visually reviewed in actual Chromium and

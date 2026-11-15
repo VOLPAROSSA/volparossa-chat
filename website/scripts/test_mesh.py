@@ -2,6 +2,7 @@
 import unittest
 from collections import deque
 import xml.etree.ElementTree as ET
+from itertools import combinations
 from mesh import DATA, render_mesh
 
 
@@ -61,6 +62,21 @@ class IllustrationTopology(unittest.TestCase):
         self.assertGreaterEqual(len({p[n][0] for n in DATA['peer_nodes']}),2)
         self.assertTrue(all(p['S'][1]<p[n][1]<p['T'][1] for n in DATA['peer_nodes']))
         self.assertNotEqual(DATA['mobile'],DATA['desktop'])
+
+    def test_scene_alignment_does_not_create_false_junctions(self):
+        def side(a,b,c):
+            return (b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0])
+        for layout in ['desktop','mobile']:
+            positions=DATA[layout]['positions']
+            _,_,width,height=DATA[layout]['viewBox']
+            for x,y in positions.values():
+                self.assertTrue(0<x<width and 0<y<height)
+            for (a,b),(c,d) in combinations(DATA['edges'],2):
+                if len({a,b,c,d})<4:
+                    continue
+                u,v,w,z=[positions[n] for n in (a,b,c,d)]
+                with self.subTest(layout=layout,edges=(a,b,c,d)):
+                    self.assertFalse(side(u,v,w)*side(u,v,z)<0 and side(w,z,u)*side(w,z,v)<0)
 
 
 if __name__=='__main__':unittest.main()

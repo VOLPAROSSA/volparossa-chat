@@ -1,0 +1,291 @@
+{
+  "checkedAt": "2026-11-15T17:18:39.392Z",
+  "url": "http://127.0.0.1:8780/volparossa-chat/",
+  "results": [
+    {
+      "engine": "chromium",
+      "overflow": false,
+      "headerOverlap": false,
+      "missingImages": [],
+      "meshNodes": [
+        {
+          "peers": 8,
+          "edges": 15,
+          "endpoints": 2
+        }
+      ],
+      "width": 1440,
+      "height": 900,
+      "initialTransfer": 522173,
+      "images": 580442,
+      "fonts": 47140,
+      "errors": [],
+      "failures": [],
+      "external": []
+    },
+    {
+      "engine": "chromium",
+      "overflow": false,
+      "headerOverlap": false,
+      "missingImages": [],
+      "meshNodes": [
+        {
+          "peers": 8,
+          "edges": 15,
+          "endpoints": 2
+        }
+      ],
+      "width": 390,
+      "height": 844,
+      "initialTransfer": 282678,
+      "images": 226062,
+      "fonts": 47140,
+      "errors": [],
+      "failures": [],
+      "external": []
+    },
+    {
+      "engine": "chromium",
+      "overflow": false,
+      "headerOverlap": false,
+      "missingImages": [],
+      "meshNodes": [
+        {
+          "peers": 8,
+          "edges": 15,
+          "endpoints": 2
+        }
+      ],
+      "width": 320,
+      "height": 740,
+      "initialTransfer": 282678,
+      "images": 226062,
+      "fonts": 47140,
+      "errors": [],
+      "failures": [],
+      "external": []
+    },
+    {
+      "engine": "chromium",
+      "overflow": false,
+      "headerOverlap": false,
+      "missingImages": [],
+      "meshNodes": [
+        {
+          "peers": 8,
+          "edges": 15,
+          "endpoints": 2
+        }
+      ],
+      "width": 768,
+      "height": 1024,
+      "initialTransfer": 366694,
+      "images": 389418,
+      "fonts": 47140,
+      "errors": [],
+      "failures": [],
+      "external": []
+    },
+    {
+      "engine": "chromium",
+      "overflow": false,
+      "headerOverlap": false,
+      "missingImages": [],
+      "meshNodes": [
+        {
+          "peers": 8,
+          "edges": 15,
+          "endpoints": 2
+        }
+      ],
+      "width": 1920,
+      "height": 1080,
+      "initialTransfer": 715227,
+      "images": 705045,
+      "fonts": 47140,
+      "errors": [],
+      "failures": [],
+      "external": []
+    },
+    {
+      "engine": "chromium",
+      "overflow": false,
+      "headerOverlap": false,
+      "missingImages": [],
+      "meshNodes": [
+        {
+          "peers": 8,
+          "edges": 15,
+          "endpoints": 2
+        }
+      ],
+      "width": 844,
+      "height": 390,
+      "initialTransfer": 425873,
+      "images": 355558,
+      "fonts": 47140,
+      "errors": [],
+      "failures": [],
+      "external": []
+    },
+    {
+      "type": "no-js",
+      "overflow": false,
+      "headerOverlap": false,
+      "missingImages": [],
+      "meshNodes": [
+        {
+          "peers": 8,
+          "edges": 15,
+          "endpoints": 2
+        }
+      ],
+      "width": 390,
+      "height": 900,
+      "passed": true
+    },
+    {
+      "type": "text-200-percent",
+      "overflow": false,
+      "headerOverlap": false,
+      "missingImages": [],
+      "meshNodes": [
+        {
+          "peers": 8,
+          "edges": 15,
+          "endpoints": 2
+        }
+      ],
+      "width": 1440,
+      "height": 900,
+      "passed": true
+    },
+    {
+      "type": "zoom-400-percent",
+      "overflow": false,
+      "headerOverlap": false,
+      "missingImages": [],
+      "meshNodes": [
+        {
+          "peers": 8,
+          "edges": 15,
+          "endpoints": 2
+        }
+      ],
+      "width": 320,
+      "height": 225,
+      "passed": true
+    },
+    {
+      "type": "images-disabled",
+      "overflow": false,
+      "headerOverlap": false,
+      "missingImages": [
+        "http://127.0.0.1:8780/volparossa-chat/assets/logo.png",
+        "http://127.0.0.1:8780/volparossa-chat/assets/chat/hero-salon-mobile-480.avif",
+        "http://127.0.0.1:8780/volparossa-chat/assets/chat/signal-worktable-desktop-640.avif",
+        "http://127.0.0.1:8780/volparossa-chat/assets/upstream/signal-app-128.png",
+        "http://127.0.0.1:8780/volparossa-chat/assets/chat/mesh-courtyard-mobile-480.avif",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "http://127.0.0.1:8780/volparossa-chat/assets/logo.png"
+      ],
+      "meshNodes": [
+        {
+          "peers": 8,
+          "edges": 15,
+          "endpoints": 2
+        }
+      ],
+      "width": 390,
+      "height": 900,
+      "passed": true
+    },
+    {
+      "engine": "firefox",
+      "overflow": false,
+      "headerOverlap": false,
+      "missingImages": [],
+      "meshNodes": [
+        {
+          "peers": 8,
+          "edges": 15,
+          "endpoints": 2
+        }
+      ],
+      "width": 390,
+      "height": 844,
+      "initialTransfer": 216745,
+      "images": 226062,
+      "fonts": 47140,
+      "errors": [],
+      "failures": [],
+      "external": []
+    },
+    {
+      "engine": "firefox",
+      "overflow": false,
+      "headerOverlap": false,
+      "missingImages": [],
+      "meshNodes": [
+        {
+          "peers": 8,
+          "edges": 15,
+          "endpoints": 2
+        }
+      ],
+      "width": 1440,
+      "height": 900,
+      "initialTransfer": 453201,
+      "images": 580442,
+      "fonts": 47140,
+      "errors": [],
+      "failures": [],
+      "external": []
+    },
+    {
+      "engine": "firefox",
+      "overflow": false,
+      "headerOverlap": false,
+      "missingImages": [],
+      "meshNodes": [
+        {
+          "peers": 8,
+          "edges": 15,
+          "endpoints": 2
+        }
+      ],
+      "width": 2560,
+      "height": 1440,
+      "initialTransfer": 508568,
+      "images": 738590,
+      "fonts": 47140,
+      "errors": [],
+      "failures": [],
+      "external": []
+    }
+  ],
+  "accessibility": [
+    {
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "expanded": true,
+      "violations": []
+    },
+    {
+      "width": 390,
+      "violations": []
+    },
+    {
+      "width": 390,
+      "expanded": true,
+      "violations": []
+    }
+  ]
+}

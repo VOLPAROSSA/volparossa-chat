@@ -73,6 +73,13 @@ mobile has an independent vertical arrangement, never a cropped desktop graph.
 No animation or JavaScript is needed. The topology tests establish properties
 of this illustration only, not runtime failover, service readiness or availability.
 
+The salon refinement aligns the desktop nodes with the eight pavilion roofs.
+Its coordinates and shorter mobile layout preserve the supplied edges/routes;
+tests also check that repositioning introduces no unmarked line crossings.
+Secondary explanations use native disclosures, while development labels,
+private-cache exclusion and the one-machine evidence boundary remain visible.
+The crop exporter removes obsolete variants when crop dimensions change.
+
 ## Validation and publication
 
 Optional tools in `package-lock.json`: Playwright 1.62.1, axe 4.14.0 and
@@ -87,6 +94,10 @@ CHROME_PATH=/usr/bin/chromium node website/scripts/browser_check.mjs
 exist. `review/QA.md` records actual results and unavailable engines. Website CI
 builds a noindex preview artifact and checks local assets, metadata, theme hashes
 and topology. Existing source-contract CI is retained unchanged.
+
+The latest visual correction is documented in
+[the salon refinement review](review/salon-refinement/REVIEW.md), including
+actual desktop/mobile renders and expanded-disclosure accessibility checks.
 
 The user explicitly authorized publication after completion, superseding the
 attached package's preview-only delivery wording. Production publication uses
