@@ -1,7 +1,7 @@
 # Chat website review — 1 November 2026
 
 For the later visual correction and its current screenshots, see the
-[15 November salon refinement review](salon-refinement/REVIEW.md).
+[15 November reference artwork review](reference-art/REVIEW.md).
 The measurements below describe the original November 1 release.
 
 ## Result

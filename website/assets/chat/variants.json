@@ -40,22 +40,34 @@
       {
         "stem": "signal-worktable-desktop-640",
         "width": 640,
-        "height": 320
+        "height": 273
       },
       {
         "stem": "signal-worktable-desktop-960",
         "width": 960,
-        "height": 480
+        "height": 410
       },
       {
         "stem": "signal-worktable-desktop-1440",
         "width": 1440,
-        "height": 720
+        "height": 614
       },
       {
-        "stem": "signal-worktable-desktop-1774",
-        "width": 1774,
-        "height": 887
+        "stem": "signal-worktable-desktop-1920",
+        "width": 1920,
+        "height": 819
+      }
+    ],
+    "mobile": [
+      {
+        "stem": "signal-worktable-mobile-480",
+        "width": 480,
+        "height": 283
+      },
+      {
+        "stem": "signal-worktable-mobile-768",
+        "width": 768,
+        "height": 453
       }
     ]
   },
@@ -64,34 +76,34 @@
       {
         "stem": "mesh-courtyard-desktop-640",
         "width": 640,
-        "height": 273
+        "height": 320
       },
       {
         "stem": "mesh-courtyard-desktop-960",
         "width": 960,
-        "height": 409
+        "height": 480
       },
       {
         "stem": "mesh-courtyard-desktop-1440",
         "width": 1440,
-        "height": 614
+        "height": 720
       },
       {
-        "stem": "mesh-courtyard-desktop-1642",
-        "width": 1642,
-        "height": 700
+        "stem": "mesh-courtyard-desktop-1774",
+        "width": 1774,
+        "height": 887
       }
     ],
     "mobile": [
       {
         "stem": "mesh-courtyard-mobile-480",
         "width": 480,
-        "height": 613
+        "height": 409
       },
       {
-        "stem": "mesh-courtyard-mobile-750",
-        "width": 750,
-        "height": 958
+        "stem": "mesh-courtyard-mobile-768",
+        "width": 768,
+        "height": 655
       }
     ]
   },
@@ -148,34 +160,34 @@
       {
         "stem": "recovery-table-desktop-640",
         "width": 640,
-        "height": 320
+        "height": 240
       },
       {
         "stem": "recovery-table-desktop-960",
         "width": 960,
-        "height": 480
+        "height": 360
       },
       {
         "stem": "recovery-table-desktop-1440",
         "width": 1440,
-        "height": 720
+        "height": 540
       },
       {
-        "stem": "recovery-table-desktop-1774",
-        "width": 1774,
-        "height": 887
+        "stem": "recovery-table-desktop-1920",
+        "width": 1920,
+        "height": 720
       }
     ],
     "mobile": [
       {
         "stem": "recovery-table-mobile-480",
         "width": 480,
-        "height": 334
+        "height": 197
       },
       {
         "stem": "recovery-table-mobile-768",
         "width": 768,
-        "height": 535
+        "height": 314
       }
     ]
   },
@@ -184,29 +196,34 @@
       {
         "stem": "storage-cabinets-desktop-640",
         "width": 640,
-        "height": 348
+        "height": 200
       },
       {
         "stem": "storage-cabinets-desktop-960",
         "width": 960,
-        "height": 522
+        "height": 300
       },
       {
-        "stem": "storage-cabinets-desktop-1030",
-        "width": 1030,
-        "height": 560
+        "stem": "storage-cabinets-desktop-1440",
+        "width": 1440,
+        "height": 450
+      },
+      {
+        "stem": "storage-cabinets-desktop-2048",
+        "width": 2048,
+        "height": 640
       }
     ],
     "mobile": [
       {
         "stem": "storage-cabinets-mobile-480",
         "width": 480,
-        "height": 323
+        "height": 234
       },
       {
         "stem": "storage-cabinets-mobile-768",
         "width": 768,
-        "height": 517
+        "height": 375
       }
     ]
   },

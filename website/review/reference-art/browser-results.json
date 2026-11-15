@@ -1,0 +1,383 @@
+{
+  "checkedAt": "2026-11-15T18:25:40.706Z",
+  "url": "http://127.0.0.1:8780/volparossa-chat/",
+  "results": [
+    {
+      "engine": "chromium",
+      "overflow": false,
+      "headerOverlap": false,
+      "missingImages": [],
+      "laptop": {
+        "ratio": 1.6068056146320715,
+        "insidePhoto": true,
+        "contentFits": true
+      },
+      "networkCaptionClear": true,
+      "calculationFits": true,
+      "meshNodes": [
+        {
+          "peers": 8,
+          "edges": 15,
+          "endpoints": 2
+        }
+      ],
+      "width": 1440,
+      "height": 900,
+      "initialTransfer": 444813,
+      "images": 537068,
+      "fonts": 47140,
+      "errors": [],
+      "failures": [],
+      "external": []
+    },
+    {
+      "engine": "chromium",
+      "overflow": false,
+      "headerOverlap": false,
+      "missingImages": [],
+      "laptop": {
+        "ratio": 1.607713915298185,
+        "insidePhoto": true,
+        "contentFits": true
+      },
+      "networkCaptionClear": true,
+      "calculationFits": true,
+      "meshNodes": [
+        {
+          "peers": 8,
+          "edges": 15,
+          "endpoints": 2
+        }
+      ],
+      "width": 390,
+      "height": 844,
+      "initialTransfer": 312521,
+      "images": 186265,
+      "fonts": 47140,
+      "errors": [],
+      "failures": [],
+      "external": []
+    },
+    {
+      "engine": "chromium",
+      "overflow": false,
+      "headerOverlap": false,
+      "missingImages": [],
+      "laptop": {
+        "ratio": 1.6078483012904925,
+        "insidePhoto": true,
+        "contentFits": true
+      },
+      "networkCaptionClear": true,
+      "calculationFits": true,
+      "meshNodes": [
+        {
+          "peers": 8,
+          "edges": 15,
+          "endpoints": 2
+        }
+      ],
+      "width": 320,
+      "height": 740,
+      "initialTransfer": 293519,
+      "images": 186265,
+      "fonts": 47140,
+      "errors": [],
+      "failures": [],
+      "external": []
+    },
+    {
+      "engine": "chromium",
+      "overflow": false,
+      "headerOverlap": false,
+      "missingImages": [],
+      "laptop": {
+        "ratio": 1.6069861811800834,
+        "insidePhoto": true,
+        "contentFits": true
+      },
+      "networkCaptionClear": true,
+      "calculationFits": true,
+      "meshNodes": [
+        {
+          "peers": 8,
+          "edges": 15,
+          "endpoints": 2
+        }
+      ],
+      "width": 768,
+      "height": 1024,
+      "initialTransfer": 350264,
+      "images": 331033,
+      "fonts": 47140,
+      "errors": [],
+      "failures": [],
+      "external": []
+    },
+    {
+      "engine": "chromium",
+      "overflow": false,
+      "headerOverlap": false,
+      "missingImages": [],
+      "laptop": {
+        "ratio": 1.6061224489795918,
+        "insidePhoto": true,
+        "contentFits": true
+      },
+      "networkCaptionClear": true,
+      "calculationFits": true,
+      "meshNodes": [
+        {
+          "peers": 8,
+          "edges": 15,
+          "endpoints": 2
+        }
+      ],
+      "width": 1920,
+      "height": 1080,
+      "initialTransfer": 703011,
+      "images": 722078,
+      "fonts": 47140,
+      "errors": [],
+      "failures": [],
+      "external": []
+    },
+    {
+      "engine": "chromium",
+      "overflow": false,
+      "headerOverlap": false,
+      "missingImages": [],
+      "laptop": {
+        "ratio": 1.604231577421926,
+        "insidePhoto": true,
+        "contentFits": true
+      },
+      "networkCaptionClear": true,
+      "calculationFits": true,
+      "meshNodes": [
+        {
+          "peers": 8,
+          "edges": 15,
+          "endpoints": 2
+        }
+      ],
+      "width": 844,
+      "height": 390,
+      "initialTransfer": 412304,
+      "images": 304262,
+      "fonts": 47140,
+      "errors": [],
+      "failures": [],
+      "external": []
+    },
+    {
+      "type": "no-js",
+      "overflow": false,
+      "headerOverlap": false,
+      "missingImages": [],
+      "laptop": {
+        "ratio": 1.607713915298185,
+        "insidePhoto": true,
+        "contentFits": true
+      },
+      "networkCaptionClear": true,
+      "calculationFits": true,
+      "meshNodes": [
+        {
+          "peers": 8,
+          "edges": 15,
+          "endpoints": 2
+        }
+      ],
+      "width": 390,
+      "height": 900,
+      "passed": true
+    },
+    {
+      "type": "text-200-percent",
+      "overflow": false,
+      "headerOverlap": false,
+      "missingImages": [],
+      "laptop": {
+        "ratio": 1.6068056146320715,
+        "insidePhoto": true,
+        "contentFits": true
+      },
+      "networkCaptionClear": true,
+      "calculationFits": true,
+      "meshNodes": [
+        {
+          "peers": 8,
+          "edges": 15,
+          "endpoints": 2
+        }
+      ],
+      "width": 1440,
+      "height": 900,
+      "passed": true
+    },
+    {
+      "type": "zoom-400-percent",
+      "overflow": false,
+      "headerOverlap": false,
+      "missingImages": [],
+      "laptop": {
+        "ratio": 1.6078483012904925,
+        "insidePhoto": true,
+        "contentFits": true
+      },
+      "networkCaptionClear": true,
+      "calculationFits": true,
+      "meshNodes": [
+        {
+          "peers": 8,
+          "edges": 15,
+          "endpoints": 2
+        }
+      ],
+      "width": 320,
+      "height": 225,
+      "passed": true
+    },
+    {
+      "type": "images-disabled",
+      "overflow": false,
+      "headerOverlap": false,
+      "missingImages": [
+        "http://127.0.0.1:8780/volparossa-chat/assets/logo.png",
+        "http://127.0.0.1:8780/volparossa-chat/assets/chat/hero-salon-mobile-480.avif",
+        "http://127.0.0.1:8780/volparossa-chat/assets/chat/signal-worktable-mobile-480.avif",
+        "http://127.0.0.1:8780/volparossa-chat/assets/upstream/signal-app-128.png",
+        "http://127.0.0.1:8780/volparossa-chat/assets/upstream/signal-app-128.png",
+        "http://127.0.0.1:8780/volparossa-chat/assets/chat/mesh-courtyard-mobile-480.avif",
+        "http://127.0.0.1:8780/volparossa-chat/assets/chat/calls-surround-desktop-640.avif",
+        "http://127.0.0.1:8780/volparossa-chat/assets/chat/call-portraits-desktop-640.avif",
+        "",
+        "",
+        "",
+        "http://127.0.0.1:8780/volparossa-chat/assets/logo.png"
+      ],
+      "laptop": {
+        "ratio": 1.6070194384449243,
+        "insidePhoto": true,
+        "contentFits": true
+      },
+      "networkCaptionClear": true,
+      "calculationFits": true,
+      "meshNodes": [
+        {
+          "peers": 8,
+          "edges": 15,
+          "endpoints": 2
+        }
+      ],
+      "width": 390,
+      "height": 900,
+      "passed": true
+    },
+    {
+      "engine": "firefox",
+      "overflow": false,
+      "headerOverlap": false,
+      "missingImages": [],
+      "laptop": {
+        "ratio": 1.6078137097606378,
+        "insidePhoto": true,
+        "contentFits": true
+      },
+      "networkCaptionClear": true,
+      "calculationFits": true,
+      "meshNodes": [
+        {
+          "peers": 8,
+          "edges": 15,
+          "endpoints": 2
+        }
+      ],
+      "width": 390,
+      "height": 844,
+      "initialTransfer": 246484,
+      "images": 186265,
+      "fonts": 47140,
+      "errors": [],
+      "failures": [],
+      "external": []
+    },
+    {
+      "engine": "firefox",
+      "overflow": false,
+      "headerOverlap": false,
+      "missingImages": [],
+      "laptop": {
+        "ratio": 1.6067328912362173,
+        "insidePhoto": true,
+        "contentFits": true
+      },
+      "networkCaptionClear": true,
+      "calculationFits": true,
+      "meshNodes": [
+        {
+          "peers": 8,
+          "edges": 15,
+          "endpoints": 2
+        }
+      ],
+      "width": 1440,
+      "height": 900,
+      "initialTransfer": 444813,
+      "images": 537068,
+      "fonts": 47140,
+      "errors": [],
+      "failures": [],
+      "external": []
+    },
+    {
+      "engine": "firefox",
+      "overflow": false,
+      "headerOverlap": false,
+      "missingImages": [],
+      "laptop": {
+        "ratio": 1.6061224489795918,
+        "insidePhoto": true,
+        "contentFits": true
+      },
+      "networkCaptionClear": true,
+      "calculationFits": true,
+      "meshNodes": [
+        {
+          "peers": 8,
+          "edges": 15,
+          "endpoints": 2
+        }
+      ],
+      "width": 2560,
+      "height": 1440,
+      "initialTransfer": 519682,
+      "images": 755623,
+      "fonts": 47140,
+      "errors": [],
+      "failures": [],
+      "external": []
+    }
+  ],
+  "accessibility": [
+    {
+      "width": 1440,
+      "violations": []
+    },
+    {
+      "width": 1440,
+      "expanded": true,
+      "violations": []
+    },
+    {
+      "width": 390,
+      "violations": []
+    },
+    {
+      "width": 390,
+      "expanded": true,
+      "violations": []
+    }
+  ]
+}

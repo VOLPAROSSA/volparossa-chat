@@ -18,22 +18,28 @@
       "desktop": [
         0,
         0,
-        1774,
-        887
+        1920,
+        819
+      ],
+      "mobile": [
+        600,
+        40,
+        1920,
+        819
       ]
     },
     "mesh-courtyard": {
       "desktop": [
         0,
-        120,
-        1642,
-        820
+        0,
+        1774,
+        887
       ],
       "mobile": [
-        440,
+        410,
         0,
-        1190,
-        958
+        1450,
+        887
       ]
     },
     "calls-surround": {
@@ -56,28 +62,28 @@
       "desktop": [
         0,
         0,
-        1774,
-        887
+        1920,
+        720
       ],
       "mobile": [
-        500,
-        0,
-        1774,
-        887
+        650,
+        80,
+        1920,
+        600
       ]
     },
     "storage-cabinets": {
       "desktop": [
-        590,
-        230,
-        1620,
-        790
+        0,
+        100,
+        2048,
+        740
       ],
       "mobile": [
-        630,
-        220,
-        1620,
-        887
+        650,
+        120,
+        1880,
+        720
       ]
     },
     "closing-fox": {
@@ -125,32 +131,36 @@
       "height": 957
     },
     "masters/mesh-courtyard.png": {
-      "bytes": 2445622,
-      "sha256": "5b5253dfd87e547517dc899c67a6ff0990f0f0cc39b3124cceb0088793cae325",
-      "width": 1642,
-      "height": 958
+      "bytes": 2615282,
+      "sha256": "43617c27e6c9e6e6894d6814ef6733585d3948ff0589850379f76b1716a91cbc",
+      "width": 1774,
+      "height": 887
     },
     "masters/recovery-table.png": {
-      "bytes": 1911182,
-      "sha256": "69e68dd892401c1e7f289c5dc478a8cd731a9fcd331694229dedc486f294649c",
-      "width": 1774,
-      "height": 887
+      "bytes": 1730911,
+      "sha256": "e65c0dea6395699a83006ed011cc64bf975a4df00eabfc0b385fee87b1253d0d",
+      "width": 1920,
+      "height": 819
+    },
+    "masters/reference-refinement.json": {
+      "bytes": 7980,
+      "sha256": "686c65af858d9e98cb7a9fdedadebfd2059a8a83a1c7061c9864a464f6ba2efb"
     },
     "masters/signal-worktable.png": {
-      "bytes": 2027613,
-      "sha256": "3d53ed9727eb2703d5a4f4251c0133fd8db635cbd99c1c92d0b82e68f22b7d42",
-      "width": 1774,
-      "height": 887
+      "bytes": 1752798,
+      "sha256": "e1008298a62a3d8613721785d793af8c3313f6af60cdf32c0811d2d1a9f1670f",
+      "width": 1920,
+      "height": 819
     },
     "masters/social.html": {
       "bytes": 1396,
       "sha256": "ef2481c1c3b8b431b03ff68d841eb5ca5e8912f2b2454b5f938eb6295c9099fe"
     },
     "masters/storage-cabinets.png": {
-      "bytes": 2411392,
-      "sha256": "8ebe57a29c96d9da86e174bc4340dfa22bf1ff20dfcaecb423ab70a4b301956e",
-      "width": 1774,
-      "height": 887
+      "bytes": 2547594,
+      "sha256": "351fbd49f387073d94c9cb1c729cdae1aee32812aaa08797581cda54acc79e3f",
+      "width": 2048,
+      "height": 768
     },
     "assets/chat/call-portraits-desktop-1440.avif": {
       "bytes": 68850,
@@ -405,8 +415,8 @@
       "height": 566
     },
     "assets/chat/credits.html": {
-      "bytes": 2406,
-      "sha256": "209cf7f8caf831949b0d54af88446879c8b92e009b942405b10fe72509f5816e"
+      "bytes": 2537,
+      "sha256": "b3da1990ead3da2af1ac82c9a7a4cb9d25396613690cd2dfa71ce778e1bd6ac9"
     },
     "assets/chat/hero-salon-desktop-1440.avif": {
       "bytes": 83334,
@@ -517,292 +527,328 @@
       "height": 733
     },
     "assets/chat/mesh-courtyard-desktop-1440.avif": {
-      "bytes": 119074,
-      "sha256": "32f97d41ba6c9d7919d3b7bc341816827e27a4bdf3f9a6b011bccd917c0d2a37",
+      "bytes": 117564,
+      "sha256": "ffa032d820d177af100a71979a6c6718124410c4f863f0c73a489a032d52c1e7",
       "width": 1440,
-      "height": 614
+      "height": 720
     },
     "assets/chat/mesh-courtyard-desktop-1440.jpg": {
-      "bytes": 260563,
-      "sha256": "032a810b50d2678a2e88f65c5cb2417ca4835ae9fe60b65a1864cd98771ea118",
+      "bytes": 258150,
+      "sha256": "95f4e3621aaa28cf7ba7f42aa42da389633a40538e5cce64d46d6e168bbfc508",
       "width": 1440,
-      "height": 614
+      "height": 720
     },
     "assets/chat/mesh-courtyard-desktop-1440.webp": {
-      "bytes": 225348,
-      "sha256": "454e44751b1d60847b7bfed3da252db253ccbfd77f565ec63acb66d7f406a21b",
+      "bytes": 219486,
+      "sha256": "4525ffbaac90c338eca2d98da1e28499a3da279ab4de1f7d06ff8f98845f455d",
+      "width": 1440,
+      "height": 720
+    },
+    "assets/chat/mesh-courtyard-desktop-1774.avif": {
+      "bytes": 159571,
+      "sha256": "4d2194050ab990036cdafa7da459eadc6c58329b3d96d001b1c89ffb788f3fe7",
+      "width": 1774,
+      "height": 887
+    },
+    "assets/chat/mesh-courtyard-desktop-1774.jpg": {
+      "bytes": 362228,
+      "sha256": "a65a3cc0dceaae1b8c0ca648ec47f812358f2f516c0562636f66e37b9d1d0ad2",
+      "width": 1774,
+      "height": 887
+    },
+    "assets/chat/mesh-courtyard-desktop-1774.webp": {
+      "bytes": 296496,
+      "sha256": "28330380ab1f74bf28a8f9e32b91ec8a00b0b6dd0a04714b7dcde1c84c6147db",
+      "width": 1774,
+      "height": 887
+    },
+    "assets/chat/mesh-courtyard-desktop-640.avif": {
+      "bytes": 28492,
+      "sha256": "307f83f1b17389bf7254b7b40dcd1ff721b2d6f3c87a002a6fc2bb89a2f35d49",
+      "width": 640,
+      "height": 320
+    },
+    "assets/chat/mesh-courtyard-desktop-640.jpg": {
+      "bytes": 59873,
+      "sha256": "01ab313812b766a104a17536dd0aba2319449dc216f97e2e915885a2efd95e28",
+      "width": 640,
+      "height": 320
+    },
+    "assets/chat/mesh-courtyard-desktop-640.webp": {
+      "bytes": 54892,
+      "sha256": "4be2f7f766872c009939b4b9fd7ffcf6b01b4f0d4046607a8d7227cbe8624e2b",
+      "width": 640,
+      "height": 320
+    },
+    "assets/chat/mesh-courtyard-desktop-960.avif": {
+      "bytes": 60747,
+      "sha256": "87433760e4ade50bac8c65917cc1ee59fa3ab82d229da50a41acf690ee7f6faf",
+      "width": 960,
+      "height": 480
+    },
+    "assets/chat/mesh-courtyard-desktop-960.jpg": {
+      "bytes": 127231,
+      "sha256": "825b6ca7da3be1d1a043df1df5a474aef8ca0f6238cd525928c81cf038bd7596",
+      "width": 960,
+      "height": 480
+    },
+    "assets/chat/mesh-courtyard-desktop-960.webp": {
+      "bytes": 114060,
+      "sha256": "169da43149d7cc36c4acbcf07b2ec7e93cc0c67a810d97640a29c45b412c5c94",
+      "width": 960,
+      "height": 480
+    },
+    "assets/chat/mesh-courtyard-mobile-480.avif": {
+      "bytes": 28004,
+      "sha256": "5da616b38ac5cd411c5e99432b5fb7871fced24146d25a3eeed878ac292eac32",
+      "width": 480,
+      "height": 409
+    },
+    "assets/chat/mesh-courtyard-mobile-480.jpg": {
+      "bytes": 57149,
+      "sha256": "4b1b279866ca1a754c39c505c39678673ba94702f5e91c8f7728bad4532a0d49",
+      "width": 480,
+      "height": 409
+    },
+    "assets/chat/mesh-courtyard-mobile-480.webp": {
+      "bytes": 52878,
+      "sha256": "37860cc2fecc265245cd42e4585db1fd05f9efa30c6b150c854714436ab56a43",
+      "width": 480,
+      "height": 409
+    },
+    "assets/chat/mesh-courtyard-mobile-768.avif": {
+      "bytes": 64922,
+      "sha256": "b86f7d05bfc210f4aaf4864b19d5d86dcfdd05309901a7294648dc78e7a972fa",
+      "width": 768,
+      "height": 655
+    },
+    "assets/chat/mesh-courtyard-mobile-768.jpg": {
+      "bytes": 136228,
+      "sha256": "47988c2326b28549717b5a12807667ca71681fea40aa93ab778d4c8ca9845226",
+      "width": 768,
+      "height": 655
+    },
+    "assets/chat/mesh-courtyard-mobile-768.webp": {
+      "bytes": 120440,
+      "sha256": "8a5b7060a4421c440bf663010c4caae0591dd77f80b9f73eb3eb3612fde05d40",
+      "width": 768,
+      "height": 655
+    },
+    "assets/chat/recovery-table-desktop-1440.avif": {
+      "bytes": 37513,
+      "sha256": "e963b8ad5dd9a7bb4634a06aa727237639a21ac87727bacae2a8fbc79e40a3d8",
+      "width": 1440,
+      "height": 540
+    },
+    "assets/chat/recovery-table-desktop-1440.jpg": {
+      "bytes": 96994,
+      "sha256": "0b9e028204d4c18c4935ee35578849f5762c52995ca3dda174dab46e9a559bef",
+      "width": 1440,
+      "height": 540
+    },
+    "assets/chat/recovery-table-desktop-1440.webp": {
+      "bytes": 63760,
+      "sha256": "cde469edfab021a37274e870366f4ddb92e378c874c3d365682953ce3935f177",
+      "width": 1440,
+      "height": 540
+    },
+    "assets/chat/recovery-table-desktop-1920.avif": {
+      "bytes": 54278,
+      "sha256": "a3cee652bd387165be0f2ea36e71d70a4c0664fa7b0fb332ddd8ad0b99285f6a",
+      "width": 1920,
+      "height": 720
+    },
+    "assets/chat/recovery-table-desktop-1920.jpg": {
+      "bytes": 150718,
+      "sha256": "e39e9f6091f278657e2cff28ba9ad1c73a69f44c2030741b969737ae4d7a27f1",
+      "width": 1920,
+      "height": 720
+    },
+    "assets/chat/recovery-table-desktop-1920.webp": {
+      "bytes": 92730,
+      "sha256": "33a9684f10cf9e3e13211340716987485f451fab629c6b4682225e2887bad29a",
+      "width": 1920,
+      "height": 720
+    },
+    "assets/chat/recovery-table-desktop-640.avif": {
+      "bytes": 11668,
+      "sha256": "4fff142b0edac21ab3ea21b99d6639b78f29593babb781713ed96b2aabc3e9f9",
+      "width": 640,
+      "height": 240
+    },
+    "assets/chat/recovery-table-desktop-640.jpg": {
+      "bytes": 26484,
+      "sha256": "2c18f081d31846f79e714c651c7761f43f7a75b5a10995916a6a505b779b2a43",
+      "width": 640,
+      "height": 240
+    },
+    "assets/chat/recovery-table-desktop-640.webp": {
+      "bytes": 19718,
+      "sha256": "74204c5a4412979e2f34347df0303fcd94d16ee02db69b036c9b9172de87d9d0",
+      "width": 640,
+      "height": 240
+    },
+    "assets/chat/recovery-table-desktop-960.avif": {
+      "bytes": 21162,
+      "sha256": "d4cacd59357417ca2954a0459927cb7e2adc3b6fd375f9fd97069ba2016c09cd",
+      "width": 960,
+      "height": 360
+    },
+    "assets/chat/recovery-table-desktop-960.jpg": {
+      "bytes": 51123,
+      "sha256": "799d0cedc7d562e6831da5449886fb7d63508f3b879e279a37f00c0bd156cd92",
+      "width": 960,
+      "height": 360
+    },
+    "assets/chat/recovery-table-desktop-960.webp": {
+      "bytes": 36250,
+      "sha256": "543479e1e69695db10f2d8705846f916b768628a1264c3d8ae8fc6de737d1c72",
+      "width": 960,
+      "height": 360
+    },
+    "assets/chat/recovery-table-mobile-480.avif": {
+      "bytes": 9783,
+      "sha256": "c15c84d293932f3642bbed067b9f767cee1763d5a65ef95dee636902f8dfaaac",
+      "width": 480,
+      "height": 197
+    },
+    "assets/chat/recovery-table-mobile-480.jpg": {
+      "bytes": 22074,
+      "sha256": "ba5104679ad15f79973ba9d58484ea76e245abd1648499e01f4aebc7704ded7d",
+      "width": 480,
+      "height": 197
+    },
+    "assets/chat/recovery-table-mobile-480.webp": {
+      "bytes": 17232,
+      "sha256": "9f05ac5b15b8a0b34a572f80b17a907261f9974703a380e32e78a162bebd33f4",
+      "width": 480,
+      "height": 197
+    },
+    "assets/chat/recovery-table-mobile-768.avif": {
+      "bytes": 19504,
+      "sha256": "934c5a4b8daf43aeaff8b806a4eb580f02502c248f973ddee9bd6d8139d3008f",
+      "width": 768,
+      "height": 314
+    },
+    "assets/chat/recovery-table-mobile-768.jpg": {
+      "bytes": 46796,
+      "sha256": "0b6dc65f7ba76109d5b80d59b1f0e14702c1589c6ac0338afd32c68ab92af779",
+      "width": 768,
+      "height": 314
+    },
+    "assets/chat/recovery-table-mobile-768.webp": {
+      "bytes": 34604,
+      "sha256": "25021154bc3b6061277e32e4ac2952f0558757cb7d6d33aec7fb34ac051eea87",
+      "width": 768,
+      "height": 314
+    },
+    "assets/chat/signal-worktable-desktop-1440.avif": {
+      "bytes": 35583,
+      "sha256": "19dcd52e8ae015da9f5160baef706d9e4ba80bacfb82ec43747e02db6acce428",
       "width": 1440,
       "height": 614
     },
-    "assets/chat/mesh-courtyard-desktop-1642.avif": {
-      "bytes": 140078,
-      "sha256": "8506b88241fe5501f1cf41f13b27540eacca41610750aa8bc63238749be014a7",
-      "width": 1642,
-      "height": 700
-    },
-    "assets/chat/mesh-courtyard-desktop-1642.jpg": {
-      "bytes": 317929,
-      "sha256": "436304ded88bbdb428a65505b487d31533a060cd64b32a084a5d51f158a78d6e",
-      "width": 1642,
-      "height": 700
-    },
-    "assets/chat/mesh-courtyard-desktop-1642.webp": {
-      "bytes": 265542,
-      "sha256": "52750dd0d495d45bd16c527394c9c6dc2f1701f9dc9fbfeff53a828365858749",
-      "width": 1642,
-      "height": 700
-    },
-    "assets/chat/mesh-courtyard-desktop-640.avif": {
-      "bytes": 30984,
-      "sha256": "7f932e54c9a971471a53f0dea7c08ed4541a27e72b4de2f82efab04f28056522",
-      "width": 640,
-      "height": 273
-    },
-    "assets/chat/mesh-courtyard-desktop-640.jpg": {
-      "bytes": 64542,
-      "sha256": "3eec086b7c5b5ef2df3fba299799bfca69265d5b1c45072feb3bc6d2c6f86c0c",
-      "width": 640,
-      "height": 273
-    },
-    "assets/chat/mesh-courtyard-desktop-640.webp": {
-      "bytes": 61532,
-      "sha256": "79a4bb10702d5a74763133a43ed26b74175d8624a22a6a56ef3456f45f7cd3d1",
-      "width": 640,
-      "height": 273
-    },
-    "assets/chat/mesh-courtyard-desktop-960.avif": {
-      "bytes": 64222,
-      "sha256": "f9eb6543bfb8fbac5ed13921e4bfe11711a26f14e7bdf92da8c85189759707ef",
-      "width": 960,
-      "height": 409
-    },
-    "assets/chat/mesh-courtyard-desktop-960.jpg": {
-      "bytes": 134247,
-      "sha256": "1cf2025f25f6bedc9a81c8ba78e9348bbc878ff60595e6e443798b1f0ebd1a95",
-      "width": 960,
-      "height": 409
-    },
-    "assets/chat/mesh-courtyard-desktop-960.webp": {
-      "bytes": 122982,
-      "sha256": "8aac3822fb559c29c20d189c9d13c2fc4b1e7f09907ebd929b7a77eb7a3d89fe",
-      "width": 960,
-      "height": 409
-    },
-    "assets/chat/mesh-courtyard-mobile-480.avif": {
-      "bytes": 45412,
-      "sha256": "eba99cad19df8ece054938304a7ed782563474c5c5dc52f78c290ff7a1336b09",
-      "width": 480,
-      "height": 613
-    },
-    "assets/chat/mesh-courtyard-mobile-480.jpg": {
-      "bytes": 93427,
-      "sha256": "c4c9469621f8292df0599f0dd9d2495f8e2897c2ba7d290aa387c1eaf5a55eb1",
-      "width": 480,
-      "height": 613
-    },
-    "assets/chat/mesh-courtyard-mobile-480.webp": {
-      "bytes": 84954,
-      "sha256": "69f488b20b68d455e468c76f5b7d3e3c3a9941bac893b1ff395a063bb23b9ae0",
-      "width": 480,
-      "height": 613
-    },
-    "assets/chat/mesh-courtyard-mobile-750.avif": {
-      "bytes": 85245,
-      "sha256": "7415bbc38a9bce8edf69fc6417aad538f0d86909cbcb7f19acbdffcc7d99056e",
-      "width": 750,
-      "height": 958
-    },
-    "assets/chat/mesh-courtyard-mobile-750.jpg": {
-      "bytes": 191872,
-      "sha256": "8a039006a6bded22c2f76983b48c54652d50d72e447fa057b0d3974015f06709",
-      "width": 750,
-      "height": 958
-    },
-    "assets/chat/mesh-courtyard-mobile-750.webp": {
-      "bytes": 162720,
-      "sha256": "5b76726b72ea95c48cb9f4934aa122299767006df2381fcc9229d7670a81170b",
-      "width": 750,
-      "height": 958
-    },
-    "assets/chat/recovery-table-desktop-1440.avif": {
-      "bytes": 59802,
-      "sha256": "4e0df6c649467050baffd2bb6d569fb5ef1b8e5c9f6dadd8a2b9060dd6d6e602",
-      "width": 1440,
-      "height": 720
-    },
-    "assets/chat/recovery-table-desktop-1440.jpg": {
-      "bytes": 162603,
-      "sha256": "7ec39b38b73a912d8412f7dcfe6443147cbd343fe7e4df31f335aad41d9eec72",
-      "width": 1440,
-      "height": 720
-    },
-    "assets/chat/recovery-table-desktop-1440.webp": {
-      "bytes": 108772,
-      "sha256": "e656b666affdc6900d74029edd71df2c9504cf3f10ced2cc8da01b0d8902d6d0",
-      "width": 1440,
-      "height": 720
-    },
-    "assets/chat/recovery-table-desktop-1774.avif": {
-      "bytes": 77608,
-      "sha256": "c7458e9ec933f14af35e632c0a5bc377da6b5463e4368331cca3e7427c160c72",
-      "width": 1774,
-      "height": 887
-    },
-    "assets/chat/recovery-table-desktop-1774.jpg": {
-      "bytes": 223155,
-      "sha256": "bfca07605984cad8da9efe257b851e20eb4b7ee59e5e170c77bd76d73c1afd9d",
-      "width": 1774,
-      "height": 887
-    },
-    "assets/chat/recovery-table-desktop-1774.webp": {
-      "bytes": 142604,
-      "sha256": "928ba2891af0eaab9aa966ecb5a444c789b6422f51bfc2cc64e6dda390b14434",
-      "width": 1774,
-      "height": 887
-    },
-    "assets/chat/recovery-table-desktop-640.avif": {
-      "bytes": 18786,
-      "sha256": "c9f40efa54bd03cdbccdd97606c3351a5ce9e0cf2154432209987acaa2a84da7",
-      "width": 640,
-      "height": 320
-    },
-    "assets/chat/recovery-table-desktop-640.jpg": {
-      "bytes": 44915,
-      "sha256": "18f7cab52811c5fde9fa562ff6602453f85e69c7e03f38b9ba88b70964403689",
-      "width": 640,
-      "height": 320
-    },
-    "assets/chat/recovery-table-desktop-640.webp": {
-      "bytes": 36018,
-      "sha256": "7273c3ebed1039fbfde80eb222a0c57bc1081fb48dceea6d626d5d9f94a24f93",
-      "width": 640,
-      "height": 320
-    },
-    "assets/chat/recovery-table-desktop-960.avif": {
-      "bytes": 34109,
-      "sha256": "df058879338da786caed9163f6935928b030420d51a3caf67d0909202b56efd9",
-      "width": 960,
-      "height": 480
-    },
-    "assets/chat/recovery-table-desktop-960.jpg": {
-      "bytes": 86519,
-      "sha256": "dbe82b7615c0a29d3a6e39df1b355e08bb207c8fe257e2de396dff5ae5587199",
-      "width": 960,
-      "height": 480
-    },
-    "assets/chat/recovery-table-desktop-960.webp": {
-      "bytes": 64676,
-      "sha256": "58d08aaa3fe3c488a0bf8637d74fe25b8b3c7d620177cf0c942a36e20faf049e",
-      "width": 960,
-      "height": 480
-    },
-    "assets/chat/recovery-table-mobile-480.avif": {
-      "bytes": 18326,
-      "sha256": "544c04476b649890ccc0ee956bed1470f0957d64e1f4b721160f94b471a1d02f",
-      "width": 480,
-      "height": 334
-    },
-    "assets/chat/recovery-table-mobile-480.jpg": {
-      "bytes": 42603,
-      "sha256": "8b1e21321f9095b663298c8392af2d581013fc73f646a7c43fe7202d8a36d7eb",
-      "width": 480,
-      "height": 334
-    },
-    "assets/chat/recovery-table-mobile-480.webp": {
-      "bytes": 35990,
-      "sha256": "cb4a0efe1005c1904d5478db244511cc24b3d98cf01f254c0b2d092d54531d4b",
-      "width": 480,
-      "height": 334
-    },
-    "assets/chat/recovery-table-mobile-768.avif": {
-      "bytes": 35850,
-      "sha256": "fd1c4f0544259a5f873058b0ab0d658bd4bd732acceb231cf1d081bdca858363",
-      "width": 768,
-      "height": 535
-    },
-    "assets/chat/recovery-table-mobile-768.jpg": {
-      "bytes": 90254,
-      "sha256": "dd242d74d2ca1b53246ecd372f509f18b4d09904ac407fea180d707efa21dfc9",
-      "width": 768,
-      "height": 535
-    },
-    "assets/chat/recovery-table-mobile-768.webp": {
-      "bytes": 69862,
-      "sha256": "5805522ac97a5a77d2e48011ed03cdc8b70f8bf6dedc137e7980d65113d6b5e2",
-      "width": 768,
-      "height": 535
-    },
-    "assets/chat/signal-worktable-desktop-1440.avif": {
-      "bytes": 61846,
-      "sha256": "6df68af2c0372ec600d5f99c8b3cfbf8df0adc443f09c5b486f1b7aafce90b76",
-      "width": 1440,
-      "height": 720
-    },
     "assets/chat/signal-worktable-desktop-1440.jpg": {
-      "bytes": 165366,
-      "sha256": "aa822beecf636cfa918d07e49ae52440b25495b01ead88422bd781c75a907fb7",
+      "bytes": 100370,
+      "sha256": "63dfd0da3174315dc0da213e471f3c8543412a8a33eb9afa28c18ecbd3565f82",
       "width": 1440,
-      "height": 720
+      "height": 614
     },
     "assets/chat/signal-worktable-desktop-1440.webp": {
-      "bytes": 115382,
-      "sha256": "a12fb786816c2f81572348de8eaf9e8c92619eb05db10eae5da1247640afa02b",
+      "bytes": 59248,
+      "sha256": "c5c6ce8ba4b0d2bedbba3d90384ede503cf947ba84b0dd24f6951b50c107307a",
       "width": 1440,
-      "height": 720
+      "height": 614
     },
-    "assets/chat/signal-worktable-desktop-1774.avif": {
-      "bytes": 80154,
-      "sha256": "06a89c596fa488d07e6fe9d06cbb1d9ceec3ed2710a9f5286e501bb38ef6bdc9",
-      "width": 1774,
-      "height": 887
+    "assets/chat/signal-worktable-desktop-1920.avif": {
+      "bytes": 52390,
+      "sha256": "5f9fdbc5a8095aee742ad83402c1186424407887ff83f6651961f62c2f97a2f4",
+      "width": 1920,
+      "height": 819
     },
-    "assets/chat/signal-worktable-desktop-1774.jpg": {
-      "bytes": 225925,
-      "sha256": "5f41526f01fc7a7ba0832e8e08323f4ceeb8e2c9c796fcd7ab1abf885f824430",
-      "width": 1774,
-      "height": 887
+    "assets/chat/signal-worktable-desktop-1920.jpg": {
+      "bytes": 159174,
+      "sha256": "5a99b43577d41809511a60c30a5f33cf38328c4f3a7899aa964e8c9d93992450",
+      "width": 1920,
+      "height": 819
     },
-    "assets/chat/signal-worktable-desktop-1774.webp": {
-      "bytes": 149222,
-      "sha256": "dffa2888dc23905b3a4b0e0bf6ba21dcf4787dbddbbaba331eee8eee618e368e",
-      "width": 1774,
-      "height": 887
+    "assets/chat/signal-worktable-desktop-1920.webp": {
+      "bytes": 89346,
+      "sha256": "1497655291e5e5a7c5106e3861c9d7f09eaccb000361873fbaa768c52d2faa52",
+      "width": 1920,
+      "height": 819
     },
     "assets/chat/signal-worktable-desktop-640.avif": {
-      "bytes": 19921,
-      "sha256": "0ea05170033cd74015494eee944cfddb71ceabcb4e3c482a0a2d5e9cbe2ef1ba",
+      "bytes": 10350,
+      "sha256": "5ec9b103f793b16c52be1d2acd7521fb0a3172015a3dd413c23c612c345bb98b",
       "width": 640,
-      "height": 320
+      "height": 273
     },
     "assets/chat/signal-worktable-desktop-640.jpg": {
-      "bytes": 47096,
-      "sha256": "16d76343540b1ce50f79575d08d06c8e1407738683dde7d7d0f5b32208e04ae4",
+      "bytes": 27404,
+      "sha256": "133c68ebb7f357bebb39ae16bcbc7ea95daae74857ac6d61daef19cb3df2236d",
       "width": 640,
-      "height": 320
+      "height": 273
     },
     "assets/chat/signal-worktable-desktop-640.webp": {
-      "bytes": 37568,
-      "sha256": "befe3f44a067e6111c647147dc813fd0da4c60ca04f89d16e01bfacd092ece46",
+      "bytes": 17958,
+      "sha256": "38104bdfb7e76225b28facbb3835175619ab4ed9021ab4b0c1eba65311d61fa8",
       "width": 640,
-      "height": 320
+      "height": 273
     },
     "assets/chat/signal-worktable-desktop-960.avif": {
-      "bytes": 35670,
-      "sha256": "b399a563120296e643ef06064dd26ff46dba7e447fd5c4167f2318abb30e8669",
+      "bytes": 19138,
+      "sha256": "0301b68dd30570b031318f00f4c8f8f96d5eb38b049b1555cda25377c0bcbb7f",
       "width": 960,
-      "height": 480
+      "height": 410
     },
     "assets/chat/signal-worktable-desktop-960.jpg": {
-      "bytes": 89013,
-      "sha256": "33201a4ceede22ee0a793fc5aee59a933672e7daec8da79483a3f2e4994231ad",
+      "bytes": 52222,
+      "sha256": "b9883449df32341854eeea168da19a31b41e584b266c280bde67c44615317613",
       "width": 960,
-      "height": 480
+      "height": 410
     },
     "assets/chat/signal-worktable-desktop-960.webp": {
-      "bytes": 68000,
-      "sha256": "e77f202cd4bfb9237981e8be296eae87e18bf04a18a1d8a64d7c2fc16a811691",
+      "bytes": 33048,
+      "sha256": "17bb3437e4a2add77f9a37883931cce6d4f5625af1f7b0cb4891b1136237160b",
       "width": 960,
-      "height": 480
+      "height": 410
+    },
+    "assets/chat/signal-worktable-mobile-480.avif": {
+      "bytes": 10054,
+      "sha256": "e5fa1daee85e613f53ba2d7f1ce81a5685ca0dd1292b59b1c87e618db7e6df86",
+      "width": 480,
+      "height": 283
+    },
+    "assets/chat/signal-worktable-mobile-480.jpg": {
+      "bytes": 25577,
+      "sha256": "8fa21f672397780bcbd735b55e42eb0db759cb2c3b3b8fbf0c3112b0bd1617a5",
+      "width": 480,
+      "height": 283
+    },
+    "assets/chat/signal-worktable-mobile-480.webp": {
+      "bytes": 17690,
+      "sha256": "f0e7dc7063d5d8638c767266ce983d002a3601082ef107465bff08819d57f276",
+      "width": 480,
+      "height": 283
+    },
+    "assets/chat/signal-worktable-mobile-768.avif": {
+      "bytes": 20178,
+      "sha256": "ebd9bee324c3a8055e951e4ca2fbe358b46b78925dffde481308e77ababd92eb",
+      "width": 768,
+      "height": 453
+    },
+    "assets/chat/signal-worktable-mobile-768.jpg": {
+      "bytes": 54335,
+      "sha256": "2d5d6c896cf06295778a5062a820357d039e6376814cb741264e4abcefbcd3b8",
+      "width": 768,
+      "height": 453
+    },
+    "assets/chat/signal-worktable-mobile-768.webp": {
+      "bytes": 35572,
+      "sha256": "97d767b8ddedf4015b3cfd8c213855710b6f9b4971935fa3e43298c780ba34ed",
+      "width": 768,
+      "height": 453
     },
     "assets/chat/social.jpg": {
       "bytes": 173453,
@@ -810,99 +856,117 @@
       "width": 1200,
       "height": 630
     },
-    "assets/chat/storage-cabinets-desktop-1030.avif": {
-      "bytes": 52575,
-      "sha256": "9eaca5c96b2268470b6f6a526e7307f5460f60463a72ce72f8877e5e9af11640",
-      "width": 1030,
-      "height": 560
+    "assets/chat/storage-cabinets-desktop-1440.avif": {
+      "bytes": 59263,
+      "sha256": "d5a40221b80323ca867b7c746039d97eb14f44bd1e6f7d112e33d32aae64122f",
+      "width": 1440,
+      "height": 450
     },
-    "assets/chat/storage-cabinets-desktop-1030.jpg": {
-      "bytes": 140177,
-      "sha256": "3b7130bbb4d984077ab0a18eb5f3a33f0ec4c50e010016fee50d4854d4433621",
-      "width": 1030,
-      "height": 560
+    "assets/chat/storage-cabinets-desktop-1440.jpg": {
+      "bytes": 145208,
+      "sha256": "b379bb007fa5761fbc6f4ff16d51b90cbeff079216c5a06bca97c7880531f6e4",
+      "width": 1440,
+      "height": 450
     },
-    "assets/chat/storage-cabinets-desktop-1030.webp": {
-      "bytes": 107668,
-      "sha256": "b565fdefb6ac6289f0234c956e26603f0048c4a4ff31e93cce268f00cc01c6e5",
-      "width": 1030,
-      "height": 560
+    "assets/chat/storage-cabinets-desktop-1440.webp": {
+      "bytes": 113242,
+      "sha256": "dbbbc29d97b4d6944eec99a3b5beca2f0667083060c8ff37e6fc0fdb42b29ae6",
+      "width": 1440,
+      "height": 450
+    },
+    "assets/chat/storage-cabinets-desktop-2048.avif": {
+      "bytes": 101209,
+      "sha256": "f534dad07c6200f7ba3bf5e3b3cf3eda1c5cf6a1266ffeb085022c03ff4f1b41",
+      "width": 2048,
+      "height": 640
+    },
+    "assets/chat/storage-cabinets-desktop-2048.jpg": {
+      "bytes": 264023,
+      "sha256": "f7c774f63311465f43ff7b1f4f486692f61e3db28e1d47e5dacfaa66098fba60",
+      "width": 2048,
+      "height": 640
+    },
+    "assets/chat/storage-cabinets-desktop-2048.webp": {
+      "bytes": 194928,
+      "sha256": "b556c89ad6a9b7df28471199ee941ea961e0985c9522fabbd050907f1e219e30",
+      "width": 2048,
+      "height": 640
     },
     "assets/chat/storage-cabinets-desktop-640.avif": {
-      "bytes": 26278,
-      "sha256": "54d6b196d5b8285479e61989ae32a6ac7f06764429d4cfbe94f711800333d2fe",
+      "bytes": 15022,
+      "sha256": "6c0909440de659c0f97a27d544d3b262e5f5145711752a08fa9451f269884fcb",
       "width": 640,
-      "height": 348
+      "height": 200
     },
     "assets/chat/storage-cabinets-desktop-640.jpg": {
-      "bytes": 63283,
-      "sha256": "b84201ff9e32701c98673e0859fe5ded83ffc5dda535db1cc7fa9a9bfbfcfeee",
+      "bytes": 33951,
+      "sha256": "efe6ae2400bc4bfb1bff1a051cfca59db3c10b6f9a8f8a892d368c3ddb876bda",
       "width": 640,
-      "height": 348
+      "height": 200
     },
     "assets/chat/storage-cabinets-desktop-640.webp": {
-      "bytes": 51134,
-      "sha256": "19e5c81f05591b936a62cd8c67153c37dad0a9bdb9fe153d531524f5c59ab32a",
+      "bytes": 29434,
+      "sha256": "da8e198effe66d6621ba4f4af43105db8678a3ef156cf09aa981db09625ef814",
       "width": 640,
-      "height": 348
+      "height": 200
     },
     "assets/chat/storage-cabinets-desktop-960.avif": {
-      "bytes": 48758,
-      "sha256": "5f96a8f95e53f92f3742f9385a897fc19d7d97e32adb4153a4674dccfe857473",
+      "bytes": 30416,
+      "sha256": "df4a9f9a04fffaeb7f3b55458276c2c487ba177b3007049a93e97f22808c869d",
       "width": 960,
-      "height": 522
+      "height": 300
     },
     "assets/chat/storage-cabinets-desktop-960.jpg": {
-      "bytes": 125483,
-      "sha256": "7b8c4b245a0c4713b8c7ac84e191aef8c51bd6781dbc1ba7318541752f7dcaaf",
+      "bytes": 70672,
+      "sha256": "b4393d6114fea9ba9cdb7c495c9b2fef084c2fa1b181933279d5e74cc9e8205b",
       "width": 960,
-      "height": 522
+      "height": 300
     },
     "assets/chat/storage-cabinets-desktop-960.webp": {
-      "bytes": 98092,
-      "sha256": "c6b71411d1d592b237461197a3596617d2ffb62063d7f09365a3c91a421aeb1a",
+      "bytes": 57704,
+      "sha256": "84bd6a79a8f62fc9ddc455ca5e6482cb467df4b4be90c6443897769bf492f089",
       "width": 960,
-      "height": 522
+      "height": 300
     },
     "assets/chat/storage-cabinets-mobile-480.avif": {
-      "bytes": 20283,
-      "sha256": "d02d30a9243d50a30d9f1df433fae5f12dc95e32f685a0fdd2635553c615e7e2",
+      "bytes": 16304,
+      "sha256": "ac5cc61ac7d93ea2b3a2c1cedde78fcbe12296f40b76a2e9d273c8b450b10b64",
       "width": 480,
-      "height": 323
+      "height": 234
     },
     "assets/chat/storage-cabinets-mobile-480.jpg": {
-      "bytes": 48369,
-      "sha256": "234b129b2ab4a10f469612efb7d6aceeb95e96ae33c8900d9f4c3c51ff2f69d3",
+      "bytes": 36727,
+      "sha256": "83ec4ebd8d14272d9e83bcaaa3eeb59974b93af7690ae1463678a85f7a778520",
       "width": 480,
-      "height": 323
+      "height": 234
     },
     "assets/chat/storage-cabinets-mobile-480.webp": {
-      "bytes": 42274,
-      "sha256": "040b73ab99aa8f76e3c4099332a343b2a487bbb2bc53533b337b076d0ffcc507",
+      "bytes": 33058,
+      "sha256": "c146463b4c7dc439ad8b96dd7d02905cac97c8d679adde1f6f677e110f86b547",
       "width": 480,
-      "height": 323
+      "height": 234
     },
     "assets/chat/storage-cabinets-mobile-768.avif": {
-      "bytes": 42277,
-      "sha256": "9776dbb7a71d8a6c4446938a0eed0c40ffdc2de5dcaf9d27d954b696188c3002",
+      "bytes": 36053,
+      "sha256": "db4d0d7aaeeb308f2750faf542676db1f4ce4c525a342977716d2fb63892c6aa",
       "width": 768,
-      "height": 517
+      "height": 375
     },
     "assets/chat/storage-cabinets-mobile-768.jpg": {
-      "bytes": 107940,
-      "sha256": "46f4d50316f5ae4339315e93db57b7deb5cd9ff97c910389a84b7197858e7475",
+      "bytes": 84657,
+      "sha256": "dda3f619ac4c38715231ef3763c9bc5258f6f7e8638b4e6948dd4b8f38f975bd",
       "width": 768,
-      "height": 517
+      "height": 375
     },
     "assets/chat/storage-cabinets-mobile-768.webp": {
-      "bytes": 88900,
-      "sha256": "fc3ee0c18eed2c8f17632d2d61f7f8761d13255764d534561c001cd812617f18",
+      "bytes": 72358,
+      "sha256": "0211d883a92b6ca7fe2079790a1e1379eff9fe49df45bd94640390b0554d33d1",
       "width": 768,
-      "height": 517
+      "height": 375
     },
     "assets/chat/variants.json": {
-      "bytes": 4885,
-      "sha256": "3abd1c41955af7aea926e77115e01d98d1519dd352aa4e27b58590f3f48bea8d"
+      "bytes": 5234,
+      "sha256": "a185185faa0546d53e7daae845becd815079da0122c3d74ea99d97cbd240209d"
     },
     "assets/icons/lucide/LICENSE": {
       "bytes": 3208,

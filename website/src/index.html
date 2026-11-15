@@ -12,45 +12,37 @@
 </section>
 
 <section id="signal" class="chat-paper chat-signal" aria-labelledby="signal-title">
-  <div class="chat-setting">{{signal_picture}}</div>
-  <div class="wrap chat-split">
-    <div class="chat-paper-copy">
+  <div class="chat-signal-scene">
+    <figure class="chat-interface"><div class="chat-laptop-photo">{{signal_picture}}<div class="chat-laptop-screen">      <div class="chat-messenger" aria-hidden="true">
+        <div class="chat-ui-sidebar"><div class="chat-ui-brand"><img src="assets/upstream/signal-app-128.png" srcset="assets/upstream/signal-app-128.png 128w, assets/upstream/signal-app-256.png 256w" sizes="64px" loading="lazy" decoding="async" width="26" height="26" alt="">Signal <span>⌕</span></div><div class="chat-ui-search">Search</div><div class="chat-ui-contact selected"><span class="chat-avatar">A</span><span>Alex Rivera<small>See you there.</small></span><time>10:24</time></div><div class="chat-ui-contact"><span class="chat-avatar amber">F</span><span>Family<small>Sunday lunch?</small></span><time>09:41</time></div><div class="chat-ui-contact"><span class="chat-avatar green">T</span><span>Taylor Kim<small>Thanks!</small></span><time>09:12</time></div><div class="chat-ui-contact"><span class="chat-avatar rose">P</span><span>Project room<small>A new idea…</small></span></div></div>
+        <div class="chat-ui-conversation"><div class="chat-ui-header"><span class="chat-avatar">A</span><span>Alex Rivera<small>Conversation example</small></span>{{phone_icon}}{{video_icon}}</div><div class="chat-ui-messages"><span class="chat-ui-date">Today</span><p class="chat-bubble">Hey! Are you free later?</p><p class="chat-bubble sent">Yes! Let’s catch up.<br>Same place?<small>10:21</small></p><p class="chat-bubble">Perfect. See you soon.</p><p class="chat-bubble sent">See you there.<small>10:24</small></p></div><div class="chat-ui-composer"><span>+</span><span>Message…</span>{{mic_icon}}</div></div>
+      </div>
+</div></div><figcaption>Illustrative interface — not a running VOLPAROSSA client.</figcaption></figure>
+    <div class="chat-signal-copy">    <div class="chat-paper-copy">
       <p class="eyebrow">Signal foundation</p><h2 id="signal-title">The conversations<br>you know.</h2>
       <a class="chat-upstream" href="https://signal.org/"><img src="assets/upstream/signal-app-128.png" srcset="assets/upstream/signal-app-128.png 128w, assets/upstream/signal-app-256.png 256w" sizes="64px" loading="lazy" decoding="async" width="64" height="64" alt=""><span>Signal</span></a>
 
       <dl class="chat-roles">
-        <div><dt>{{lock_icon}}Signal</dt><dd>Identities, encryption and familiar conversations.</dd></div>
-        <div><dt>{{network_icon}}VOLPAROSSA Core</dt><dd>Shared network delivery and private storage.</dd></div>
-        <div><dt>{{user_icon}}You</dt><dd>Connection choices and recovery credentials.</dd></div>
-      </dl><details class="chat-details"><summary>How Signal and Core work together</summary><p class="chat-intro">Signal provides the messaging foundation: identities, encryption and familiar conversations. VOLPAROSSA is developing another delivery path and private backup storage through its shared Core.</p></details>
+        <div><dt>{{lock_icon}}Signal</dt><dd>Identities and encryption.</dd></div>
+        <div><dt>{{network_icon}}Core</dt><dd>Delivery and private storage.</dd></div>
+        <div><dt>{{user_icon}}You</dt><dd>Connection and recovery choices.</dd></div>
+      </dl>
     </div>
-    <figure class="chat-interface">
-      <div class="chat-messenger" aria-hidden="true">
-        <div class="chat-ui-sidebar"><div class="chat-ui-brand"><img src="assets/upstream/signal-app-128.png" srcset="assets/upstream/signal-app-128.png 128w, assets/upstream/signal-app-256.png 256w" sizes="64px" loading="lazy" decoding="async" width="26" height="26" alt="">Signal <span>⌕</span></div><div class="chat-ui-search">Search</div><div class="chat-ui-contact selected"><span class="chat-avatar">A</span><span>Alex Rivera<small>See you there.</small></span><time>10:24</time></div><div class="chat-ui-contact"><span class="chat-avatar amber">F</span><span>Family<small>Sunday lunch?</small></span><time>09:41</time></div><div class="chat-ui-contact"><span class="chat-avatar green">T</span><span>Taylor Kim<small>Thanks!</small></span><time>09:12</time></div><div class="chat-ui-contact"><span class="chat-avatar rose">P</span><span>Project room<small>A new idea…</small></span></div></div>
-        <div class="chat-ui-conversation"><div class="chat-ui-header"><span class="chat-avatar">A</span><span>Alex Rivera<small>Conversation example</small></span>{{phone_icon}}{{video_icon}}</div><div class="chat-ui-messages"><span class="chat-ui-date">Today</span><p class="chat-bubble">Hey! Are you free later?</p><p class="chat-bubble sent">Yes! Let’s catch up.<br>Same place?<small>10:21</small></p><p class="chat-bubble">Perfect. See you soon.</p><p class="chat-bubble sent">See you there.<small>10:24</small></p></div><div class="chat-ui-composer"><span>+</span><span>Message…</span>{{mic_icon}}</div></div>
-      </div>
-      <div class="chat-laptop-base" aria-hidden="true"><span></span></div>
-      <figcaption>Illustrative interface — not a running VOLPAROSSA client.</figcaption>
-    </figure>
+</div>
   </div>
-  <p class="wrap chat-affiliation">An independent integration built on Signal’s open-source software.</p>
+  <div class="wrap chat-signal-footer"><p class="chat-affiliation">An independent integration built on Signal’s open-source software.</p><details class="chat-details"><summary>How Signal and Core work together</summary><p class="chat-intro">Signal provides the messaging foundation: identities, encryption and familiar conversations. VOLPAROSSA is developing another delivery path and private backup storage through its shared Core.</p></details></div>
 </section>
 
 <section id="messaging" class="chat-dark chat-messaging" aria-labelledby="messaging-title">
+  <div class="chat-network-panorama">
   <div class="wrap chat-section-heading"><p class="eyebrow">Messaging through a shared network</p><div class="chat-heading-status"><h2 id="messaging-title">Your message. Another way to reach them.</h2><p class="status light">In development</p></div></div>
-  <figure class="chat-mesh-figure">
-    <div class="chat-mesh-stage">{{mesh_picture}}{{desktop_mesh}}{{mobile_mesh}}</div>
-    <figcaption class="wrap"><span>Illustrative network. Available paths depend on participating peers.</span><span class="chat-mesh-legend"><span><i class="route-solid" aria-hidden="true"></i>One possible route</span><span><i class="route-dashed" aria-hidden="true"></i>Another possible route</span></span></figcaption>
-  </figure>
-  <div class="wrap">
-    <ol class="chat-steps chat-message-steps">
-      <li><span class="chat-step-number">1</span><div><h3>Encrypt on your device</h3><p>Signal encrypts the message before it leaves your device.</p></div></li>
-      <li><span class="chat-step-number">2</span><div><h3>Travel through a shared network</h3><p>Participating peers carry encrypted envelopes. They do not receive your readable conversation or Signal session keys.</p></div></li>
-      <li><span class="chat-step-number">3</span><div><h3>Open on their device</h3><p>The intended device decrypts the message within the Signal conversation.</p></div></li>
-    </ol>
-    <p class="chat-network-description">Eight equal peers, several cross-links and two possible routes connect the conversation partners. No single peer is a required hub. Crossing lines connect only at marked nodes; this illustration is not live network status.</p>
-    <details class="chat-details"><summary>How delivery works, and what remains in development</summary><p class="chat-intro">Signal encrypts the message for the intended device. VOLPAROSSA is being developed to carry that encrypted message through a network of participating peers.</p><p>Decentralised message delivery is still in development. Registration, device linking and key discovery remain separate dependencies. Delivery must account for recipients’ devices and the sender’s linked devices.</p></details>
+    <figure class="chat-mesh-figure"><div class="chat-mesh-stage">{{mesh_picture}}{{desktop_mesh}}{{mobile_mesh}}</div><div class="wrap chat-network-bottom"><ol class="chat-steps chat-message-steps">
+      <li><span class="chat-step-number">1</span><div><h3>Encrypt on your device</h3></div></li>
+      <li><span class="chat-step-number">2</span><div><h3>Travel through a shared network</h3></div></li>
+      <li><span class="chat-step-number">3</span><div><h3>Open on their device</h3></div></li>
+    </ol></div><figcaption class="wrap chat-mesh-caption"><span>Illustrative network. Available paths depend on participating peers.</span><span class="chat-mesh-legend"><span><i class="route-solid" aria-hidden="true"></i>One possible route</span><span><i class="route-dashed" aria-hidden="true"></i>Another possible route</span></span></figcaption></figure>
   </div>
+  <div class="wrap"><details class="chat-details"><summary>How delivery works, and what remains in development</summary><div class="chat-delivery-explanation"><div><h3>Encrypt on your device</h3><p>Signal encrypts the message before it leaves your device.</p></div><div><h3>Travel through a shared network</h3><p>Participating peers carry encrypted envelopes. They do not receive your readable conversation or Signal session keys.</p></div><div><h3>Open on their device</h3><p>The intended device decrypts the message within the Signal conversation.</p></div></div><p class="chat-intro">Signal encrypts the message for the intended device. VOLPAROSSA is being developed to carry that encrypted message through a network of participating peers.</p><p>Decentralised message delivery is still in development. Registration, device linking and key discovery remain separate dependencies. Delivery must account for recipients’ devices and the sender’s linked devices.</p><p class="chat-network-description">Eight equal peers, several cross-links and two possible routes connect the conversation partners. No single peer is a required hub. Crossing lines connect only at marked nodes; this illustration is not live network status.</p></details></div>
 </section>
 
 <section id="calls" class="chat-paper chat-calls" aria-labelledby="calls-title">
@@ -62,18 +54,21 @@
 </section>
 
 <section id="recovery" class="chat-dark chat-recovery" aria-labelledby="recovery-title">
-  <div class="chat-recovery-art">{{recovery_picture}}</div>
-  <div class="wrap chat-recovery-top"><div><p class="eyebrow">Recovery</p><h2 id="recovery-title">Lose a device.<br>Keep the conversation.</h2><p class="status light">Recovery in development</p><p class="chat-intro">Preserve an encrypted copy of your conversations and attachments, then recover it using available storage peers and your own credentials.</p></div><figure class="chat-storage-model"><div class="chat-archive-label">{{lock_icon}}<span>Encrypted archive</span></div><div class="chat-provider-row"><div class="chat-provider"><span>Storage peer A</span><div><i>F1</i><i>F2</i></div></div><div class="chat-provider"><span>Storage peer B</span><div><i>F2</i><i>F3</i></div></div><div class="chat-provider"><span>Storage peer C</span><div><i>F1</i><i>F3</i></div></div></div><figcaption>Illustrative placement: two copies of every encrypted fragment, spread across three storage participants. Recovery credentials stay with you.</figcaption></figure></div>
-  <div class="wrap chat-recovery-bottom"><ol class="chat-steps chat-recovery-steps">
+  <div class="chat-recovery-composition">
+    <div class="chat-recovery-art">{{recovery_picture}}</div>
+    <div class="chat-recovery-copy"><div><p class="eyebrow">Recovery</p><h2 id="recovery-title">Lose a device.<br>Keep the conversation.</h2><p class="status light">Recovery in development</p><p class="chat-intro">Preserve an encrypted copy of your conversations and attachments, then recover it using available storage peers and your own credentials.</p></div></div>
+    <div class="chat-recovery-process"><ol class="chat-steps chat-recovery-steps">
     <li><span class="chat-step-number">1</span><div><h3>Create an encrypted backup</h3><p>Signal exports a snapshot. The connector protects its private container before Core receives the archive.</p></div></li>
     <li><span class="chat-step-number">2</span><div><h3>Distribute protected fragments</h3><p>Core places multiple copies of encrypted fragments across selected storage participants.</p></div></li>
     <li><span class="chat-step-number">3</span><div><h3>Retrieve and verify</h3><p>Available peers supply the fragments needed to reconstruct and check the encrypted archive.</p></div></li>
     <li><span class="chat-step-number">4</span><div><h3>Restore with your credentials</h3><p>Decrypt and import through Signal’s recovery flow using the required owner-held recovery material.</p></div></li>
-  </ol><aside class="chat-proof" aria-labelledby="proof-title"><div>{{archive_icon}}<h3 id="proof-title">Demonstrated in a scoped desktop trial</h3></div><p class="chat-proof-boundary">The three providers were isolated environments on one test machine. This does not establish availability across independent hardware.</p><a class="text-link" href="{{evidence}}">Read the recovery evidence <span aria-hidden="true">→</span></a></aside><details class="chat-details"><summary>The desktop trial and what you need for recovery</summary><p>An encrypted Signal backup was recovered and imported after one of three storage providers went offline. Restored messages and attachments were checked.</p><p>Keep Signal’s backup/account recovery material, the connector’s private wrapper descriptor and the signed reconstruction records with your owner identity. The wrapper key alone cannot locate or restore a backup. Usable credential-management tools are still in development.</p></details></div>
+  </ol><p class="chat-recovery-caption">Illustrative storage peers. Recovery credentials stay with you.</p><aside class="chat-proof" aria-labelledby="proof-title"><div>{{archive_icon}}<h3 id="proof-title">Demonstrated in a scoped desktop trial</h3></div><p class="chat-proof-boundary">The three providers were isolated environments on one test machine. This does not establish availability across independent hardware.</p><a class="text-link" href="{{evidence}}">Read the recovery evidence <span aria-hidden="true">→</span></a></aside></div>
+  </div>
+  <div class="wrap"><details class="chat-details"><summary>The desktop trial and what you need for recovery</summary><p>Core retains two copies of every encrypted fragment across at least three selected storage providers. The illustration depicts the storage model; the documented desktop trial used three isolated provider environments.</p><p>An encrypted Signal backup was recovered and imported after one of three storage providers went offline. Restored messages and attachments were checked.</p><p>Keep Signal’s backup/account recovery material, the connector’s private wrapper descriptor and the signed reconstruction records with your owner identity. The wrapper key alone cannot locate or restore a backup. Usable credential-management tools are still in development.</p></details></div>
 </section>
 
 <section id="shared-storage" class="chat-paper chat-reciprocal" aria-labelledby="storage-title">
-  <div class="wrap chat-storage-top"><div class="chat-paper-copy"><p class="eyebrow">Reciprocal storage</p><h2 id="storage-title">Make room<br>for each other.</h2><p class="status">Contribution management in development</p><p class="chat-intro">The storage model is reciprocal: contribute capacity in proportion to the space your backups occupy across the network.</p></div><div class="chat-storage-visual"><div class="chat-cabinets">{{storage_picture}}</div><div class="chat-calculation">{{exchange_icon}}<p>1 GB backup × 2 copies<br><span>≈ 2 GB contribution</span><small>+ overhead</small></p></div></div></div>
+  <div class="wrap chat-storage-top"><div class="chat-paper-copy"><p class="eyebrow">Reciprocal storage</p><h2 id="storage-title">Make room<br>for each other.</h2><p class="status">Contribution management in development</p><p class="chat-intro">The storage model is reciprocal: contribute capacity in proportion to the space your backups occupy across the network.</p></div><div class="chat-storage-visual"><div class="chat-cabinets">{{storage_picture}}<span class="chat-reciprocal-arrows" aria-hidden="true">{{exchange_icon}}</span></div><div class="chat-calculation">{{exchange_icon}}<p>1 GB backup × 2 copies<br><span>≈ 2 GB contribution</span><small>+ overhead</small></p></div></div></div>
   <div class="wrap chat-storage-explanation"><details class="chat-details"><summary>How the contribution is calculated</summary><p>The contribution target includes recovery copies and storage overhead. It should decrease when your actual remote usage decreases. Other people’s live fragments must move safely before their occupied space is released.</p><p class="chat-scope">Automatic contribution management is still being developed.</p></details></div>
 </section>
 
