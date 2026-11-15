@@ -10,12 +10,12 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'assets/chat'
 COMPOSITIONS = {
  'hero-salon': {'desktop': [0,0,1643,957], 'mobile': [640,0,1643,957]},
- 'signal-worktable': {'desktop': [0,0,1774,887]},
- 'mesh-courtyard': {'desktop': [0,120,1642,820], 'mobile': [440,0,1190,958]},
+ 'signal-worktable': {'desktop': [0,0,1920,819], 'mobile': [600,40,1920,819]},
+ 'mesh-courtyard': {'desktop': [0,0,1774,887], 'mobile': [410,0,1450,887]},
  'calls-surround': {'desktop': [0,0,1774,887]},
  'call-portraits': {'desktop': [0,0,1920,819]},
- 'recovery-table': {'desktop': [0,0,1774,887], 'mobile': [500,0,1774,887]},
- 'storage-cabinets': {'desktop': [590,230,1620,790], 'mobile': [630,220,1620,887]},
+ 'recovery-table': {'desktop': [0,0,1920,720], 'mobile': [650,80,1920,600]},
+ 'storage-cabinets': {'desktop': [0,100,2048,740], 'mobile': [650,120,1880,720]},
  'closing-fox': {'desktop': [0,0,1852,849], 'mobile': [700,0,1852,849]}
 }
 

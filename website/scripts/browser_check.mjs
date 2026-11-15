@@ -30,6 +30,14 @@ async function geometry(page){
   overflow:document.documentElement.scrollWidth>innerWidth,
   headerOverlap:document.querySelector('.site-header').getBoundingClientRect().bottom>document.querySelector('.chat-breadcrumb').getBoundingClientRect().top+1,
   missingImages:[...document.images].filter(i=>i.getClientRects().length&&(!i.complete||!i.naturalWidth)).map(i=>i.currentSrc),
+  laptop:(()=>{
+   const screen=document.querySelector('.chat-laptop-screen'),ui=screen.querySelector('.chat-messenger');
+   const s=screen.getBoundingClientRect(),p=document.querySelector('.chat-laptop-photo').getBoundingClientRect();
+   return {ratio:s.width/s.height,insidePhoto:s.left>=p.left&&s.right<=p.right&&s.top>=p.top&&s.bottom<=p.bottom,
+    contentFits:ui.scrollWidth<=ui.clientWidth+1&&ui.scrollHeight<=ui.clientHeight+1};
+  })(),
+  networkCaptionClear:document.querySelector('.chat-network-bottom').getBoundingClientRect().bottom<=document.querySelector('.chat-mesh-caption').getBoundingClientRect().top+1,
+  calculationFits:(()=>{const e=document.querySelector('.chat-calculation');return e.scrollWidth<=e.clientWidth+1;})(),
   meshNodes:[...document.querySelectorAll('.chat-mesh')].filter(e=>e.getBoundingClientRect().width>0).map(e=>({peers:e.querySelectorAll('[data-peer]').length,edges:e.querySelectorAll('[data-edge]').length,endpoints:e.querySelectorAll('[data-endpoint]').length})),
   width:innerWidth,height:innerHeight
  }));
@@ -54,6 +62,8 @@ for(const engine of (process.env.QA_ENGINES||'chromium,firefox').split(',')){
    const g=await geometry(page);
    assert(g.meshNodes.length===1&&g.meshNodes[0].peers===8&&g.meshNodes[0].edges===15&&g.meshNodes[0].endpoints===2,'Complete visible mesh');
    assert(!g.overflow&&!g.headerOverlap&&!g.missingImages.length,JSON.stringify({engine,...g}));
+   assert(g.laptop.insidePhoto&&g.laptop.contentFits&&Math.abs(g.laptop.ratio-1.606)<.015,'Laptop screen proportions and content: '+JSON.stringify(g.laptop));
+   assert(g.networkCaptionClear&&g.calculationFits,'Network caption and storage calculation must not overlap or clip');
    assert(!errors.length&&!failures.length&&!external.length,JSON.stringify({errors,failures,external}));
    assert(await page.locator('.site-header [aria-current]').count()===0,'Incorrect shared navigation active state');
    assert(await page.locator('.chat-breadcrumb [aria-current=page]').innerText()==='Chat','Breadcrumb state');
@@ -106,6 +116,7 @@ for(const engine of (process.env.QA_ENGINES||'chromium,firefox').split(',')){
    await page.goto(url,{waitUntil:'networkidle'});
    if(type!=='images-disabled')await loadAll(page);
    const g=await geometry(page);assert(!g.overflow&&!g.headerOverlap,JSON.stringify({type,...g}));
+   assert(g.networkCaptionClear&&g.calculationFits,JSON.stringify({type,networkCaptionClear:g.networkCaptionClear,calculationFits:g.calculationFits}));
    if(type==='no-js'){const m=page.locator('.mobile-nav');await m.locator('summary').click();assert(await m.getAttribute('open')!==null,'No-JS menu');await m.locator('summary').click();}
    if(type==='no-js'){
     for(const d of await page.locator('main details').all()){

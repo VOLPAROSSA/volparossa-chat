@@ -1,0 +1,22 @@
+{
+  "checkedAt": "2026-11-15T18:25:40.706Z",
+  "profiles": 13,
+  "axeViolations": 0,
+  "mobileInitialTransferBytes": {
+    "chromium": 312521,
+    "firefox": 246484
+  },
+  "largestImageTransferBytes": 755623,
+  "laptopRatios": [
+    1.6068056146320715,
+    1.607713915298185,
+    1.6078483012904925,
+    1.6069861811800834,
+    1.6061224489795918,
+    1.604231577421926,
+    1.6078137097606378,
+    1.6067328912362173,
+    1.6061224489795918
+  ],
+  "newRuntimeJavaScriptBytes": 0
+}

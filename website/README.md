@@ -76,6 +76,9 @@ of this illustration only, not runtime failover, service readiness or availabili
 The salon refinement aligns the desktop nodes with the eight pavilion roofs.
 Its coordinates and shorter mobile layout preserve the supplied edges/routes;
 tests also check that repositioning introduces no unmarked line crossings.
+The subsequent reference-art correction replaces the desk, garden, recovery and
+cabinet masters. The illustrative conversation scales inside the photographed
+laptop's 16:10 screen; it does not replace the laptop's bezel or keyboard.
 Secondary explanations use native disclosures, while development labels,
 private-cache exclusion and the one-machine evidence boundary remain visible.
 The crop exporter removes obsolete variants when crop dimensions change.
@@ -96,7 +99,7 @@ builds a noindex preview artifact and checks local assets, metadata, theme hashe
 and topology. Existing source-contract CI is retained unchanged.
 
 The latest visual correction is documented in
-[the salon refinement review](review/salon-refinement/REVIEW.md), including
+[the reference artwork review](review/reference-art/REVIEW.md), including
 actual desktop/mobile renders and expanded-disclosure accessibility checks.
 
 The user explicitly authorized publication after completion, superseding the
