@@ -10,6 +10,20 @@ At the pinned source, `OutgoingMessage.doSendMessage` encrypts separately for ea
 
 On receipt, extract a typed transport-independent entry into the existing encrypted receive queue. Preserve its atomic session/prekey/unprocessed-message transaction and acknowledge durable acceptance only after that commit. Continue through ordinary decryption and message processing, not a plaintext UI injection. The upstream functions include `signalDecrypt` and `signalDecryptPreKey`; no new cryptographic primitive is needed. [Pinned receiver](https://github.com/signalapp/Signal-Desktop/blob/ef3872cb0249ec939d8aff857568a0e87a6b5075/ts/textsecure/MessageReceiver.preload.ts).
 
+### Receipts from a linked device
+
+The Desktop overlay handles repeated message timestamps inside one encrypted
+delivery, read or viewed receipt. The normal receiver keeps the first occurrence
+of each original 64-bit timestamp in order. Timestamps in separate envelopes
+or from different devices still produce separate events. Signal's existing
+confirmation callback and handling for unknown receipt types are preserved.
+
+After staging the pinned source and applying the overlay, run
+`node --test tests/signal-receipt-dispatch.mjs`. This executes the staged
+`MessageReceiver` receipt method with synthetic envelopes and event consumers.
+It checks the per-device rows and confirmation callback. Desktop decryption,
+database persistence and peer delivery require their own runtime tests.
+
 ## Authenticate the device-to-peer binding
 
 A DHT record or self-declared phone number does not prove Signal identity. The first integration must explicitly pair each compatible device through an already authenticated Signal exchange or an owner-verified out-of-band invitation. Bind the exact Signal account/device identity and registration generation to the VOLPAROSSA peer key, supported protocol version, expiry and fresh challenge response. Revoke/reconfirm that binding when identities, registrations or devices change.
