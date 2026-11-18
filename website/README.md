@@ -33,8 +33,8 @@ The builder refuses to erase directories it does not own.
 
 ## Shared theme and content
 
-`vendor/volparossa-theme` is the unmodified source-only export of theme 1.0.3
-from central commit `179bf4893d7c3e48ffd51ce52377d302f98ae743`.
+`vendor/volparossa-theme` is the unmodified source-only export of theme 1.1.0
+from central commit `991cf1638c906226574b9c21bb32c6618fc07fb7`.
 The build verifies every SHA-256 in `theme-version.json`. Header, footer,
 navigation, original branding, typography and menu come from that export.
 Chat composition lives separately in `src/chat.css`; product copy in `src/index.html`.
