@@ -11,6 +11,7 @@ from stage_signal_source import COMMIT, ROOT, checked_tree, verify_checkout
 
 SOURCE_HASHES = {
     # Filled from the blob-verified upstream checkout, not from an editable candidate.
+    "ts/textsecure/MessageReceiver.preload.ts": "ee5d8762e07853d0ebb23c3e64f1d5bc9c78b0ca233939b2ea11fc5e03090a55",
     "ts/CI.preload.ts": "c0cceb89192d42513577f400ecd70fa3a2f3a06114bee2a8a07e3fde60677427",
     "ts/test-mock/backups/backups_test.node.ts": "efdc142d335f9f930ce3e382a455d46ed0c22f86da09bdb575bc7e8994f761cd",
 }
@@ -39,6 +40,10 @@ def main():
         if path.is_symlink() or hashlib.sha256(path.read_bytes()).hexdigest() != digest:
             raise ValueError("pinned patch source hash differs")
         patched[name] = path.read_text()
+    name = "ts/textsecure/MessageReceiver.preload.ts"
+    patched[name] = replace_once(patched[name],
+        "    const receipts = receiptMessage.timestamp.map(rawTimestamp => ({",
+        "    const receipts = Array.from(new Set(receiptMessage.timestamp), rawTimestamp => ({")
     ci = patched["ts/CI.preload.ts"]
     ci = replace_once(ci, "import { backupsService } from './services/backups/index.preload.ts';",
         "import { backupsService } from './services/backups/index.preload.ts';\n"
