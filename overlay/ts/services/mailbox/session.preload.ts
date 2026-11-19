@@ -214,7 +214,13 @@ export async function importAvailable(receive: Receive): Promise<void> {
           check(donor.toString('ascii') === `${pair.sendGrant}\n`);
           const row = await DataReader.getMailboxRowForCustody(key);
           check(row && row.intent);
-          await settleOutgoing(root, pair, key, row.id, row.settled);
+          await settleOutgoing(
+            root,
+            pair,
+            key,
+            row.id,
+            row.settled ? row.expires : undefined
+          );
         }
       } catch (err) {
         // The bridge can complete cleanup while this directory is being streamed.
@@ -230,10 +236,13 @@ async function settleOutgoing(
   pair: MailboxPair,
   key: string,
   id: string,
-  settled = false
+  settledExpiry?: number
 ): Promise<void> {
-  if (!settled) await DataWriter.settleMailboxRow(id);
-  await publish(join(root, 'retired', key), Buffer.from(`${pair.sendGrant}\n`));
+  const expires = settledExpiry ?? (await DataWriter.settleMailboxRow(id));
+  await publish(
+    join(root, 'retired', key),
+    Buffer.from(`${pair.sendGrant}\n${expires}\n`)
+  );
 }
 
 async function importPacket(

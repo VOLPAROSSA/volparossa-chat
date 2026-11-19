@@ -88,7 +88,9 @@ class MailboxHandoffTest(unittest.TestCase):
         self.bridge.cli = Mock(return_value={'confirmed_providers': 2, 'message_id': '77' * 32})
         self.assertEqual(self.bridge.deposit(), 1)
         self.assertTrue((self.root / 'outbox' / key).exists())
-        mailbox.publish(self.root / 'retired' / key, marker)
+        receipt = marker + (str(self.bridge.pair['expires']) + '\n').encode()
+        mailbox.publish(self.root / 'retired' / key, receipt)
+        self.bridge.pair['sendGrant'] = 'ee' * 32
         with patch.object(mailbox, 'remove_private_tree', side_effect=OSError('interrupted')):
             with self.assertRaises(OSError):
                 self.bridge.deposit()

@@ -107,6 +107,14 @@ async function inspectNative<T>(
     db.close();
   }
 }
+function previousProofs(): Array<string> {
+  return Array.from({ length: 256 }, (_, index) =>
+    createHash('sha256')
+      .update(`previous synthetic import ${index}`)
+      .digest('hex')
+  );
+}
+
 // Only seed the previous release's application-owned item in a closed,
 // disposable SQLCipher profile. Messages, peer sessions and status rows are
 // created exclusively by the real Desktops.
@@ -123,12 +131,11 @@ async function seedPreviousMailbox(bootstrap: Bootstrap, mailbox: string) {
   try {
     db.pragma(`key = "x'${key}'"`);
     const id = 'volparossaMailboxV1';
-    const value = Array.from({ length: 256 }, (_, index) => {
-      const proof = createHash('sha256')
-        .update(`previous synthetic import ${index}`)
-        .digest('hex');
-      return { id: proof, bodyDigest: proof, expires };
-    });
+    const value = previousProofs().map(proof => ({
+      id: proof,
+      bodyDigest: proof,
+      expires,
+    }));
     db.prepare('INSERT INTO items (id, json) VALUES ($id, $json)').run({
       id,
       json: JSON.stringify({ id, value }),
@@ -152,6 +159,13 @@ async function ledgerCount(boot: Bootstrap): Promise<number> {
         .get()?.n,
       0
     );
+    const migrated = db
+      .prepare(
+        "SELECT id FROM volparossa_mailbox WHERE json_extract(json, '$.bodyDigest') = id ORDER BY id"
+      )
+      .all()
+      .map(row => row.id);
+    assert.deepEqual(migrated, previousProofs().sort());
     return total;
   });
 }

@@ -104,17 +104,23 @@ export function getMailboxRowForCustody(
     : undefined;
 }
 
-export function settleMailboxRow(db: WritableDB, id: string): void {
+export function settleMailboxRow(db: WritableDB, id: string): number {
   // The native consumer has verified the ordinary durable Signal result.
   // Retain only immutable identifiers and retry intent for the whole grant.
-  const result = db
+  const expires = db
     .prepare(
       `
     UPDATE volparossa_mailbox
     SET json = json_set(json_remove(json, '$.packet', '$.bodyDigest', '$.profileDigest', '$.receipt'), '$.settled', json('true'))
     WHERE id = $id AND expires > $now
-  `
+    RETURNING expires
+  `,
+      { pluck: true }
     )
-    .run({ id, now: Date.now() });
-  strictAssert(result.changes === 1, 'Missing or expired native mailbox proof');
+    .get({ id, now: Date.now() });
+  strictAssert(
+    typeof expires === 'number',
+    'Missing or expired native mailbox proof'
+  );
+  return expires;
 }

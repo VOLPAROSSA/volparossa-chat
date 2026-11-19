@@ -105,7 +105,7 @@ index 78e2568..129d389 100644
  };
 
  type WritableInterface = {
-+  settleMailboxRow: (id: string) => void;
++  settleMailboxRow: (id: string) => number;
    close: () => void;
 
    removeIndexedDBFiles: () => void;

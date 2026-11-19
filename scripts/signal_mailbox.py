@@ -225,43 +225,60 @@ class Bridge:
             db.execute('DELETE FROM settled WHERE expires <= ?', (int(time.time() * 1000),))
         return db
 
-    def retire_outgoing(self, db, key, marker, already=False):
-        if not already:
-            require(read(self.root / 'retired' / key, 128) == marker, 'native custody grant differs')
-            with db:
-                db.execute('INSERT INTO settled(key, grant, expires) VALUES(?, ?, ?) ON CONFLICT(key) DO NOTHING',
-                           (key, self.pair['sendGrant'], self.pair['expires']))
-        found = db.execute('SELECT grant FROM settled WHERE key = ?', (key,)).fetchone()
-        require(found == (self.pair['sendGrant'],), 'retired packet authority differs')
+    def record_retirement(self, db, entry):
+        record = read(entry, 128)
+        match = re.fullmatch(rb'([a-f0-9]{64})\n(?:(\d{1,16})\n)?', record)
+        require(match, 'invalid native retirement')
+        grant = match[1].decode('ascii')
+        if match[2]:
+            expires = int(match[2])
+            require(0 < expires <= 2**53 - 1, 'invalid native expiry')
+        elif grant == self.pair['sendGrant']:
+            # Earlier native handoffs recorded only the current grant.
+            expires = self.pair['expires']
+        else:
+            previous = db.execute('SELECT expires FROM settled WHERE key = ? AND grant = ?', (entry.name, grant)).fetchone()
+            if not previous:
+                return
+            expires, = previous
+        with db:
+            db.execute('INSERT INTO settled(key, grant, expires) VALUES(?, ?, ?) ON CONFLICT(key) DO NOTHING',
+                       (entry.name, grant, expires))
+        found = db.execute('SELECT grant, expires FROM settled WHERE key = ?', (entry.name,)).fetchone()
+        require(found == (grant, expires), 'retired packet authority differs')
+        self.remove_outgoing(entry.name, grant)
+        remove_matching(entry, record, 128)
+
+    def remove_outgoing(self, key, grant):
         packet = self.root / 'outbox' / key
         if os.path.lexists(packet):
             data = read(packet, PACKET_LIMIT)
-            require(sha(data) == key and json.loads(data)['grant'] == self.pair['sendGrant'], 'outbound packet differs')
+            require(sha(data) == key and json.loads(data)['grant'] == grant, 'outbound packet differs')
             remove_matching(packet, data, PACKET_LIMIT)
         remove_private_tree(self.state / key, 'send')
-        remove_matching(self.root / 'custody' / key, marker, 128)
-        remove_matching(self.root / 'retired' / key, marker, 128)
+        remove_matching(self.root / 'custody' / key, (grant + '\n').encode('ascii'), 128)
 
     def deposit(self):
         with closing(self.send_ledger()) as db:
-            marker = (self.pair['sendGrant'] + '\n').encode('ascii')
             for entry in packets(directory(self.root / 'retired', True)):
-                if read(entry, 128) == marker:
-                    self.retire_outgoing(db, entry.name, marker)
-            return self.deposit_live(db, marker)
+                self.record_retirement(db, entry)
+            return self.deposit_live(db)
 
-    def deposit_live(self, db, marker):
+    def deposit_live(self, db):
         count = 0
+        marker = (self.pair['sendGrant'] + '\n').encode('ascii')
         for packet in packets(self.root / 'outbox'):
             data = read(packet, PACKET_LIMIT)
             grant = json.loads(data)['grant']
             require(sha(data) == packet.name and HEX.fullmatch(grant), 'outbound packet differs')
+            settled = db.execute('SELECT grant FROM settled WHERE key = ?', (packet.name,)).fetchone()
+            if settled:
+                require(settled == (grant,), 'late packet differs from native custody')
+                self.remove_outgoing(packet.name, grant)
+                continue
             if grant != self.pair['sendGrant']:
                 continue
             saved = self.root / 'custody' / packet.name
-            if db.execute('SELECT 1 FROM settled WHERE key = ?', (packet.name,)).fetchone():
-                self.retire_outgoing(db, packet.name, marker, already=True)
-                continue
             if saved.exists():
                 require(read(saved, 128) == marker, 'custody belongs to another grant')
                 continue
