@@ -134,10 +134,11 @@ def trial(args):
     hashes = {path: digest(candidate / path) for path in runtime_paths}
     cli_hash, provider_hash = digest(cli), digest(provider)
     with tempfile.TemporaryDirectory(prefix='paired-desktop-', dir=build) as work:
-        private = Path(work)
+        private = Path(work) / 'runtime'
+        private.mkdir(mode=0o700)
         # A concurrent Cargo build can replace a target executable. Freeze the two
         # checked inputs before running any synthetic account or signed store.
-        core_tools = private / 'tools'
+        core_tools = Path(work) / 'tools'
         core_tools.mkdir(mode=0o700)
         for src, name, expected in ((cli, 'volparossa', cli_hash), (provider, 'mailbox-provider-pair', provider_hash)):
             dst = core_tools / name
