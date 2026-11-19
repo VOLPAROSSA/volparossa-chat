@@ -29,6 +29,13 @@ OBSERVATIONS = {
     'previous_records_per_profile': 256, 'both_profiles_added_native_records_past_256': True,
     'settled_handoffs_removed': True,
 }
+VOLUME_OBSERVATIONS = {
+    'version': 1, 'standalone_desktops': 2, 'migrated_fixture_rows': 0,
+    'distinct_native_texts': 260, 'recipient_sqlcipher_rows': 260, 'sender_rows_delivered': 260,
+    'enrolled_grant_pairs': 5, 'providers_per_grant': 2,
+    'paired_stock_submissions': 0, 'settled_handoffs_removed': True, 'provider_inboxes_empty': True,
+}
+
 
 
 def digest(path):
@@ -68,7 +75,7 @@ def join(process):
             process.wait(timeout=5)
 
 
-def run_desktops():
+def run_desktops(volume=False):
     unix = Path('/tmp/.X11-unix')
     unix.mkdir(mode=0o1777, exist_ok=True)
     with subprocess.Popen(['/trial/Xvfb', ':156', '-screen', '0', '1280x1024x24', '-nolisten', 'tcp']) as display:
@@ -77,14 +84,20 @@ def run_desktops():
             command = ['node', 'node_modules/mocha/bin/mocha.js', '--forbid-pending', '--fail-zero',
                        '--require', 'ts/test-mock/setup-ci.node.ts', '--grep', '^' + TITLE + '$',
                        '--reporter', 'spec', TARGET]
-            subprocess.run(command, env=os.environ | {'DISPLAY': ':156'}, timeout=275, check=True)
+            env = os.environ | {'DISPLAY': ':156', 'CHAT_NATIVE_VOLUME': '1' if volume else '0'}
+            subprocess.run(command, env=env, timeout=3900 if volume else 275, check=True)
         finally:
             join(display)
 
 
-def run_inside(prepared):
+def run_inside(prepared, volume):
     check(sorted(name for _, name in socket.if_nameindex()) == ['lo'], 'isolated loopback required')
     state = Path('/tmp/r/providers')
+    if volume:
+        # The two test owners explicitly enroll a fresh pair of grants for each
+        # group. Every pair keeps its own 64-message provider limit.
+        run_desktops(volume=True)
+        return
     if prepared:
         cli = '/trial/core/volparossa'
         agent = '/trial/core/agent.sock'
@@ -130,7 +143,7 @@ def trial(args):
     check(not subprocess.check_output(['git', 'status', '--porcelain'], cwd=ROOT), 'expected clean Chat source')
     build = ROOT / 'build'
     candidate = build / 'signal-backup-candidate'
-    result = build / 'native-mailbox-result.json'
+    result = build / ('native-mailbox-volume-result.json' if args.volume else 'native-mailbox-result.json')
     check(not os.path.lexists(result), 'output already exists')
     fixture = ROOT / 'tests/native/paired-mailbox_test.node.ts'
     bridge = ROOT / 'scripts/signal_mailbox.py'
@@ -164,8 +177,10 @@ def trial(args):
         mounts = [(core_tools, '/trial/core'), (bridge, '/trial/signal_mailbox.py'), (xvfb, '/trial/Xvfb')]
         node = build / 'node-v24.19.0-linux-x64-with-npm/bin'
         command = sandbox(private, candidate, node, fixture, TARGET, Path(__file__).resolve(), mounts)
+        if args.volume:
+            command.append('--volume')
         with (private / 'log').open('xb') as log:
-            status = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT, timeout=400)
+            status = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT, timeout=4000 if args.volume else 400)
         if status.returncode:
             phase = (private / 'phase').read_text() if (private / 'phase').is_file() else 'bootstrap'
             check(phase in {'bootstrap', 'register-a', 'register-b', 'open-before', 'warm-send', 'warm-receive',
@@ -174,7 +189,8 @@ def trial(args):
                   'unexpected fixture phase')
             raise ValueError('native mailbox trial failed during ' + phase)
         observed = json.loads((private / 'result.json').read_bytes())
-        check(json.dumps(observed, sort_keys=True) == json.dumps(OBSERVATIONS, sort_keys=True), 'incomplete observations')
+        expected = VOLUME_OBSERVATIONS if args.volume else OBSERVATIONS
+        check(json.dumps(observed, sort_keys=True) == json.dumps(expected, sort_keys=True), 'incomplete observations')
     check(subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip() == revision
           and not subprocess.check_output(['git', 'status', '--porcelain'], cwd=ROOT), 'Chat source changed during the trial')
     report = dict(observed, chat_revision=revision, signal_revision=signal_revision, core_fixture_revision=CORE_SOURCE,
@@ -191,14 +207,16 @@ def trial(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--inside', action='store_true', help=argparse.SUPPRESS)
+    parser.add_argument('--volume', action='store_true', help='exchange 260 native texts across five signed grant pairs')
     parser.add_argument('--prepared-providers', action='store_true', help='use the existing Core KVM guest agent inside the native sandbox')
     parser.add_argument('--core-source', type=Path, help='clean checkout of the pinned Core revision with locked dependencies available')
     parser.add_argument('--cargo-target', type=Path, help='reuse compatible Cargo intermediates for the offline build')
     parser.add_argument('--xvfb', type=Path, default=shutil.which('Xvfb'))
     try:
         args = parser.parse_args()
+        check(not (args.prepared_providers and args.volume), 'the volume trial provisions its own provider pairs')
         if args.inside:
-            run_inside(args.prepared_providers)
+            run_inside(args.prepared_providers, args.volume)
         else:
             check(not args.prepared_providers, 'prepared providers require the existing isolated guest sandbox')
             check(args.core_source and args.xvfb, 'provide --core-source and an installed or explicit --xvfb')

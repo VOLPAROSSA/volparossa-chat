@@ -5,7 +5,7 @@ import { join, dirname } from 'node:path';
 import { promisify } from 'node:util';
 import Database from '@signalapp/sqlcipher';
 import { createHash } from 'node:crypto';
-import { execFile } from 'node:child_process';
+import { execFile, spawn } from 'node:child_process';
 import { setTimeout as delay } from 'node:timers/promises';
 import { Bootstrap } from '../bootstrap.node.ts';
 import {
@@ -184,13 +184,15 @@ async function configure(
   bootstrap: Bootstrap,
   name: string,
   self: Device,
-  peer: Device
+  peer: Device,
+  providerState = '/tmp/r/providers',
+  replacing = false
 ) {
   const dir = join(dirname(bootstrap.logsDir), 'volparossa-mailbox');
-  const input = join('/tmp/r/providers', name);
-  await mkdir(dir, { mode: 0o700 });
+  const input = join(providerState, name);
+  await mkdir(dir, { mode: 0o700, recursive: replacing });
   for (const sub of ['outbox', 'custody', 'inbox', 'imported'])
-    await mkdir(join(dir, sub), { mode: 0o700 });
+    await mkdir(join(dir, sub), { mode: 0o700, recursive: replacing });
   const grants = JSON.parse(await readFile(join(input, 'grants.json'), 'utf8'));
   const pair = {
     version: 1,
@@ -201,11 +203,11 @@ async function configure(
   await writeFile(
     join(dir, 'core.json'),
     await readFile(join(input, 'core.json')),
-    { mode: 0o600, flag: 'wx' }
+    { mode: 0o600, flag: replacing ? 'w' : 'wx' }
   );
   await writeFile(join(dir, 'pair.json'), JSON.stringify(pair), {
     mode: 0o600,
-    flag: 'wx',
+    flag: replacing ? 'w' : 'wx',
   });
   return dir;
 }
@@ -262,8 +264,146 @@ async function observedRow(
     return row.id;
   });
 }
+async function volumeMessages(
+  a: Bootstrap,
+  b: Bootstrap,
+  da: Device,
+  db: Device
+): Promise<{ messages: number; grants: number }> {
+  let messages = 0;
+  for (let round = 0; round < 5; round++) {
+    await phase(`volume-grant-${round + 1}`);
+    const providerState = join('/tmp/r', `providers-volume-${round}`);
+    await mkdir(providerState, { mode: 0o700 });
+    const provider = spawn(
+      '/trial/core/mailbox-provider-pair',
+      [providerState],
+      { stdio: ['pipe', 'ignore', 'ignore'] }
+    );
+    const exited = new Promise<number | null>((resolve, reject) => {
+      provider.once('error', reject);
+      provider.once('exit', resolve);
+    });
+    try {
+      await until(async () => {
+        assert.equal(provider.exitCode, null);
+        return (await readdir(providerState)).includes('ready')
+          ? true
+          : undefined;
+      }, 60);
+      const left = await configure(a, 'a', da, db, providerState, round > 0);
+      const right = await configure(b, 'b', db, da, providerState, round > 0);
+      const sender = await a.startApp();
+      const recipient = await b.startApp();
+      const senderPage = await sender.getWindow();
+      await senderPage.locator('#LeftPane').waitFor();
+      await (await recipient.getWindow()).locator('#LeftPane').waitFor();
+      await clickOnConversationWithAci(senderPage, db.aci);
+      const prefix = `Native volume ${round + 1}/`;
+      const expected = Array.from(
+        { length: 52 },
+        (_, i) => prefix + String(i + 1).padStart(2, '0')
+      );
+      const sending = (async () => {
+        for (const body of expected) await send(sender, body);
+      })();
+      let submissionError: unknown;
+      void sending.catch(error => {
+        submissionError = error;
+      });
+      const readBodies = (boot: Bootstrap, kind: string) =>
+        inspectNative(boot, sql => {
+          const rows = sql
+            .prepare(
+              'SELECT body, conversationId, sourceServiceId, sourceDevice, json FROM messages WHERE type = $kind AND body LIKE $pattern ORDER BY body'
+            )
+            .all({ kind, pattern: prefix + '%' });
+          return rows.map(row => {
+            assert(typeof row.json === 'string');
+            const message = JSON.parse(row.json);
+            assert(
+              typeof row.body === 'string' &&
+                typeof row.conversationId === 'string'
+            );
+            const status =
+              message.sendStateByConversationId?.[row.conversationId]?.status;
+            return {
+              body: row.body,
+              status,
+              source: row.sourceServiceId,
+              device: row.sourceDevice,
+            };
+          });
+        });
+      let packets = 0;
+      await until(async () => {
+        if (submissionError) throw submissionError;
+        const sent = await Promise.all([
+          command(left, 'deposit'),
+          command(right, 'deposit'),
+        ]);
+        packets += sent[0];
+        await Promise.all([command(right, 'fetch'), command(left, 'fetch')]);
+        await Promise.all([
+          command(right, 'confirm'),
+          command(left, 'confirm'),
+        ]);
+        const [outgoing, incoming] = await Promise.all([
+          readBodies(a, 'outgoing'),
+          readBodies(b, 'incoming'),
+        ]);
+        if (
+          incoming.length < expected.length ||
+          outgoing.length < expected.length
+        )
+          return undefined;
+        assert.deepEqual(
+          incoming.map(m => m.body),
+          expected
+        );
+        assert.deepEqual(
+          outgoing.map(m => m.body),
+          expected
+        );
+        assert(
+          incoming.every(m => m.source === da.aci && m.device === da.deviceId)
+        );
+        if (
+          !outgoing.every(m =>
+            ['Delivered', 'Read', 'Viewed'].includes(m.status)
+          )
+        )
+          return undefined;
+        for (const dir of [left, right]) {
+          for (const name of [
+            'inbox',
+            'outbox',
+            'custody',
+            'retired',
+            'transport/received',
+          ]) {
+            if ((await readdir(join(dir, name))).length > 0) return undefined;
+          }
+        }
+        return true;
+      }, 720);
+      await sending;
+      assert(packets >= expected.length);
+      assert.equal(await command(left, 'fetch'), 0);
+      assert.equal(await command(right, 'fetch'), 0);
+      await sender.close();
+      await recipient.close();
+      messages += expected.length;
+    } finally {
+      provider.stdin.end();
+      assert.equal(await exited, 0);
+    }
+  }
+  return { messages, grants: 5 };
+}
+
 describe('native paired Signal mailbox', function () {
-  this.timeout(240000);
+  this.timeout(process.env.CHAT_NATIVE_VOLUME === '1' ? 4_000_000 : 240000);
   it('recovers one offline message exactly once after native durable import', async () => {
     const a = new Bootstrap({ linkedDevices: 0, contactCount: 0 });
     const b = new Bootstrap({
@@ -380,6 +520,32 @@ describe('native paired Signal mailbox', function () {
       await delay(1500);
       await phase('pair');
       assert(stock >= 2);
+      if (process.env.CHAT_NATIVE_VOLUME === '1') {
+        await alice.close();
+        await bob.close();
+        closed = true;
+        const { messages, grants } = await volumeMessages(a, b, da, db);
+        assert.equal(messages, 260);
+        assert.equal(forbidden, 0);
+        await writeFile(
+          process.env.CHAT_NATIVE_RESULT!,
+          JSON.stringify({
+            version: 1,
+            standalone_desktops: 2,
+            migrated_fixture_rows: 0,
+            distinct_native_texts: messages,
+            recipient_sqlcipher_rows: messages,
+            sender_rows_delivered: messages,
+            enrolled_grant_pairs: grants,
+            providers_per_grant: 2,
+            paired_stock_submissions: forbidden,
+            settled_handoffs_removed: true,
+            provider_inboxes_empty: true,
+          }),
+          { flag: 'wx', mode: 0o600 }
+        );
+        return;
+      }
       const left = await configure(a, 'a', da, db);
       const right = await configure(b, 'b', db, da);
       await bob.close();
@@ -388,14 +554,24 @@ describe('native paired Signal mailbox', function () {
       await phase('offline-send');
       const body = 'Private offline synthetic message.';
       await send(alice, body);
-      const stamp = await until(async () => inspectNative(a, sql => {
-        const rows = sql.prepare("SELECT sent_at FROM messages WHERE type='outgoing' AND body = $body").all({body});
-        if (!rows.length) return undefined;
-        assert.equal(rows.length, 1);
-        const value = rows[0]?.sent_at;
-        assert(typeof value === 'number' && Number.isSafeInteger(value) && value > 0);
-        return value;
-      }));
+      const stamp = await until(async () =>
+        inspectNative(a, sql => {
+          const rows = sql
+            .prepare(
+              "SELECT sent_at FROM messages WHERE type='outgoing' AND body = $body"
+            )
+            .all({ body });
+          if (!rows.length) return undefined;
+          assert.equal(rows.length, 1);
+          const value = rows[0]?.sent_at;
+          assert(
+            typeof value === 'number' &&
+              Number.isSafeInteger(value) &&
+              value > 0
+          );
+          return value;
+        })
+      );
       const outgoing = await readPacket(left, stamp);
       assert.equal(outgoing.packet.from.aci, da.aci);
       assert.equal(outgoing.packet.to.aci, db.aci);
@@ -416,8 +592,20 @@ describe('native paired Signal mailbox', function () {
       // Wait until all native jobs have confirmed custody and completed cleanup.
       await until(async () => {
         deposited += await command(left, 'deposit');
-        const busy = await inspectNative(a, sql => sql.prepare("SELECT count(*) AS n FROM jobs WHERE queueType='conversation'").get()?.n);
-        return busy === 0 && !(await readdir(join(left, 'outbox'))).length && !(await readdir(join(left, 'custody'))).length ? true : undefined;
+        const busy = await inspectNative(
+          a,
+          sql =>
+            sql
+              .prepare(
+                "SELECT count(*) AS n FROM jobs WHERE queueType='conversation'"
+              )
+              .get()?.n
+        );
+        return busy === 0 &&
+          !(await readdir(join(left, 'outbox'))).length &&
+          !(await readdir(join(left, 'custody'))).length
+          ? true
+          : undefined;
       }, 65);
       assert.equal(await command(left, 'deposit'), 0);
       await alice.close();
@@ -474,7 +662,10 @@ describe('native paired Signal mailbox', function () {
       await deliveryEvent;
       await until(async () => {
         await command(right, 'deposit');
-        return !(await readdir(join(right, 'outbox'))).length && !(await readdir(join(right, 'custody'))).length ? true : undefined;
+        return !(await readdir(join(right, 'outbox'))).length &&
+          !(await readdir(join(right, 'custody'))).length
+          ? true
+          : undefined;
       }, 65);
       receiverRecords = await ledgerCount(b);
       assert(receiverRecords > 256);
