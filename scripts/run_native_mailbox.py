@@ -32,7 +32,7 @@ OBSERVATIONS = {
 VOLUME_OBSERVATIONS = {
     'version': 1, 'standalone_desktops': 2, 'migrated_fixture_rows': 0,
     'distinct_native_texts': 260, 'recipient_sqlcipher_rows': 260, 'sender_rows_delivered': 260,
-    'enrolled_grant_pairs': 5, 'providers_per_grant': 2,
+    'enrolled_grant_pairs': 10, 'providers_per_grant': 2,
     'paired_stock_submissions': 0, 'settled_handoffs_removed': True, 'provider_inboxes_empty': True,
 }
 
@@ -207,7 +207,7 @@ def trial(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--inside', action='store_true', help=argparse.SUPPRESS)
-    parser.add_argument('--volume', action='store_true', help='exchange 260 native texts across five signed grant pairs')
+    parser.add_argument('--volume', action='store_true', help='exchange 260 native texts across ten signed grant pairs')
     parser.add_argument('--prepared-providers', action='store_true', help='use the existing Core KVM guest agent inside the native sandbox')
     parser.add_argument('--core-source', type=Path, help='clean checkout of the pinned Core revision with locked dependencies available')
     parser.add_argument('--cargo-target', type=Path, help='reuse compatible Cargo intermediates for the offline build')

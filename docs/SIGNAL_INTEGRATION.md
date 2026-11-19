@@ -68,7 +68,11 @@ open. The migration trial starts both profiles with 256 synthetic records in the
 previous format, then sends a new real message through the normal composer.
 It reopens both profiles, checks the original row and session after replay,
 and checks the cleared private handoffs. The provider fixture and reproducible
-workflow are public.
+workflow are public. The workflow’s optional volume trial sends 260 distinct
+texts through the two native profiles with an empty initial mailbox. It grants
+26 texts at a time so normal delivery, read and authorized profile messages
+also fit within each invitation’s signed limit. It checks the recipient's
+original rows and the sender's delivery status for every text.
 [Source versions, executable hashes and native trial results](../provenance/paired-mailbox-20261119.json) ·
 [Hosted trial](https://github.com/VOLPAROSSA/volparossa-chat/actions/runs/44519772345) ·
 [Core fixture](https://github.com/VOLPAROSSA/volparossa/pull/429) ·

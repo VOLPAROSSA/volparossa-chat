@@ -285,7 +285,9 @@ async function volumeMessages(
   db: Device
 ): Promise<{ messages: number; grants: number }> {
   let messages = 0;
-  for (let round = 0; round < 5; round++) {
+  // Each signed invitation covers at most 64 distinct manifests. A user text
+  // can prompt both a delivery and a read receipt in the reverse direction.
+  for (let round = 0; round < 10; round++) {
     await phase(`volume-grant-${round + 1}`);
     const providerState = join('/tmp/r', `providers-volume-${round}`);
     await mkdir(providerState, { mode: 0o700 });
@@ -298,6 +300,7 @@ async function volumeMessages(
       provider.once('error', reject);
       provider.once('exit', resolve);
     });
+    let roundComplete = false;
     try {
       await until(async () => {
         assert.equal(provider.exitCode, null);
@@ -315,7 +318,7 @@ async function volumeMessages(
       await clickOnConversationWithAci(senderPage, db.aci);
       const prefix = `Native volume ${round + 1}/`;
       const expected = Array.from(
-        { length: 52 },
+        { length: 26 },
         (_, i) => prefix + String(i + 1).padStart(2, '0')
       );
       const sending = (async () => {
@@ -408,12 +411,15 @@ async function volumeMessages(
       await sender.close();
       await recipient.close();
       messages += expected.length;
+      roundComplete = true;
     } finally {
       provider.stdin.end();
-      assert.equal(await exited, 0);
+      const exitCode = await exited;
+      // Preserve the original trial error if a provider also failed to exit cleanly.
+      if (roundComplete) assert.equal(exitCode, 0);
     }
   }
-  return { messages, grants: 5 };
+  return { messages, grants: 10 };
 }
 
 describe('native paired Signal mailbox', function () {
