@@ -62,23 +62,26 @@ def sync_dir(path):
 
 def publish(path, data):
     directory(path.parent)
+    # All bridge publications share the mailbox transfer lock. A fixed private
+    # slot lets a restart discard a partial write even after SIGKILL.
+    staging = path.parent / '.bridge-write'
+    if os.path.lexists(staging):
+        check_owned_file(staging)
+        staging.unlink()
     try:
         require(read(path, len(data)) == data, 'existing handoff differs')
         return
     except FileNotFoundError:
         pass
-    with tempfile.NamedTemporaryFile(dir=path.parent, prefix='.', delete=False) as f:
-        name = Path(f.name)
-        try:
-            f.write(data)
-            f.flush()
-            os.fsync(f.fileno())
-            # The bridge alone publishes custody/inbox under its exclusive lock.
-            # Rename atomically so a crash never leaves a second hard link that
-            # would invalidate the native consumer's single-link check.
-            os.replace(name, path)
-        finally:
-            name.unlink(missing_ok=True)
+    fd = os.open(staging, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
+    try:
+        with os.fdopen(fd, 'wb') as output:
+            output.write(data)
+            output.flush()
+            os.fsync(output.fileno())
+        os.replace(staging, path)
+    finally:
+        staging.unlink(missing_ok=True)
     sync_dir(path.parent)
 
 

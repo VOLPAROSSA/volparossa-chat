@@ -162,6 +162,15 @@ class MailboxHandoffTest(unittest.TestCase):
         with mailbox.closing(self.bridge.send_ledger()) as db:
             self.assertEqual(db.execute('SELECT count(*) FROM settled').fetchone(), (270,))
 
+    def test_restart_replaces_only_the_interrupted_private_publication(self):
+        destination = self.root / 'inbox' / ('93' * 32)
+        staging = destination.parent / '.bridge-write'
+        staging.touch(mode=0o600)
+        staging.write_bytes(b'interrupted write')
+        mailbox.publish(destination, b'original complete packet')
+        self.assertEqual(mailbox.read(destination, 64), b'original complete packet')
+        self.assertFalse(staging.exists())
+
     def test_interrupted_fetch_scratch_is_checked_and_reused(self):
         staging = mailbox.directory(self.bridge.state / 'fetching', True)
         packet = mailbox.directory(staging / ('77' * 32), True)

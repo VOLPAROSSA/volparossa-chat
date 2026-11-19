@@ -256,7 +256,7 @@ async function observedRow(
   body: string,
   type: 'incoming' | 'outgoing',
   peer?: Device,
-  expected?: string
+  expected?: string | ReadonlyArray<string>
 ) {
   return until(async () => {
     const rows = await app.getMessagesBySentAt(stamp);
@@ -270,11 +270,16 @@ async function observedRow(
       assert.equal(row.sourceServiceId, peer!.aci);
       assert.equal(row.sourceDevice, peer!.deviceId);
     }
+    const status = row.sendStateByConversationId?.[row.conversationId]?.status;
     if (
       expected &&
-      row.sendStateByConversationId?.[row.conversationId]?.status !== expected
-    )
+      (!status ||
+        !(typeof expected === 'string' ? [expected] : expected).includes(
+          status
+        ))
+    ) {
       return undefined;
+    }
     assert(row.id);
     return row.id;
   });
@@ -346,8 +351,12 @@ async function startOwnerWorker(dir: string) {
     lines.close();
     child.stdout.resume();
   }
+  let stopped = false;
   return async (signal: NodeJS.Signals = 'SIGTERM') => {
-    if (child.exitCode !== null || child.signalCode !== null) return;
+    if (stopped) return;
+    stopped = true;
+    assert.equal(child.exitCode, null);
+    assert.equal(child.signalCode, null);
     child.kill(signal);
     const result = await exited;
     if (signal === 'SIGKILL') assert.equal(result.signal, signal);
@@ -466,27 +475,30 @@ async function ownerTransfer(
     );
     const stopInterrupted = await start(left);
     await until(async () =>
-      (await readdir(join(left, 'inbox'))).length > 0 ? true : undefined
+      (await readdir(join(left, 'inbox'))).some(name =>
+        /^[a-f0-9]{64}$/.test(name)
+      )
+        ? true
+        : undefined
     );
     await stopInterrupted('SIGKILL');
     await start(left);
     const sender = await a.startApp();
     await phase('worker-sender-restart');
     assert.equal(
-      await observedRow(
-        sender,
-        stamp,
-        body,
-        'outgoing',
-        undefined,
-        'Delivered'
-      ),
+      await observedRow(sender, stamp, body, 'outgoing', undefined, [
+        'Delivered',
+        'Read',
+        'Viewed',
+      ]),
       senderId
     );
+    await phase('worker-recipient-row');
     assert.equal(
       await observedRow(recipient, stamp, body, 'incoming', da),
       incomingId
     );
+    await phase('worker-handoff-retirement');
     await until(async () => {
       for (const dir of [left, right]) {
         for (const name of [

@@ -198,7 +198,8 @@ def trial(args):
             check(phase in {'bootstrap', 'register-a', 'register-b', 'open-before', 'warm-send', 'warm-receive',
                   'warm-reply', 'stock-acknowledgements', 'pair', 'offline-send', 'provider-custody', 'offline-fetch',
                   'recipient-reopen', 'confirm-native-import', 'peer-receipt', 'sender-reopen', 'complete',
-                  'worker-outgoing', 'worker-offline-pickup', 'worker-native-confirmation', 'worker-sender-restart'},
+                  'worker-outgoing', 'worker-offline-pickup', 'worker-native-confirmation', 'worker-sender-restart',
+                  'worker-recipient-row', 'worker-handoff-retirement'},
                   'unexpected fixture phase')
             raise ValueError('native mailbox trial failed during ' + phase)
         observed = json.loads((private / 'result.json').read_bytes())
