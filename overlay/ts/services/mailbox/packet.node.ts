@@ -18,30 +18,28 @@ export type PairedDevice = z.infer<typeof deviceSchema>;
 export const MAX_PACKET_BYTES = 32_768;
 const hash = z.string().regex(/^[0-9a-f]{64}$/);
 const timestamp = z.number().int().positive().max(Number.MAX_SAFE_INTEGER);
-export const mailboxRows = z
-  .array(
-    z
+export const mailboxRowSchema = z
+  .object({
+    id: hash,
+    expires: timestamp,
+    // Outbound sessions retain the exact packet and intent for repeat delivery.
+    packet: z.string().max(44_000).optional(),
+    intent: hash.optional(),
+    packetKey: hash.optional(),
+    settled: z.literal(true).optional(),
+    // Inbound rows refer to native Signal state. No decrypted text or profile key is stored here.
+    bodyDigest: hash.optional(),
+    profileDigest: hash.optional(),
+    receipt: z
       .object({
-        id: hash,
-        expires: timestamp,
-        // Outbound sessions retain the exact packet and intent for repeat delivery.
-        packet: z.string().max(44_000).optional(),
-        intent: hash.optional(),
-        // Inbound rows refer to native Signal state. No decrypted text or profile key is stored here.
-        bodyDigest: hash.optional(),
-        profileDigest: hash.optional(),
-        receipt: z
-          .object({
-            state: z.enum(['Delivered', 'Read', 'Viewed']),
-            timestamps: z.array(timestamp).min(1).max(32),
-          })
-          .strict()
-          .optional(),
+        state: z.enum(['Delivered', 'Read', 'Viewed']),
+        timestamps: z.array(timestamp).min(1).max(32),
       })
-      .strict(),
-  )
-  .max(256);
-export type MailboxRow = z.infer<typeof mailboxRows>[number];
+      .strict()
+      .optional(),
+  })
+  .strict();
+export type MailboxRow = z.infer<typeof mailboxRowSchema>;
 
 const packetSchema = z
   .object({
@@ -74,7 +72,7 @@ export function decodePacket(bytes: Uint8Array<ArrayBuffer>): MailboxPacket {
     throw new Error('Invalid mailbox packet size');
   }
   const packet = packetSchema.parse(
-    JSON.parse(Buffer.from(bytes).toString('utf8')),
+    JSON.parse(Buffer.from(bytes).toString('utf8'))
   );
   if (!Buffer.from(encodePacket(packet)).equals(bytes)) {
     throw new Error('Noncanonical mailbox packet');

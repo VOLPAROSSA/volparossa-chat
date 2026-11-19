@@ -81,10 +81,35 @@ index 22c9ad4..510a96b 100644
        conversation.getAccepted()
      ) {
 diff --git a/ts/sql/Interface.std.ts b/ts/sql/Interface.std.ts
-index 78e2568..f7748de 100644
+index 78e2568..129d389 100644
 --- a/ts/sql/Interface.std.ts
 +++ b/ts/sql/Interface.std.ts
-@@ -1218,6 +1218,7 @@ type WritableInterface = {
+@@ -5,6 +5,7 @@ import type { Database, RowType } from '@signalapp/sqlcipher';
+ import type { ReadonlyDeep } from 'type-fest';
+
+ import { strictAssert } from '../util/assert.std.ts';
++import type { MailboxRow } from '../services/mailbox/packet.node.ts';
+
+ import type {
+   ConversationAttributesType,
+@@ -880,6 +881,8 @@ export type RemoveMessageOptions = {
+   fromSync?: boolean;
+ };
+ type ReadableInterface = {
++  getMailboxRow: (id: string) => MailboxRow | undefined;
++  getMailboxRowForCustody: (packetKey: string) => MailboxRow | undefined;
+   close: () => void;
+
+   getSenderKeyById: (id: SenderKeyIdType) => SenderKeyType | undefined;
+@@ -1161,6 +1164,7 @@ type ReadableInterface = {
+ };
+
+ type WritableInterface = {
++  settleMailboxRow: (id: string) => number;
+   close: () => void;
+
+   removeIndexedDBFiles: () => void;
+@@ -1218,6 +1222,7 @@ type WritableInterface = {
    createOrUpdateSession: (data: SessionType) => void;
    createOrUpdateSessions: (array: Array<SessionType>) => void;
    commitDecryptResult: (options: {
@@ -93,7 +118,7 @@ index 78e2568..f7748de 100644
      preKeysToRemove: Array<PreKeyIdType>;
      senderKeys: Array<SenderKeyType>;
 diff --git a/ts/sql/Server.node.ts b/ts/sql/Server.node.ts
-index 7946639..e5a1073 100644
+index 7946639..c1b3c9a 100644
 --- a/ts/sql/Server.node.ts
 +++ b/ts/sql/Server.node.ts
 @@ -1,6 +1,8 @@
@@ -105,7 +130,32 @@ index 7946639..e5a1073 100644
  // TODO(indutny): format queries
  import type { RowType } from '@signalapp/sqlcipher';
  import SQL, { setLogger as setSqliteLogger } from '@signalapp/sqlcipher';
-@@ -1819,6 +1821,7 @@ function createOrUpdateSessions(
+@@ -37,6 +39,7 @@ import {
+ import type { StoryDistributionIdString } from '../types/StoryDistributionId.std.ts';
+ import * as Errors from '../types/errors.std.ts';
+ import { assertDev, strictAssert } from '../util/assert.std.ts';
++import { getMailboxRow, getMailboxRowForCustody, insertMailboxRow, settleMailboxRow } from '../services/mailbox/ledger.node.ts';
+ import { missingCaseError } from '../util/missingCaseError.std.ts';
+ import { combineNames } from '../util/combineNames.std.ts';
+ import { consoleLogger } from '../util/consoleLogger.std.ts';
+@@ -426,6 +429,8 @@ type AttachmentDownloadJobRow = Omit<
+ // Note: In Javascript, you need to access the .default property when requiring it
+ // https://github.com/microsoft/TypeScript/issues/420
+ export const DataReader: ServerReadableInterface = {
++  getMailboxRow,
++  getMailboxRowForCustody,
+   close: closeReadable,
+
+   getIdentityKeyById,
+@@ -600,6 +605,7 @@ export const DataReader: ServerReadableInterface = {
+ };
+
+ export const DataWriter: ServerWritableInterface = {
++  settleMailboxRow,
+   close: closeWritable,
+   removeIndexedDBFiles,
+
+@@ -1819,6 +1825,7 @@ function createOrUpdateSessions(
  function commitDecryptResult(
    db: WritableDB,
    {
@@ -113,7 +163,7 @@ index 7946639..e5a1073 100644
      kyberPreKeysToRemove,
      preKeysToRemove,
      senderKeys,
-@@ -1826,6 +1829,7 @@ function commitDecryptResult(
+@@ -1826,6 +1833,7 @@ function commitDecryptResult(
      unprocessed,
      kyberTriples,
    }: {
@@ -121,22 +171,56 @@ index 7946639..e5a1073 100644
      kyberPreKeysToRemove: Array<PreKeyIdType>;
      preKeysToRemove: Array<PreKeyIdType>;
      senderKeys: Array<SenderKeyType>;
-@@ -1835,6 +1839,15 @@ function commitDecryptResult(
+@@ -1835,6 +1843,13 @@ function commitDecryptResult(
    }
  ): void {
    db.transaction(() => {
 +    if (mailboxRows?.length) {
 +      const now = Date.now();
-+      const rows = (getItemById(db, 'volparossaMailboxV1')?.value ?? []).filter(row => row.expires > now);
++      db.prepare('DELETE FROM volparossa_mailbox WHERE expires <= $now').run({ now });
 +      for (const row of mailboxRows) {
-+        strictAssert(row.expires > now && rows.length < 256 && !rows.some(old => old.id === row.id), 'Mailbox record expired, duplicated or full');
-+        rows.push(row);
++        insertMailboxRow(db, row, now);
 +      }
-+      createOrUpdateItem(db, { id: 'volparossaMailboxV1', value: rows });
 +    }
      if (kyberPreKeysToRemove.length > 0) {
        const kyberPreKeyChanges = removeKyberPreKeyById(
          db,
+@@ -8756,6 +8771,7 @@ function removeAll(db: WritableDB): void {
+       DELETE FROM sendLogPayloads;
+       DELETE FROM sendLogRecipients;
+       DELETE FROM sessions;
++      DELETE FROM volparossa_mailbox;
+       DELETE FROM signedPreKeys;
+       DELETE FROM sticker_packs;
+       DELETE FROM sticker_references;
+@@ -8809,6 +8825,7 @@ function removeAllConfiguration(db: WritableDB, isPrimary: boolean): void {
+       DELETE FROM sendLogPayloads;
+       DELETE FROM sendLogRecipients;
+       DELETE FROM sessions;
++      DELETE FROM volparossa_mailbox;
+       DELETE FROM signedPreKeys;
+       DELETE FROM syncTasks;
+       DELETE FROM unprocessed;
+diff --git a/ts/sql/migrations/index.node.ts b/ts/sql/migrations/index.node.ts
+index 306ff34..096d14a 100644
+--- a/ts/sql/migrations/index.node.ts
++++ b/ts/sql/migrations/index.node.ts
+@@ -157,6 +157,7 @@ import updateToSchemaVersion1770 from './1770-add-blocked-at.std.ts';
+ import updateToSchemaVersion1780 from './1780-fts-reindex.std.ts';
+ import updateToSchemaVersion1790 from './1790-notify-for-mentions-if-muted.std.ts';
+ import updateToSchemaVersion1800 from './1800-deleted-fields-for-defunct-call-links.std.ts';
++import { openMailboxLedger } from '../../services/mailbox/ledger.node.ts';
+
+ import { DataWriter } from '../Server.node.ts';
+ import { strictAssert } from '../../util/assert.std.ts';
+@@ -1789,6 +1790,7 @@ export function updateSchema(
+     }
+   }
+
++  openMailboxLedger(db);
+   DataWriter.ensureMessageInsertTriggersAreEnabled(db);
+   enableFTS5SecureDelete(db, logger);
+
 diff --git a/ts/textsecure/MessageReceiver.preload.ts b/ts/textsecure/MessageReceiver.preload.ts
 index 886c66c..1b4dcf6 100644
 --- a/ts/textsecure/MessageReceiver.preload.ts

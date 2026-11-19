@@ -43,9 +43,15 @@ Each poll reads the current provider inbox. A poll before native import leaves
 the message available. Multiple fetches and a reopen preserve the original
 message row. The sender marks a message delivered only when its normal Signal
 receipt arrives. Recipient-authorized profile updates and native receipt types
-use the same private channel. Each profile currently retains up to 256 unexpired
-mailbox transaction records, including receipts, and each handoff queue accepts
-up to 256 files. Settled handoffs remain in the private profile. Unpaired
+use the same private channel. The existing SQLCipher profile indexes each
+mailbox transaction by its message ID. After native acceptance it retains a
+small deduplication record through the invitation expiry. The bridge removes
+the delivered ciphertext, original import token, signed acknowledgements and
+native marker after both providers confirm. An interrupted cleanup resumes
+from its private confirmation directory. On the sending side a compact local
+receipt prevents a delayed file from depositing the same ciphertext again.
+Existing profiles migrate the previous 256-entry format in one transaction.
+Each Core invitation still enforces the owner's signed quota. Unpaired
 contacts continue to use Signal. A stale
 or changed pairing, a changed device set, or unsupported paired content produces
 a pending or failed send.
@@ -58,7 +64,15 @@ native databases, exercises duplicate pickup and compares the same local
 ratchet across replay. Its two real Core stores use authenticated local test
 streams. Verified cross-machine routing, automatic authenticated discovery,
 general multi-device fan-out, groups, calls and interactive pairing remain
-open. The provider fixture and reproducible workflow are public.
+open. The migration trial starts both profiles with 256 synthetic records in their
+previous format, then sends a new real message through the normal composer.
+It reopens both profiles, checks the original row and session after replay,
+and checks the cleared private handoffs. The provider fixture and reproducible
+workflow are public. The workflow’s optional volume trial sends 260 distinct
+texts through the two native profiles with an empty initial mailbox. It grants
+26 texts at a time so normal delivery, read and authorized profile messages
+also fit within each invitation’s signed limit. It checks the recipient's
+original rows and the sender's delivery status for every text.
 [Source versions, executable hashes and native trial results](../provenance/paired-mailbox-20261119.json) ·
 [Hosted trial](https://github.com/VOLPAROSSA/volparossa-chat/actions/runs/44519772345) ·
 [Core fixture](https://github.com/VOLPAROSSA/volparossa/pull/429) ·
