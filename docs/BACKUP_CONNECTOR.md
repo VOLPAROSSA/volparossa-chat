@@ -5,8 +5,9 @@ disposable KVM guest, using the core's fragment-placement API across three provi
 including withdrawal of one provider before restore. The earlier whole-archive replica
 proof is retained separately below. This remains a development integration, not a complete
 backup product.
-The narrow connector checks and four preparatory compile steps also pass; a complete
-TypeScript typecheck is not claimed. The process-boundary unit test uses an explicitly
+The offline Desktop build generates the upstream ICU declarations and runs the full
+TypeScript check. The [hosted build and native trials](https://github.com/VOLPAROSSA/volparossa-chat/actions/runs/44521164389)
+passed on the integrated mailbox and backup overlay. The process-boundary unit test uses an explicitly
 test-only CLI substitute, while the native trial and production connector invoke the real
 core executable. Production code has no substitute backend.
 
