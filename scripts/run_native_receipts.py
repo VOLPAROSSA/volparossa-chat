@@ -7,7 +7,6 @@ import json
 import os
 from pathlib import Path
 import socket
-from contextlib import contextmanager
 import subprocess
 import sys
 import tempfile
@@ -35,21 +34,6 @@ def native():
                '--require', 'ts/test-mock/setup-ci.node.ts', '--grep', '^' + TITLE + '$', '--reporter', 'spec', FIXTURE])
 
 
-@contextmanager
-def staged_fixture(target, source):
-    # The source tree is only writable while placing/removing this private test.
-    with target.open('xb') as output:
-        try:
-            output.write(source.read_bytes())
-        except BaseException:
-            target.unlink()
-            raise
-    try:
-        yield
-    finally:
-        target.unlink()
-
-
 def trial():
     build = ROOT / 'build'
     candidate = build / 'signal-backup-candidate'
@@ -66,15 +50,24 @@ def trial():
             or overlay['upstream_commit'] != expected_source
             or before != overlay['modified_files']['ts/textsecure/MessageReceiver.preload.ts']):
         raise ValueError('candidate receiver does not match its verified source and overlay')
-    with staged_fixture(candidate / FIXTURE, fixture), tempfile.TemporaryDirectory(prefix='receipt-test-', dir=build) as work:
+    with tempfile.TemporaryDirectory(prefix='receipt-test-', dir=build) as work:
         private = Path(work)
         for name in ('home', 'config', 'cache', 'data', 'runtime', 'tmp'):
             (private / name).mkdir(mode=0o700)
+        # Populate a fresh mount namespace with runtime inputs only. Linking, X11 and
+        # every mock-service socket live beneath this private namespace.
         args = ['bwrap', '--die-with-parent', '--unshare-user', '--unshare-pid', '--unshare-net',
-                '--unshare-ipc', '--cap-drop', 'ALL', '--clearenv', '--ro-bind', '/', '/',
-                '--dev', '/dev', '--proc', '/proc', '--tmpfs', '/tmp', '--dir', '/tmp/r',
-                '--bind', str(private), '/tmp/r',
-                '--chdir', str(candidate)]
+                '--unshare-ipc', '--cap-drop', 'ALL', '--clearenv']
+        for path in ('/usr', '/lib', '/lib64', '/bin', '/etc'):
+            args.extend(['--ro-bind', path, path])
+        args += ['--dev', '/dev', '--proc', '/proc', '--remount-ro', '/proc',
+                 '--tmpfs', '/tmp', '--bind', str(private), '/tmp/r', '--dir', '/run',
+                 '--ro-bind', str(node.parent), str(node.parent),
+                 '--ro-bind', str(candidate), str(candidate),
+                 '--tmpfs', str((candidate / FIXTURE).parent),
+                 '--ro-bind', str(fixture), str(candidate / FIXTURE),
+                 '--remount-ro', str((candidate / FIXTURE).parent),
+                 '--ro-bind', str(Path(__file__).resolve()), '/trial/run.py', '--chdir', str(candidate)]
         for k, v in dict(PATH=f'{node}:{candidate}/node_modules/.bin:/usr/bin:/bin',
                          HOME='/tmp/r/home', XDG_CONFIG_HOME='/tmp/r/config', XDG_CACHE_HOME='/tmp/r/cache',
                          XDG_DATA_HOME='/tmp/r/data', XDG_RUNTIME_DIR='/tmp/r/runtime', TMPDIR='/tmp/r/tmp',
@@ -82,7 +75,7 @@ def trial():
                          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD='1', CHAT_NATIVE_RESULT='/tmp/r/result.json',
                          CHAT_NATIVE_PHASE='/tmp/r/phase').items():
             args.extend(['--setenv', k, v])
-        args += ['/usr/bin/python3', '-B', str(Path(__file__).resolve()), '--inside']
+        args += ['/usr/bin/python3', '-B', '/trial/run.py', '--inside']
         with (private / 'log').open('xb') as log:
             code = subprocess.run(args, stdout=log, stderr=subprocess.STDOUT, timeout=300, check=False).returncode
         if code:
