@@ -110,6 +110,8 @@ def build_core(src, target):
 
 def trial(args):
     from run_native_receipts import sandbox
+    revision = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
+    check(not subprocess.check_output(['git', 'status', '--porcelain'], cwd=ROOT), 'expected clean Chat source')
     build = ROOT / 'build'
     candidate = build / 'signal-backup-candidate'
     result = build / 'native-mailbox-result.json'
@@ -130,10 +132,19 @@ def trial(args):
                      'node_modules/@signalapp/libsignal-client/prebuilds/linux-x64/@signalapp+libsignal-client.node',
                      'node_modules/@signalapp/sqlcipher/prebuilds/linux-x64/@signalapp+sqlcipher.node']
     hashes = {path: digest(candidate / path) for path in runtime_paths}
-    mounts = [(provider, '/trial/core/mailbox-provider-pair'), (cli, '/trial/core/volparossa'),
-              (bridge, '/trial/signal_mailbox.py'), (xvfb, '/trial/Xvfb')]
+    cli_hash, provider_hash = digest(cli), digest(provider)
     with tempfile.TemporaryDirectory(prefix='paired-desktop-', dir=build) as work:
         private = Path(work)
+        # A concurrent Cargo build can replace a target executable. Freeze the two
+        # checked inputs before running any synthetic account or signed store.
+        core_tools = private / 'tools'
+        core_tools.mkdir(mode=0o700)
+        for src, name, expected in ((cli, 'volparossa', cli_hash), (provider, 'mailbox-provider-pair', provider_hash)):
+            dst = core_tools / name
+            shutil.copyfile(src, dst)
+            dst.chmod(0o500)
+            check(digest(dst) == expected, 'Core executable changed before it could be mounted')
+        mounts = [(core_tools, '/trial/core'), (bridge, '/trial/signal_mailbox.py'), (xvfb, '/trial/Xvfb')]
         node = build / 'node-v24.19.0-linux-x64-with-npm/bin'
         command = sandbox(private, candidate, node, fixture, TARGET, Path(__file__).resolve(), mounts)
         with (private / 'log').open('xb') as log:
@@ -147,9 +158,10 @@ def trial(args):
             raise ValueError('native mailbox trial failed during ' + phase)
         observed = json.loads((private / 'result.json').read_bytes())
         check(json.dumps(observed, sort_keys=True) == json.dumps(OBSERVATIONS, sort_keys=True), 'incomplete observations')
-    report = dict(observed, chat_revision=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT,
-                  text=True).strip(), signal_revision=signal_revision, core_fixture_revision=CORE_SOURCE,
-                  rustc=rust, core_cli_sha256=digest(cli), core_provider_fixture_sha256=digest(provider),
+    check(subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip() == revision
+          and not subprocess.check_output(['git', 'status', '--porcelain'], cwd=ROOT), 'Chat source changed during the trial')
+    report = dict(observed, chat_revision=revision, signal_revision=signal_revision, core_fixture_revision=CORE_SOURCE,
+                  rustc=rust, core_cli_sha256=cli_hash, core_provider_fixture_sha256=provider_hash,
                   fixture_sha256=digest(fixture), bridge_sha256=digest(bridge), runtime_sha256=hashes,
                   original_signal_network='isolated Signal test service', mailbox_transport='local signed Core streams',
                   private_profiles_removed=True, provider_stores_removed=True, native_network_interfaces=['lo'])
