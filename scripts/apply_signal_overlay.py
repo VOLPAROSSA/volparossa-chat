@@ -6,6 +6,8 @@ import hashlib
 import json
 from pathlib import Path
 import shutil
+import subprocess
+import tempfile
 
 from stage_signal_source import COMMIT, ROOT, checked_tree, verify_checkout
 
@@ -40,6 +42,19 @@ def main():
         if path.is_symlink() or hashlib.sha256(path.read_bytes()).hexdigest() != digest:
             raise ValueError("pinned patch source hash differs")
         patched[name] = path.read_text()
+    # Apply the reviewed application patch to copies of the exact, blob-verified upstream files.
+    patch = ROOT / "patches/signal-mailbox.patch"
+    with tempfile.TemporaryDirectory() as directory:
+        scratch = Path(directory)
+        names = [line.split("\t", 2)[2] for line in subprocess.check_output(
+            ["git", "apply", "--numstat", str(patch)], cwd=scratch, text=True).splitlines()]
+        for name in names:
+            if name not in files or not name.startswith("ts/"):
+                raise ValueError("unexpected mailbox patch path")
+            (scratch / name).parent.mkdir(parents=True, exist_ok=True)
+            (scratch / name).write_bytes((source / name).read_bytes())
+        subprocess.run(["git", "apply", "--whitespace=error", str(patch)], cwd=scratch, check=True)
+        patched.update({name: (scratch / name).read_text() for name in names})
     name = "ts/textsecure/MessageReceiver.preload.ts"
     patched[name] = replace_once(patched[name],
         "    const receipts = receiptMessage.timestamp.map(rawTimestamp => ({",

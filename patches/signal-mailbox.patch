@@ -1,0 +1,389 @@
+diff --git a/ts/SignalProtocolStore.preload.ts b/ts/SignalProtocolStore.preload.ts
+index 8a2acdb..fd67784 100644
+--- a/ts/SignalProtocolStore.preload.ts
++++ b/ts/SignalProtocolStore.preload.ts
+@@ -1208,6 +1208,7 @@ export class SignalProtocolStore extends EventEmitter {
+   }
+
+   async #commitZoneChanges(name: string): Promise<void> {
++    const mailboxRows = this.#currentZone?.mailboxRows;
+     const pendingKyberPreKeysToRemove = this.#pendingKyberPreKeysToRemove;
+     const pendingPreKeysToRemove = this.#pendingPreKeysToRemove;
+     const pendingSenderKeys = this.#pendingSenderKeys;
+@@ -1216,6 +1217,7 @@ export class SignalProtocolStore extends EventEmitter {
+     const pendingKyberTriples = this.#pendingKyberTriples;
+
+     if (
++      !mailboxRows?.length &&
+       pendingKyberPreKeysToRemove.size === 0 &&
+       pendingPreKeysToRemove.size === 0 &&
+       pendingSenderKeys.size === 0 &&
+@@ -1246,6 +1248,7 @@ export class SignalProtocolStore extends EventEmitter {
+     // Commit both sender keys, sessions and unprocessed in the same database transaction
+     //   to unroll both on error.
+     await DataWriter.commitDecryptResult({
++      mailboxRows,
+       kyberPreKeysToRemove: Array.from(pendingKyberPreKeysToRemove.values()),
+       preKeysToRemove: Array.from(pendingPreKeysToRemove.values()),
+       senderKeys: Array.from(pendingSenderKeys.values()).map(
+@@ -1258,6 +1261,8 @@ export class SignalProtocolStore extends EventEmitter {
+       kyberTriples: Array.from(pendingKyberTriples.values()),
+     });
+
++    if (mailboxRows) { mailboxRows.length = 0; }
++
+     // Apply changes to in-memory storage after successful DB write.
+
+     for (const cacheKey of pendingKyberTriples.keys()) {
+diff --git a/ts/background.preload.ts b/ts/background.preload.ts
+index 84b1845..cb945a1 100644
+--- a/ts/background.preload.ts
++++ b/ts/background.preload.ts
+@@ -595,6 +595,9 @@ async function startApp(): Promise<void> {
+       storage: itemStorage,
+       serverTrustRoots: window.getServerTrustRoots(),
+     });
++    const importMailbox = () => { void messageReceiver?.importMailbox().catch(() => log.warn('Paired mailbox import pending')); };
++    const mailboxTimer = setInterval(importMailbox, 3_000);
++    window.addEventListener('beforeunload', () => clearInterval(mailboxTimer), { once: true });
+     window.ConversationController.registerDelayBeforeUpdatingRedux(() => {
+       if (backupsService.isImportRunning()) {
+         return 500;
+@@ -2911,7 +2914,7 @@ async function startApp(): Promise<void> {
+         message,
+         data.message,
+         event.confirm,
+-        {},
++        { mailboxReceipt: data.envelopeId.startsWith('volparossa-') },
+         { saveAndNotify }
+       )
+     );
+diff --git a/ts/messages/handleDataMessage.preload.ts b/ts/messages/handleDataMessage.preload.ts
+index 22c9ad4..510a96b 100644
+--- a/ts/messages/handleDataMessage.preload.ts
++++ b/ts/messages/handleDataMessage.preload.ts
+@@ -91,7 +91,7 @@ export async function handleDataMessage(
+   message: MessageModel,
+   initialMessage: ProcessedDataMessage,
+   confirm: () => void,
+-  options: { data?: SentEventData } = {},
++  options: { data?: SentEventData; mailboxReceipt?: boolean } = {},
+   dependencies: {
+     saveAndNotify: typeof saveAndNotify;
+   }
+@@ -371,7 +371,7 @@ export async function handleDataMessage(
+     //   and not for messages from unaccepted conversations
+     if (
+       type === 'incoming' &&
+-      message.get('unidentifiedDeliveryReceived') &&
++      (message.get('unidentifiedDeliveryReceived') || options.mailboxReceipt) &&
+       !hasErrors(message.attributes) &&
+       conversation.getAccepted()
+     ) {
+diff --git a/ts/sql/Interface.std.ts b/ts/sql/Interface.std.ts
+index 78e2568..f7748de 100644
+--- a/ts/sql/Interface.std.ts
++++ b/ts/sql/Interface.std.ts
+@@ -1218,6 +1218,7 @@ type WritableInterface = {
+   createOrUpdateSession: (data: SessionType) => void;
+   createOrUpdateSessions: (array: Array<SessionType>) => void;
+   commitDecryptResult: (options: {
++    mailboxRows?: StorageAccessType['volparossaMailboxV1'];
+     kyberPreKeysToRemove: Array<PreKeyIdType>;
+     preKeysToRemove: Array<PreKeyIdType>;
+     senderKeys: Array<SenderKeyType>;
+diff --git a/ts/sql/Server.node.ts b/ts/sql/Server.node.ts
+index 7946639..e5a1073 100644
+--- a/ts/sql/Server.node.ts
++++ b/ts/sql/Server.node.ts
+@@ -1,6 +1,8 @@
+ // Copyright 2020 Signal Messenger, LLC
+ // SPDX-License-Identifier: AGPL-3.0-only
+
++import type { StorageAccessType } from '../types/StorageKeys.std.ts';
++
+ // TODO(indutny): format queries
+ import type { RowType } from '@signalapp/sqlcipher';
+ import SQL, { setLogger as setSqliteLogger } from '@signalapp/sqlcipher';
+@@ -1819,6 +1821,7 @@ function createOrUpdateSessions(
+ function commitDecryptResult(
+   db: WritableDB,
+   {
++    mailboxRows,
+     kyberPreKeysToRemove,
+     preKeysToRemove,
+     senderKeys,
+@@ -1826,6 +1829,7 @@ function commitDecryptResult(
+     unprocessed,
+     kyberTriples,
+   }: {
++    mailboxRows?: StorageAccessType['volparossaMailboxV1'];
+     kyberPreKeysToRemove: Array<PreKeyIdType>;
+     preKeysToRemove: Array<PreKeyIdType>;
+     senderKeys: Array<SenderKeyType>;
+@@ -1835,6 +1839,15 @@ function commitDecryptResult(
+   }
+ ): void {
+   db.transaction(() => {
++    if (mailboxRows?.length) {
++      const now = Date.now();
++      const rows = (getItemById(db, 'volparossaMailboxV1')?.value ?? []).filter(row => row.expires > now);
++      for (const row of mailboxRows) {
++        strictAssert(row.expires > now && rows.length < 256 && !rows.some(old => old.id === row.id), 'Mailbox record expired, duplicated or full');
++        rows.push(row);
++      }
++      createOrUpdateItem(db, { id: 'volparossaMailboxV1', value: rows });
++    }
+     if (kyberPreKeysToRemove.length > 0) {
+       const kyberPreKeyChanges = removeKyberPreKeyById(
+         db,
+diff --git a/ts/textsecure/MessageReceiver.preload.ts b/ts/textsecure/MessageReceiver.preload.ts
+index 886c66c..1b4dcf6 100644
+--- a/ts/textsecure/MessageReceiver.preload.ts
++++ b/ts/textsecure/MessageReceiver.preload.ts
+@@ -186,6 +186,10 @@ import type { ConversationAttributesTypeType } from '../model-types.d.ts';
+
+ const { isBoolean, isNumber, isString, noop } = lodash;
+
++import { importAvailable } from '../services/mailbox/session.preload.ts';
++import { supportedContent } from '../services/mailbox/content.preload.ts';
++import type { MailboxRow } from '../services/mailbox/packet.node.ts';
++
+ const log = createLogger('MessageReceiver');
+
+ const GROUPV2_ID_LENGTH = 32;
+@@ -208,6 +212,7 @@ type DecryptResult = Readonly<
+   | {
+       envelope: UnsealedEnvelope;
+       plaintext: Uint8Array<ArrayBuffer>;
++      mailboxProof?: ReturnType<typeof supportedContent>;
+     }
+   | {
+       envelope?: UnsealedEnvelope;
+@@ -229,6 +234,7 @@ type CacheAddItemType = {
+   envelope: ProcessedEnvelope;
+   data: UnprocessedType;
+   request: Pick<IncomingWebSocketRequest, 'respond'>;
++  mailboxRow?: MailboxRow;
+ };
+
+ type LockedStores = {
+@@ -491,6 +497,24 @@ export default class MessageReceiver
+     );
+   }
+
++  #mailboxBusy = false;
++  public async importMailbox(): Promise<void> {
++    if (this.#mailboxBusy || this.#stoppingProcessing) { return; }
++    this.#mailboxBusy = true;
++    try {
++      await importAvailable((packet, row) => new Promise<void>((resolve, reject) => {
++        const envelope: ProcessedEnvelope = {
++          id: `volparossa-${row.id}`, receivedAtCounter: incrementMessageCounter(), receivedAtDate: ReceivedTimestampMs.now(), messageAgeSec: 0,
++          type: Proto.Envelope.Type.DOUBLE_RATCHET, source: undefined, sourceServiceId: packet.from.aci, sourceDevice: packet.from.device,
++          destinationServiceId: packet.to.aci, updatedPni: undefined, timestamp: SentTimestampMs.fromBigInt(BigInt(packet.timestamp)),
++          content: Buffer.from(packet.ciphertext, 'base64'), serverGuid: '', serverTimestamp: ServerTimestampMs.fromBigInt(0n),
++          groupId: undefined, urgent: true, story: false, reportingToken: undefined,
++        };
++        this.#decryptAndCache(envelope, { respond: status => { if (status === 200) { resolve(); } else { reject(new Error('Mailbox import failed')); } } }, row);
++      }));
++    } finally { this.#mailboxBusy = false; }
++  }
++
+   public handleDisconnect(): void {
+     this.#isEmptied = false;
+   }
+@@ -1022,7 +1046,7 @@ export default class MessageReceiver
+       // 6. Finally process decrypted envelopes
+       await storageProtocol.withZone(zone, 'MessageReceiver', async () => {
+         await Promise.all<void>(
+-          items.map(async ({ data, envelope }) => {
++          items.map(async ({ data, envelope, mailboxRow }) => {
+             try {
+               const { destinationServiceId } = envelope;
+
+@@ -1049,7 +1073,12 @@ export default class MessageReceiver
+                 stores,
+                 envelope
+               );
++              if (mailboxRow && !result.plaintext) { throw new Error('Paired mailbox message was rejected'); }
+               if (result.plaintext) {
++                if (mailboxRow) {
++                  strictAssert(result.mailboxProof, 'Missing authenticated mailbox content');
++                  zone.mailboxRows.push({ ...mailboxRow, ...result.mailboxProof });
++                }
+                 decrypted.push({
+                   plaintext: result.plaintext,
+                   envelope: result.envelope,
+@@ -1057,6 +1086,7 @@ export default class MessageReceiver
+                 });
+               }
+             } catch (error) {
++              if (mailboxRow) { throw error; }
+               failed.push(data);
+               log.error(
+                 'decryptAndCacheBatch error when processing the envelope',
+@@ -1135,7 +1165,7 @@ export default class MessageReceiver
+
+   // The final step in decryptAndCacheBatch: queue the decrypted envelopes for processing
+   async #queueAllDecryptedEnvelopes(
+-    decrypted: Array<Required<DecryptResult>>
++    decrypted: ReadonlyArray<{ envelope: UnsealedEnvelope; plaintext: Uint8Array<ArrayBuffer> }>
+   ): Promise<void> {
+     await Promise.all(
+       decrypted.map(async ({ envelope, plaintext }) => {
+@@ -1157,7 +1187,8 @@ export default class MessageReceiver
+
+   #decryptAndCache(
+     envelope: ProcessedEnvelope,
+-    request: IncomingWebSocketRequest
++    request: Pick<IncomingWebSocketRequest, 'respond'>,
++    mailboxRow?: MailboxRow
+   ): void {
+     const { id } = envelope;
+     const data: UnprocessedType = {
+@@ -1182,11 +1213,14 @@ export default class MessageReceiver
+       reportingToken: envelope.reportingToken,
+       groupId: envelope.groupId,
+     };
+-    this.#decryptAndCacheBatcher.add({
+-      request,
+-      envelope,
+-      data,
+-    });
++    const item = { request, envelope, data, mailboxRow };
++    if (mailboxRow) {
++      // Its native ratchet, durable incoming envelope and replay marker commit together.
++      // A refused mailbox packet must not roll back unrelated Signal service requests.
++      drop(this.#decryptAndCacheBatch([item]));
++    } else {
++      this.#decryptAndCacheBatcher.add(item);
++    }
+   }
+
+   async #cacheRemoveBatch(items: Array<string>): Promise<void> {
+@@ -1467,8 +1501,11 @@ export default class MessageReceiver
+     let isGroupV2 = false;
+
+     let inProgressMessageType = '';
++    let mailboxProof: ReturnType<typeof supportedContent> | undefined;
++    const fromMailbox = envelope.id.startsWith('volparossa-');
+     try {
+       const content = Proto.Content.decode(plaintext);
++      if (fromMailbox) { mailboxProof = supportedContent(content, envelope.timestamp); }
+       if (
+         !wasEncrypted &&
+         Bytes.isEmpty(content.content?.decryptionErrorMessage)
+@@ -1593,6 +1630,7 @@ export default class MessageReceiver
+
+       inProgressMessageType = '';
+     } catch (error) {
++      if (fromMailbox) { throw error; }
+       log.error(
+         `${logId}: Failed to process ${inProgressMessageType} ` +
+           `message: ${Errors.toLogFormat(error)}`
+@@ -1609,7 +1647,7 @@ export default class MessageReceiver
+       return { plaintext: undefined, envelope };
+     }
+
+-    return { plaintext, envelope };
++    return { plaintext, envelope, mailboxProof };
+   }
+
+   #validateUnsealedEnvelope(envelope: UnsealedEnvelope): void {
+diff --git a/ts/textsecure/OutgoingMessage.preload.ts b/ts/textsecure/OutgoingMessage.preload.ts
+index 84eb546..cf41b65 100644
+--- a/ts/textsecure/OutgoingMessage.preload.ts
++++ b/ts/textsecure/OutgoingMessage.preload.ts
+@@ -58,6 +58,9 @@ import { strictAssert } from '../util/assert.std.ts';
+ import { toLogFormat } from '../types/errors.std.ts';
+ import { ZERO_ACCESS_KEY } from '../types/SealedSender.std.ts';
+
++import { sendPacket, strictPair } from '../services/mailbox/session.preload.ts';
++import { supportedContent } from '../services/mailbox/content.preload.ts';
++
+ const log = createLogger('OutgoingMessage');
+
+ export const enum SenderCertificateMode {
+@@ -383,6 +386,8 @@ export default class OutgoingMessage {
+     timestamp: number,
+     sealedSenderAuth: SealedSenderAuth
+   ): Promise<void> {
++    // Pairing may have changed while an ordinary send waited for device keys.
++    strictAssert(!(await strictPair(serviceId)), 'Paired device requires its private mailbox');
+     const useLibsignal = isFeaturedEnabledNoRedux({
+       betaKey: 'desktop.sendMessageViaLibsignal.beta',
+       prodKey: 'desktop.sendMessageViaLibsignal.prod',
+@@ -424,6 +429,8 @@ export default class OutgoingMessage {
+     messages: ReadonlyArray<OutgoingUnsealedMessageType>,
+     timestamp: number
+   ): Promise<void> {
++    // Pairing may have changed while an ordinary send waited for device keys.
++    strictAssert(!(await strictPair(serviceId)), 'Paired device requires its private mailbox');
+     const useLibsignal = isFeaturedEnabledNoRedux({
+       betaKey: 'desktop.sendMessageViaLibsignal.beta',
+       prodKey: 'desktop.sendMessageViaLibsignal.prod',
+@@ -770,6 +777,19 @@ export default class OutgoingMessage {
+     }
+
+     try {
++      const pair = await strictPair(serviceId);
++      if (pair) {
++        const devices = await this.#getDeviceIds(serviceId);
++        strictAssert(devices.length === 1 && devices[0] === pair.remote.device, 'Mailbox device set changed');
++        strictAssert(!this.groupId && !this.story && !this.online && !(this.message instanceof PlaintextContent), 'Mailbox requires durable one-to-one Signal content');
++        const proof = supportedContent(this.message, this.timestamp);
++        const deviceId = await sendPacket(pair, this.timestamp, this.getPlaintext(), proof.receipt, stores => this.getCiphertextMessage(stores));
++        this.successfulServiceIds.push(serviceId);
++        this.recipients[serviceId] = [deviceId];
++        this.numberCompleted();
++        if (this.sendLogCallback) { await this.sendLogCallback({ serviceId, deviceIds: [deviceId] }); }
++        return;
++      }
+       const filteredDeviceIds = await this.#getDeviceIds(serviceId);
+       if (filteredDeviceIds.length === 0) {
+         await this.getKeysForServiceId(serviceId, null);
+diff --git a/ts/types/StorageKeys.std.ts b/ts/types/StorageKeys.std.ts
+index 4f43af0..3413739 100644
+--- a/ts/types/StorageKeys.std.ts
++++ b/ts/types/StorageKeys.std.ts
+@@ -74,7 +74,10 @@ export type BlockedNumber = {
+   e164: string;
+ };
+
++import type { MailboxRow } from '../services/mailbox/packet.node.ts';
++
+ export type StorageAccessType = {
++  volparossaMailboxV1: Array<MailboxRow>;
+   'always-relay-calls': boolean;
+   'audio-notification': boolean;
+   'auto-download-update': boolean;
+@@ -486,6 +489,7 @@ export const STORAGE_KEYS_TO_PRESERVE_WHEN_PRIMARY = [
+ ] as const satisfies ReadonlyArray<keyof StorageAccessType>;
+
+ const STORAGE_KEYS_TO_REMOVE_AFTER_UNLINK = [
++  'volparossaMailboxV1',
+   'lastCallQualitySurveyTime',
+   'lastCallQualityFailureSurveyTime',
+   'cqsTestMode',
+diff --git a/ts/util/Zone.std.ts b/ts/util/Zone.std.ts
+index 5029d41..ea0203d 100644
+--- a/ts/util/Zone.std.ts
++++ b/ts/util/Zone.std.ts
+@@ -1,6 +1,8 @@
+ // Copyright 2021 Signal Messenger, LLC
+ // SPDX-License-Identifier: AGPL-3.0-only
+
++import type { MailboxRow } from '../services/mailbox/packet.node.ts';
++
+ export type ZoneOptions = {
+   readonly pendingKyberPreKeysToRemove?: boolean;
+   readonly pendingPreKeysToRemove?: boolean;
+@@ -11,6 +13,7 @@ export type ZoneOptions = {
+
+ export class Zone {
+   public readonly name: string;
++  public readonly mailboxRows: Array<MailboxRow> = [];
+   readonly #options: ZoneOptions = {};
+
+   constructor(name: string, options: ZoneOptions = {}) {
