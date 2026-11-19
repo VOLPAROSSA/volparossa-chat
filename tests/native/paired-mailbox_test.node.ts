@@ -402,9 +402,8 @@ describe('native paired Signal mailbox', function () {
       assert(!outgoing.bytes.includes(Buffer.from(body)));
       const ts = outgoing.packet.timestamp;
       await phase('provider-custody');
-      const deposited = await command(left, 'deposit');
+      let deposited = await command(left, 'deposit');
       assert(deposited >= 1);
-      assert.equal(await command(left, 'deposit'), 0);
       const outgoingId = await observedRow(
         alice,
         ts,
@@ -413,9 +412,14 @@ describe('native paired Signal mailbox', function () {
         undefined,
         'Sent'
       );
+      // The conversation may enqueue a previously authorized profile update.
+      // Wait until all native jobs have confirmed custody and completed cleanup.
+      await until(async () => {
+        deposited += await command(left, 'deposit');
+        const busy = await inspectNative(a, sql => sql.prepare("SELECT count(*) AS n FROM jobs WHERE queueType='conversation'").get()?.n);
+        return busy === 0 && !(await readdir(join(left, 'outbox'))).length && !(await readdir(join(left, 'custody'))).length ? true : undefined;
+      }, 65);
       assert.equal(await command(left, 'deposit'), 0);
-      assert.deepEqual(await readdir(join(left, 'outbox')), []);
-      assert.deepEqual(await readdir(join(left, 'custody')), []);
       await alice.close();
       await seedPreviousMailbox(a, left);
       await phase('offline-fetch');
@@ -468,7 +472,10 @@ describe('native paired Signal mailbox', function () {
         return receiptSent ? true : undefined;
       }, 65);
       await deliveryEvent;
-      assert.equal(await command(right, 'deposit'), 0);
+      await until(async () => {
+        await command(right, 'deposit');
+        return !(await readdir(join(right, 'outbox'))).length && !(await readdir(join(right, 'custody'))).length ? true : undefined;
+      }, 65);
       receiverRecords = await ledgerCount(b);
       assert(receiverRecords > 256);
       await recipient.close();
