@@ -21,8 +21,16 @@ confirmation callback and handling for unknown receipt types are preserved.
 After staging the pinned source and applying the overlay, run
 `node --test tests/signal-receipt-dispatch.mjs`. This executes the staged
 `MessageReceiver` receipt method with synthetic envelopes and event consumers.
-It checks the per-device rows and confirmation callback. Desktop decryption,
-database persistence and peer delivery require their own runtime tests.
+It checks the per-device rows and confirmation callback.
+
+The **Native Signal receipts** workflow builds the pinned Desktop and runs
+`python3 -B scripts/run_native_receipts.py`. Two synthetic contacts decrypt four
+messages sent through the Desktop UI and send encrypted delivery receipts
+through Signal’s local mock service. One receipt references a message sent to
+the other contact. The test reopens the same profile and queries the native
+database for each original row ID and recipient status. Success publishes the
+counts and source hashes. All test traffic stays on loopback. Delivery through
+the VOLPAROSSA Core and calling have separate acceptance criteria below.
 
 ## Authenticate the device-to-peer binding
 

@@ -1,0 +1,72 @@
+name: Native Signal receipts
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/native-receipts.yml'
+      - 'scripts/**'
+      - 'tests/native/**'
+      - 'patches/**'
+      - 'overlay/**'
+      - 'upstream-lock.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-signal-receipts-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  desktop:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-22.04
+    timeout-minutes: 100
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: '3.12.14'
+      - name: Install native Desktop runtime libraries
+        run: |
+          sudo apt-get -q update
+          sudo apt-get install --yes --no-install-recommends \
+            bubblewrap xvfb xauth libgtk-3-0 libnss3 libnspr4 libgbm1 libasound2 \
+            libpulse0 libatk-bridge2.0-0 libatk1.0-0 libatspi2.0-0 libcups2 \
+            libx11-6 libxcomposite1 libxdamage1 libxext6 libxfixes3 libxrandr2 libxcb1 \
+            libxkbcommon0 libdrm2 libxshmfence1 fonts-dejavu-core
+      - name: Check unprivileged build isolation before downloading dependencies
+        run: bwrap --unshare-user --unshare-pid --unshare-net --cap-drop ALL --ro-bind / / --proc /proc --dev /dev -- /usr/bin/true
+      - name: Stage verified source and tools
+        run: |
+          mkdir -m 0700 build
+          python3 -B scripts/stage_signal_source.py --download
+          python3 -B scripts/stage_node.py --with-npm
+          python3 -B scripts/stage_pnpm.py --download
+          python3 -B scripts/apply_signal_overlay.py
+      - name: Install the locked package graph and pinned native components
+        run: |
+          python3 -B scripts/stage_signal_dependencies.py --download
+          python3 -B scripts/stage_signal_native.py --download --artifact electron
+          python3 -B scripts/stage_signal_native.py --download --artifact ringrtc
+          python3 -B scripts/install_signal_native.py --artifact electron
+          python3 -B scripts/install_signal_native.py --artifact ringrtc
+      - name: Build the pinned Desktop offline
+        run: |
+          if ! python3 -B scripts/build_signal_candidate.py --build; then
+            # Only upstream compiler diagnostics exist at this stage.
+            find build/signal-candidate-build -name 'attempt-*.log' -type f -exec tail -c 3000 {} \;
+            exit 1
+          fi
+      - name: Exchange encrypted receipts and reopen the native profile
+        run: python3 -B scripts/run_native_receipts.py
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: native-signal-receipts-${{ github.run_id }}-${{ github.run_attempt }}
+          path: build/native-receipts-result.json
+          if-no-files-found: error
