@@ -26,6 +26,8 @@ OBSERVATIONS = {
     'confirm_before_import': 0, 'native_row_survived_restart': True,
     'repeat_import_preserved_ratchet': True, 'delivered_after_sender_restart': True,
     'paired_stock_submissions': 0, 'both_provider_inboxes_empty': True,
+    'previous_records_per_profile': 256, 'both_profiles_added_native_records_past_256': True,
+    'settled_handoffs_removed': True,
 }
 
 

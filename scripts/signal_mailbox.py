@@ -4,11 +4,13 @@
 import argparse
 import fcntl
 import hashlib
+from contextlib import closing
 from itertools import islice
 import json
 import os
 from pathlib import Path
 import re
+import sqlite3
 import stat
 import subprocess
 import sys
@@ -102,13 +104,71 @@ def sha(data):
 
 
 def packets(directory_path):
-    entries = sorted(islice(directory_path.iterdir(), 257))
-    require(len(entries) <= 256, 'mailbox handoff full')
-    for entry in entries:
+    # The live queue is streamed. Settled or concurrently added packets do not
+    # turn an otherwise healthy grant into a permanent lifetime limit.
+    for entry in directory_path.iterdir():
         if entry.name.startswith('.'):
             continue
         require(HEX.fullmatch(entry.name), 'unexpected handoff name')
         yield entry
+
+
+CACHE_FILE = re.compile(r'(?:[0-9a-f]{64}|\.volparossa-(?:owner|index|chunk-next|index-next|replicas|mailbox)-v1)\Z')
+RECEIVE_FILE = re.compile(r'(?:payload|import-token|pending\.pb|confirmed\.json|ack-[a-f0-9]{64}\.json)\Z')
+
+
+def check_owned_file(path):
+    info = path.lstat()
+    require(stat.S_ISREG(info.st_mode) and info.st_uid == os.getuid() and info.st_nlink == 1
+            and stat.S_IMODE(info.st_mode) == 0o600, 'unexpected file in settled handoff')
+
+
+def retired_files(path, pattern):
+    directory(path)
+    children = list(islice(path.iterdir(), 257))
+    require(len(children) <= 256, 'unexpected settled packet layout')
+    for child in children:
+        require(pattern.fullmatch(child.name), 'unknown file in settled handoff')
+        check_owned_file(child)
+    return children
+
+
+def remove_private_tree(path, direction):
+    # Inspect every name before touching any item. A partially retired tree
+    # contains a subset of the original files and can be retried after a crash.
+    if not os.path.lexists(path):
+        return
+    directory(path)
+    if direction == 'receive':
+        files = retired_files(path, RECEIVE_FILE)
+        subdirs = []
+    else:
+        entries = list(islice(path.iterdir(), 4))
+        require(len(entries) <= 3, 'unexpected outgoing retirement layout')
+        files, subdirs = [], []
+        for child in entries:
+            if child.name == 'manifest':
+                check_owned_file(child)
+                files.append(child)
+            else:
+                require(child.name in ('cache', 'first-unpublished-cache'), 'unknown outgoing retirement path')
+                files.extend(retired_files(child, CACHE_FILE))
+                subdirs.append(child)
+    for file in files:
+        file.unlink()
+    for child in subdirs:
+        child.rmdir()
+    path.rmdir()
+    sync_dir(path.parent)
+
+
+def remove_matching(path, expected, maximum):
+    try:
+        require(read(path, maximum) == expected, 'settled handoff differs')
+    except FileNotFoundError:
+        return
+    path.unlink()
+    sync_dir(path.parent)
 
 
 class Bridge:
@@ -131,7 +191,7 @@ class Bridge:
         for name, role in [('sendInvitation', 'sendGrant'), ('receiveInvitation', 'receiveGrant')]:
             require(sha(read(Path(cfg[name]), 16384)) == pair[role], 'invitation differs from the authenticated pairing')
         self.state = directory(root / 'transport', True)
-        for name in ('outbox', 'custody', 'inbox', 'imported'):
+        for name in ('outbox', 'custody', 'inbox', 'imported', 'retired'):
             directory(root / name, True)
 
     def cli(self, operation, *args):
@@ -148,13 +208,63 @@ class Bridge:
         require(report['operation'] == 'mailbox_' + operation.replace('-', '_'), 'unexpected Core receipt')
         return report
 
+    def send_ledger(self):
+        # Keep only a hash and expiry after native custody. A briefly stalled
+        # native sender may republish its former handoff after cleanup.
+        path = self.state / 'settled-sends.sqlite'
+        try:
+            fd = os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY | os.O_NOFOLLOW, 0o600)
+        except FileExistsError:
+            pass
+        else:
+            os.close(fd)
+            sync_dir(self.state)
+        check_owned_file(path)
+        db = sqlite3.connect(path)
+        db.execute('PRAGMA synchronous=FULL')
+        db.execute('CREATE TABLE IF NOT EXISTS settled (key TEXT PRIMARY KEY, grant TEXT NOT NULL, expires INTEGER NOT NULL) WITHOUT ROWID')
+        db.execute('CREATE INDEX IF NOT EXISTS settled_expiry ON settled(expires)')
+        with db:
+            db.execute('DELETE FROM settled WHERE expires <= ?', (int(time.time() * 1000),))
+        return db
+
+    def retire_outgoing(self, db, key, marker, already=False):
+        if not already:
+            require(read(self.root / 'retired' / key, 128) == marker, 'native custody grant differs')
+            with db:
+                db.execute('INSERT INTO settled(key, grant, expires) VALUES(?, ?, ?) ON CONFLICT(key) DO NOTHING',
+                           (key, self.pair['sendGrant'], self.pair['expires']))
+        found = db.execute('SELECT grant FROM settled WHERE key = ?', (key,)).fetchone()
+        require(found == (self.pair['sendGrant'],), 'retired packet authority differs')
+        packet = self.root / 'outbox' / key
+        if os.path.lexists(packet):
+            data = read(packet, PACKET_LIMIT)
+            require(sha(data) == key and json.loads(data)['grant'] == self.pair['sendGrant'], 'outbound packet differs')
+            remove_matching(packet, data, PACKET_LIMIT)
+        remove_private_tree(self.state / key, 'send')
+        remove_matching(self.root / 'custody' / key, marker, 128)
+        remove_matching(self.root / 'retired' / key, marker, 128)
+
     def deposit(self):
+        with closing(self.send_ledger()) as db:
+            marker = (self.pair['sendGrant'] + '\n').encode('ascii')
+            for entry in packets(directory(self.root / 'retired', True)):
+                if read(entry, 128) == marker:
+                    self.retire_outgoing(db, entry.name, marker)
+            return self.deposit_live(db, marker)
+
+    def deposit_live(self, db, marker):
         count = 0
         for packet in packets(self.root / 'outbox'):
             data = read(packet, PACKET_LIMIT)
-            require(sha(data) == packet.name and json.loads(data)['grant'] == self.pair['sendGrant'], 'outbound packet differs')
+            grant = json.loads(data)['grant']
+            require(sha(data) == packet.name and HEX.fullmatch(grant), 'outbound packet differs')
+            if grant != self.pair['sendGrant']:
+                continue
             saved = self.root / 'custody' / packet.name
-            marker = (self.pair['sendGrant'] + '\n').encode('ascii')
+            if db.execute('SELECT 1 FROM settled WHERE key = ?', (packet.name,)).fetchone():
+                self.retire_outgoing(db, packet.name, marker, already=True)
+                continue
             if saved.exists():
                 require(read(saved, 128) == marker, 'custody belongs to another grant')
                 continue
@@ -189,7 +299,6 @@ class Bridge:
                 if retained.exists():
                     require(read(retained / 'payload', PACKET_LIMIT) == payload, 'retained pending payload changed')
                 else:
-                    require(sum(1 for _ in packets(pending)) < 256, 'private pending mailbox full')
                     item.rename(retained)
                     sync_dir(pending)
                 publish(self.root / 'inbox' / sha(payload), payload)
@@ -199,14 +308,34 @@ class Bridge:
         # Core keeps custody on both providers until the native consumer explicitly confirms.
         return count
 
+    def finish_imports(self, completed):
+        directory(completed)
+        marker = (self.pair['receiveGrant'] + '\n').encode('ascii')
+        for item in completed.iterdir():
+            parts = item.name.split('-')
+            require(len(parts) == 2 and all(HEX.fullmatch(part) for part in parts), 'unknown confirmed import')
+            _, key = parts
+            handoff = self.root / 'inbox' / key
+            if os.path.lexists(handoff):
+                payload = read(handoff, PACKET_LIMIT)
+                require(sha(payload) == key and json.loads(payload)['grant'] == self.pair['receiveGrant'], 'inbox packet differs')
+                remove_matching(handoff, payload, PACKET_LIMIT)
+            remove_matching(self.root / 'imported' / key, marker, 128)
+            remove_private_tree(item, 'receive')
+
     def confirm(self):
+        completed_dir = directory(self.state / 'confirmed', True)
+        self.finish_imports(completed_dir)
         pending = self.state / 'received'
         if not pending.exists():
             return 0
         count = 0
         for item in packets(directory(pending)):
             directory(item)
-            key = sha(read(item / 'payload', PACKET_LIMIT))
+            payload = read(item / 'payload', PACKET_LIMIT)
+            if json.loads(payload)['grant'] != self.pair['receiveGrant']:
+                continue
+            key = sha(payload)
             accepted = self.root / 'imported' / key
             if not accepted.exists():
                 continue
@@ -221,6 +350,14 @@ class Bridge:
             require(result['operation'] == 'mailbox_confirm_import' and result['message_id'] == item.name
                     and result['consumer_import_attested'] is True and result['acknowledged_providers'] == 2,
                     'consumer confirmation incomplete')
+            # This signed, native-confirmed publication is the durable cleanup
+            # boundary. A crash on either side of rename preserves retry state.
+            retired = completed_dir / (item.name + '-' + key)
+            require(not os.path.lexists(retired), 'confirmed handoff already exists')
+            item.rename(retired)
+            sync_dir(completed_dir)
+            sync_dir(pending)
+        self.finish_imports(completed_dir)
         return count
 
 
@@ -239,5 +376,5 @@ def main():
 if __name__ == '__main__':
     try:
         main()
-    except (KeyError, OSError, subprocess.SubprocessError, TypeError, ValueError):
+    except (KeyError, OSError, sqlite3.Error, subprocess.SubprocessError, TypeError, ValueError):
         sys.exit('Signal mailbox transfer incomplete. Retain the private handoff and retry.')

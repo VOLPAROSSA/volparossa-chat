@@ -6,7 +6,7 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 import signal_mailbox as mailbox
@@ -20,9 +20,9 @@ class MailboxHandoffTest(unittest.TestCase):
         self.bridge = mailbox.Bridge.__new__(mailbox.Bridge)
         self.bridge.root = self.root
         self.bridge.state = mailbox.directory(self.root / 'transport', True)
-        self.bridge.pair = {'sendGrant': '11' * 32, 'receiveGrant': '22' * 32}
+        self.bridge.pair = {'sendGrant': '11' * 32, 'receiveGrant': '22' * 32, 'expires': 4_000_000_000_000}
         self.bridge.config = {'receiveInvitation': 'in', 'sendInvitation': 'out', 'remoteOwner': '33' * 32}
-        for group in ('outbox', 'custody', 'inbox', 'imported'):
+        for group in ('outbox', 'custody', 'inbox', 'imported', 'retired'):
             mailbox.directory(self.root / group, True)
 
     def packet(self, direction):
@@ -80,6 +80,47 @@ class MailboxHandoffTest(unittest.TestCase):
         self.assertFalse(cache.exists())
         self.assertTrue(original.is_dir())
 
+    def test_native_settlement_recovers_after_crash_and_stale_republication(self):
+        payload = self.packet('sendGrant')
+        key = mailbox.sha(payload)
+        marker = (self.bridge.pair['sendGrant'] + '\n').encode()
+        mailbox.publish(self.root / 'outbox' / key, payload)
+        self.bridge.cli = Mock(return_value={'confirmed_providers': 2, 'message_id': '77' * 32})
+        self.assertEqual(self.bridge.deposit(), 1)
+        self.assertTrue((self.root / 'outbox' / key).exists())
+        mailbox.publish(self.root / 'retired' / key, marker)
+        with patch.object(mailbox, 'remove_private_tree', side_effect=OSError('interrupted')):
+            with self.assertRaises(OSError):
+                self.bridge.deposit()
+        self.assertTrue((self.root / 'retired' / key).exists())
+        self.assertEqual(self.bridge.deposit(), 0)
+        for name in ('outbox', 'retired', 'custody', 'transport'):
+            self.assertFalse((self.root / name / key).exists())
+        # A sender suspended before publication can wake after every file was retired.
+        mailbox.publish(self.root / 'outbox' / key, payload)
+        self.assertEqual(self.bridge.deposit(), 0)
+        self.assertFalse((self.root / 'outbox' / key).exists())
+        self.bridge.cli.assert_called_once()
+
+    def test_more_than_256_distinct_settled_sends_do_not_stall_subsequent_work(self):
+        marker = (self.bridge.pair['sendGrant'] + '\n').encode()
+        digests = set()
+        self.bridge.cli = Mock(return_value={'confirmed_providers': 2, 'message_id': '77' * 32})
+        for i in range(270):
+            payload = json.dumps({'grant': self.bridge.pair['sendGrant'], 'sequence': i}).encode()
+            key = mailbox.sha(payload)
+            digests.add(key)
+            mailbox.publish(self.root / 'outbox' / key, payload)
+        self.assertEqual(self.bridge.deposit(), 270)
+        for key in digests:
+            mailbox.publish(self.root / 'retired' / key, marker)
+        self.assertEqual(self.bridge.deposit(), 0)
+        self.assertEqual(self.bridge.cli.call_count, 270)
+        self.assertFalse(list((self.root / 'outbox').iterdir()))
+        self.assertFalse(list((self.root / 'custody').iterdir()))
+        with mailbox.closing(self.bridge.send_ledger()) as db:
+            self.assertEqual(db.execute('SELECT count(*) FROM settled').fetchone(), (270,))
+
     def test_empty_poll_future_arrival_and_native_import_confirmation(self):
         payload = self.packet('receiveGrant')
         message_id = '77' * 32
@@ -120,10 +161,16 @@ class MailboxHandoffTest(unittest.TestCase):
         key = mailbox.sha(payload)
         self.assertEqual(mailbox.read(self.root / 'inbox' / key, 256), payload)
         mailbox.publish(self.root / 'imported' / key, (self.bridge.pair['receiveGrant'] + '\n').encode())
-        self.assertEqual(self.bridge.confirm(), 1)
+        with patch.object(mailbox, 'remove_private_tree', side_effect=OSError('interrupted after acknowledgement')):
+            with self.assertRaises(OSError):
+                self.bridge.confirm()
         self.assertTrue(acknowledged)
+        self.assertFalse(list((self.bridge.state / 'received').iterdir()))
+        self.assertTrue(list((self.bridge.state / 'confirmed').iterdir()))
         self.assertEqual(self.bridge.confirm(), 0)
         self.assertEqual(self.bridge.fetch(), 0)
+        for name in ('inbox', 'imported', 'transport/confirmed'):
+            self.assertFalse(list((self.root / name).iterdir()))
 
 
 if __name__ == '__main__':

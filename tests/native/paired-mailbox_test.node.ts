@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 import assert from 'node:assert/strict';
-import { writeFile, readFile, mkdir, readdir, unlink } from 'node:fs/promises';
+import { writeFile, readFile, mkdir, readdir } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { promisify } from 'node:util';
 import Database from '@signalapp/sqlcipher';
@@ -51,22 +51,22 @@ async function openPeer(
   app: App,
   boot: Bootstrap,
   remote: Device,
-  username: string,
+  username: string
 ) {
   await boot.server.setUsername(remote.aci, username);
   const { entropy, serverId } = await boot.server.setUsernameLink(
     remote.aci,
-    username,
+    username
   );
   const link = contactByEncryptedUsernameRoute
     .toWebUrl({
       encryptedUsername: Buffer.concat([entropy, serverId]).toString(
-        'base64url',
+        'base64url'
       ),
     })
     .toString();
   const page = await app.getWindow();
-  await page.evaluate((url) => {
+  await page.evaluate(url => {
     if (!window.SignalCI) throw new Error('Native test API is unavailable');
     return window.SignalCI.openSignalRoute(url);
   }, link);
@@ -89,12 +89,12 @@ async function until<T>(observe: () => Promise<T | undefined>, seconds = 38) {
 }
 async function inspectNative<T>(
   bootstrap: Bootstrap,
-  read: (db: Database) => T,
+  read: (db: Database) => T
 ): Promise<T> {
   // Only the two disposable standalone test profiles are available inside this namespace.
   const profile = dirname(bootstrap.logsDir);
   const config = JSON.parse(
-    await readFile(join(profile, 'config.json'), 'utf8'),
+    await readFile(join(profile, 'config.json'), 'utf8')
   );
   assert.equal(typeof config.key, 'string');
   assert(/^[0-9a-f]{64}$/.test(config.key));
@@ -107,16 +107,65 @@ async function inspectNative<T>(
     db.close();
   }
 }
+// Only seed the previous release's application-owned item in a closed,
+// disposable SQLCipher profile. Messages, peer sessions and status rows are
+// created exclusively by the real Desktops.
+async function seedPreviousMailbox(bootstrap: Bootstrap, mailbox: string) {
+  const profile = dirname(bootstrap.logsDir);
+  const { key } = JSON.parse(
+    await readFile(join(profile, 'config.json'), 'utf8')
+  );
+  assert(typeof key === 'string' && /^[0-9a-f]{64}$/.test(key));
+  const { expires } = JSON.parse(
+    await readFile(join(mailbox, 'pair.json'), 'utf8')
+  );
+  const db = new Database(join(profile, 'sql/db.sqlite'));
+  try {
+    db.pragma(`key = "x'${key}'"`);
+    const id = 'volparossaMailboxV1';
+    const value = Array.from({ length: 256 }, (_, index) => {
+      const proof = createHash('sha256')
+        .update(`previous synthetic import ${index}`)
+        .digest('hex');
+      return { id: proof, bodyDigest: proof, expires };
+    });
+    db.prepare('INSERT INTO items (id, json) VALUES ($id, $json)').run({
+      id,
+      json: JSON.stringify({ id, value }),
+    });
+  } finally {
+    db.close();
+  }
+}
+
+async function ledgerCount(boot: Bootstrap): Promise<number> {
+  return inspectNative(boot, db => {
+    const total = db
+      .prepare('SELECT count(*) AS n FROM volparossa_mailbox')
+      .get()?.n;
+    assert(typeof total === 'number');
+    assert.equal(
+      db
+        .prepare(
+          "SELECT count(*) AS n FROM items WHERE id='volparossaMailboxV1'"
+        )
+        .get()?.n,
+      0
+    );
+    return total;
+  });
+}
+
 async function ratchet(bootstrap: Bootstrap, self: Device, remote: Device) {
-  return inspectNative(bootstrap, (db) => {
+  return inspectNative(bootstrap, db => {
     const row = db
       .prepare(
-        'SELECT record FROM sessions WHERE ourServiceId=$local AND serviceId=$remote AND deviceId=$device',
+        'SELECT record FROM sessions WHERE ourServiceId=$local AND serviceId=$remote AND deviceId=$device'
       )
       .get({ local: self.aci, remote: remote.aci, device: remote.deviceId });
     assert(
       row &&
-        (row.record instanceof Uint8Array || typeof row.record === 'string'),
+        (row.record instanceof Uint8Array || typeof row.record === 'string')
     );
     return createHash('sha256').update(row.record).digest('hex');
   });
@@ -127,7 +176,7 @@ async function device(d: Device) {
     device: d.deviceId,
     registration: d.getCheckedRegistrationId(ServiceIdKind.ACI),
     identity: Buffer.from(
-      (await d.getIdentityKey(ServiceIdKind.ACI)).serialize(),
+      (await d.getIdentityKey(ServiceIdKind.ACI)).serialize()
     ).toString('hex'),
   };
 }
@@ -135,7 +184,7 @@ async function configure(
   bootstrap: Bootstrap,
   name: string,
   self: Device,
-  peer: Device,
+  peer: Device
 ) {
   const dir = join(dirname(bootstrap.logsDir), 'volparossa-mailbox');
   const input = join('/tmp/r/providers', name);
@@ -152,7 +201,7 @@ async function configure(
   await writeFile(
     join(dir, 'core.json'),
     await readFile(join(input, 'core.json')),
-    { mode: 0o600, flag: 'wx' },
+    { mode: 0o600, flag: 'wx' }
   );
   await writeFile(join(dir, 'pair.json'), JSON.stringify(pair), {
     mode: 0o600,
@@ -164,7 +213,7 @@ async function command(dir: string, operation: string) {
   const { stdout } = await promisify(execFile)(
     '/usr/bin/python3',
     ['-B', '/trial/signal_mailbox.py', operation, '--mailbox', dir],
-    { timeout: 180000 },
+    { timeout: 180000 }
   );
   const data = JSON.parse(stdout);
   assert.equal(data.operation, operation);
@@ -173,8 +222,8 @@ async function command(dir: string, operation: string) {
 }
 async function readPacket(dir: string, stamp: number) {
   return until(async () => {
-    const entries = (await readdir(join(dir, 'outbox'))).filter((k) =>
-      /^[0-9a-f]{64}$/.test(k),
+    const entries = (await readdir(join(dir, 'outbox'))).filter(k =>
+      /^[0-9a-f]{64}$/.test(k)
     );
     for (const key of entries) {
       const bytes = await readFile(join(dir, 'outbox', key));
@@ -190,7 +239,7 @@ async function observedRow(
   body: string,
   type: 'incoming' | 'outgoing',
   peer?: Device,
-  expected?: string,
+  expected?: string
 ) {
   return until(async () => {
     const rows = await app.getMessagesBySentAt(stamp);
@@ -223,8 +272,10 @@ describe('native paired Signal mailbox', function () {
       contactCount: 0,
     });
     const devices: Device[] = [];
+    let receiverRecords = 0,
+      senderRecords = 0;
     const create = a.server.registerDevice.bind(a.server);
-    a.server.registerDevice = async (opts) => {
+    a.server.registerDevice = async opts => {
       const dev = await create(opts);
       if (!opts.primary) devices.push(dev);
       return dev;
@@ -239,7 +290,7 @@ describe('native paired Signal mailbox', function () {
       type,
       target,
       encrypted,
-      timestamp,
+      timestamp
     ) => {
       if (!devices.includes(target))
         return ordinary(source, kind, type, target, encrypted, timestamp);
@@ -314,12 +365,12 @@ describe('native paired Signal mailbox', function () {
       await phase('stock-acknowledgements');
       for (const profile of [a, b]) {
         await until(async () => {
-          const jobs = await inspectNative(profile, (db) =>
+          const jobs = await inspectNative(profile, db =>
             db
               .prepare(
-                "SELECT count(*) AS n FROM jobs WHERE queueType='conversation'",
+                "SELECT count(*) AS n FROM jobs WHERE queueType='conversation'"
               )
-              .get(),
+              .get()
           );
           return jobs?.n === 0 ? true : undefined;
         });
@@ -332,6 +383,7 @@ describe('native paired Signal mailbox', function () {
       const left = await configure(a, 'a', da, db);
       const right = await configure(b, 'b', db, da);
       await bob.close();
+      await seedPreviousMailbox(b, right);
       closed = true;
       await phase('offline-send');
       const body = 'Private offline synthetic message.';
@@ -339,8 +391,8 @@ describe('native paired Signal mailbox', function () {
       const label = (await alice.getWindow())
         .locator('.ConversationView')
         .getByText(body, { exact: true });
-      const stamp = await label.evaluate((e) =>
-        Number(e.closest('[data-testid]')?.getAttribute('data-testid')),
+      const stamp = await label.evaluate(e =>
+        Number(e.closest('[data-testid]')?.getAttribute('data-testid'))
       );
       assert(Number.isSafeInteger(stamp) && stamp > 0);
       const outgoing = await readPacket(left, stamp);
@@ -358,16 +410,20 @@ describe('native paired Signal mailbox', function () {
         body,
         'outgoing',
         undefined,
-        'Sent',
+        'Sent'
       );
+      assert.equal(await command(left, 'deposit'), 0);
+      assert.deepEqual(await readdir(join(left, 'outbox')), []);
+      assert.deepEqual(await readdir(join(left, 'custody')), []);
       await alice.close();
+      await seedPreviousMailbox(a, left);
       await phase('offline-fetch');
       assert.equal(await command(right, 'fetch'), deposited);
       assert.equal(await command(right, 'confirm'), 0);
       assert.equal(await command(right, 'fetch'), deposited);
       assert.deepEqual(
         await readFile(join(right, 'inbox', outgoing.key)),
-        outgoing.bytes,
+        outgoing.bytes
       );
       await phase('recipient-reopen');
       let recipient = await b.startApp();
@@ -378,7 +434,7 @@ describe('native paired Signal mailbox', function () {
       await until(async () =>
         (await readdir(join(right, 'imported'))).includes(outgoing.key)
           ? true
-          : undefined,
+          : undefined
       );
       const confirmations = await command(right, 'confirm');
       assert(confirmations >= 1);
@@ -411,6 +467,9 @@ describe('native paired Signal mailbox', function () {
         return receiptSent ? true : undefined;
       }, 65);
       await deliveryEvent;
+      assert.equal(await command(right, 'deposit'), 0);
+      receiverRecords = await ledgerCount(b);
+      assert(receiverRecords > 256);
       await recipient.close();
       const initialSession = await ratchet(b, db, da);
       await phase('sender-reopen');
@@ -421,22 +480,37 @@ describe('native paired Signal mailbox', function () {
       await (await sender.getWindow()).locator('#LeftPane').waitFor();
       assert.equal(
         await observedRow(sender, ts, body, 'outgoing', undefined, 'Delivered'),
-        outgoingId,
+        outgoingId
       );
       await until(async () =>
         (await readdir(join(left, 'imported'))).length === returning
           ? true
-          : undefined,
+          : undefined
       );
       assert.equal(await command(left, 'confirm'), returning);
       assert.equal(await command(left, 'fetch'), 0);
-      await unlink(join(right, 'imported', outgoing.key));
+      senderRecords = await ledgerCount(a);
+      assert(senderRecords > 256);
+      // Both provider transfers and receiver handoffs were fully retired.
+      // Re-present the exact original ciphertext as a late duplicate.
+      for (const dir of [
+        'inbox',
+        'imported',
+        'transport/received',
+        'transport/confirmed',
+      ]) {
+        assert.deepEqual(await readdir(join(right, dir)), []);
+      }
+      await writeFile(join(right, 'inbox', outgoing.key), outgoing.bytes, {
+        flag: 'wx',
+        mode: 0o600,
+      });
       recipient = await b.startApp();
       page = await recipient.getWindow();
       await until(async () =>
         (await readdir(join(right, 'imported'))).includes(outgoing.key)
           ? true
-          : undefined,
+          : undefined
       );
       assert.equal(await ratchet(b, db, da), initialSession);
       await clickOnConversationWithAci(page, da.aci);
@@ -446,7 +520,7 @@ describe('native paired Signal mailbox', function () {
         .waitFor();
       assert.equal(
         await observedRow(recipient, ts, body, 'incoming', da),
-        incomingId,
+        incomingId
       );
       await recipient.close();
       assert.equal(forbidden, 0);
@@ -461,6 +535,10 @@ describe('native paired Signal mailbox', function () {
       JSON.stringify({
         version: 1,
         standalone_desktops: 2,
+        previous_records_per_profile: 256,
+        both_profiles_added_native_records_past_256:
+          senderRecords > 256 && receiverRecords > 256,
+        settled_handoffs_removed: true,
         mailbox_providers: 2,
         stock_messaging_before_pairing: true,
         receiver_offline_during_deposit: true,
@@ -473,7 +551,7 @@ describe('native paired Signal mailbox', function () {
         paired_stock_submissions: forbidden,
         both_provider_inboxes_empty: true,
       }),
-      { flag: 'wx', mode: 0o600 },
+      { flag: 'wx', mode: 0o600 }
     );
   });
 });
