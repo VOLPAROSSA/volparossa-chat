@@ -60,7 +60,10 @@ export function checkedReport(value: unknown, operation: string, config: Replica
   ensure(report && report.operation === `private_storage_replicas_${operation}`);
   ensure(report.logical_ciphertext_bytes === bytes && report.read_consumes_archive === false);
   ensure(Array.isArray(report.copies) && report.copies.length === config.providers.length);
-  ensure(report.copies.every((copy, index) => copy.provider_key === config.providers[index].key));
+  ensure(report.copies.every((copy, index) => {
+    const provider = config.providers[index];
+    return provider !== undefined && copy.provider_key === provider.key;
+  }));
   if (operation !== 'create' && operation !== 'status') {
     ensure(report.operation_complete === true);
   }

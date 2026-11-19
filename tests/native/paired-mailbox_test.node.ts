@@ -66,7 +66,10 @@ async function openPeer(
     })
     .toString();
   const page = await app.getWindow();
-  await page.evaluate((url) => window.SignalCI.openSignalRoute(url), link);
+  await page.evaluate((url) => {
+    if (!window.SignalCI) throw new Error('Native test API is unavailable');
+    return window.SignalCI.openSignalRoute(url);
+  }, link);
   await page.getByTestId('conversation-hero').getByText(username).waitFor();
 }
 
@@ -194,6 +197,7 @@ async function observedRow(
     if (!rows.length) return undefined;
     assert.equal(rows.length, 1);
     const [row] = rows;
+    assert(row);
     assert.equal(row.type, type);
     assert.equal(row.body, body);
     if (type === 'incoming') {
@@ -280,6 +284,7 @@ describe('native paired Signal mailbox', function () {
       const bob = await register(b, '+14155551112', 'Owner Two');
       assert.equal(devices.length, 2);
       const [da, db] = devices;
+      assert(da && db);
       assert.equal(da.deviceId, 1);
       assert.equal(db.deviceId, 1);
       await phase('open-before');

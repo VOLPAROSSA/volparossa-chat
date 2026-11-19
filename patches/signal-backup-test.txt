@@ -10,8 +10,8 @@
     await generateTestDataThenRestoreBackup(
       this,
       async () => {
-        const window = await app.getWindow();
-        await window.evaluate(async ({ directory, configPath }) => {
+        const appPage = await app.getWindow();
+        await appPage.evaluate(async ({ directory, configPath }) => {
           if (!window.SignalCI) { throw new Error('Signal CI bridge unavailable'); }
           await window.SignalCI.volparossaBackupExport(directory, configPath);
         }, { directory: work, configPath: config });
@@ -26,7 +26,7 @@
         }
         const restore = join(work, 'restored');
         await fs.mkdir(restore, { mode: 0o700 });
-        snapshotDir = await window.evaluate(async ({ directory, configPath, destination }) => {
+        snapshotDir = await appPage.evaluate(async ({ directory, configPath, destination }) => {
           if (!window.SignalCI) { throw new Error('Signal CI bridge unavailable'); }
           return window.SignalCI.volparossaBackupRestore(directory, configPath, destination);
         }, { directory: work, configPath: config, destination: restore });

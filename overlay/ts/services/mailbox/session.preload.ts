@@ -189,7 +189,6 @@ export async function importAvailable(receive: Receive): Promise<void> {
   if (!pair) {
     return;
   }
-  await checkIdentity(pair);
   const inbox = join(root, 'inbox');
   try {
     await directory(inbox);
@@ -201,94 +200,115 @@ export async function importAvailable(receive: Receive): Promise<void> {
   }
   const entries = await readdir(inbox);
   check(entries.length <= 256);
+  if (!entries.length) return;
+  await checkIdentity(pair);
+  let rejected = false;
   for (const key of entries) {
-    if (key.startsWith('.')) {
-      continue;
+    if (key.startsWith('.')) continue;
+    try {
+      await importPacket(root, inbox, pair, key, receive);
+    } catch {
+      rejected = true;
     }
-    check(/^[a-f0-9]{64}$/.test(key));
-    const bytes = await readPrivate(join(inbox, key), MAX_PACKET_BYTES);
-    const packet = decodePacket(bytes);
-    check(
-      digest(bytes) === key &&
-        packet.grant === pair.receiveGrant &&
-        sameDevice(packet.from, pair.remote) &&
-        sameDevice(packet.to, pair.local),
-    );
-    const session = await signalProtocolStore.loadSession(
-      new QualifiedAddress(
-        pair.local.aci,
-        new Address(pair.remote.aci, pair.remote.device),
-      ),
-    );
-    check(
-      session?.hasCurrentState() &&
-        session.remoteRegistrationId() === pair.remote.registration,
-    );
-    SignalMessage.deserialize(Buffer.from(packet.ciphertext, 'base64'));
-    const id = digest(JSON.stringify(['inbound', pair.receiveGrant, key]));
-    if (!(await rowFor(id))) {
-      await receive(packet, { id, expires: pair.expires });
-    }
-    const committed = await rowFor(id);
-    check(committed);
-    if (committed.bodyDigest) {
-      const messages = await DataReader.getMessagesBySentAt(packet.timestamp);
-      if (
-        !messages.some(
-          (m) =>
-            m.type === 'incoming' &&
-            m.sourceServiceId === packet.from.aci &&
-            m.sourceDevice === packet.from.device &&
-            typeof m.body === 'string' &&
-            digest(m.body) === committed.bodyDigest,
-        )
-      ) {
-        continue;
-      }
-    }
-    if (committed.profileDigest) {
-      const conversation = window.ConversationController.get(packet.from.aci);
-      if (!conversation) {
-        continue;
-      }
-      const stored = await DataReader.getConversationById(conversation.id);
-      if (
-        !stored?.profileKey ||
-        digest(Buffer.from(stored.profileKey, 'base64')) !==
-          committed.profileDigest
-      ) {
-        continue;
-      }
-    }
-    if (committed.receipt) {
-      const conversation = window.ConversationController.get(packet.from.aci);
-      check(conversation, 'Missing locally paired conversation');
-      const done = { Delivered: isDelivered, Read: isRead, Viewed: isViewed }[
-        committed.receipt.state
-      ];
-      const settled = await Promise.all(
-        committed.receipt.timestamps.map(async (timestamp) => {
-          const messages = await DataReader.getMessagesBySentAt(timestamp);
-          return messages.some((m) => {
-            const state =
-              m.sendStateByConversationId?.[conversation.id]?.status;
-            return (
-              m.type === 'outgoing' &&
-              m.conversationId === conversation.id &&
-              state != null &&
-              state !== SendStatus.Skipped &&
-              done(state)
-            );
-          });
-        }),
-      );
-      if (settled.some((result) => !result)) {
-        continue;
-      }
-    }
-    await publish(
-      join(root, 'imported', key),
-      Buffer.from(`${pair.receiveGrant}\n`),
-    );
   }
+  check(!rejected, 'Some private mailbox packets are still pending');
+}
+
+async function importPacket(
+  root: string,
+  inbox: string,
+  pair: MailboxPair,
+  key: string,
+  receive: Receive,
+) {
+  check(/^[a-f0-9]{64}$/.test(key));
+  const marker = Buffer.from(`${pair.receiveGrant}\n`);
+  try {
+    // This packet already crossed the native durable-import boundary. Its
+    // bridge will check the same private marker before contacting either provider.
+    check((await readPrivate(join(root, 'imported', key), 128)).equals(marker));
+    return;
+  } catch (err) {
+    if (!absent(err)) throw err;
+  }
+  const bytes = await readPrivate(join(inbox, key), MAX_PACKET_BYTES);
+  const packet = decodePacket(bytes);
+  check(
+    digest(bytes) === key &&
+      packet.grant === pair.receiveGrant &&
+      sameDevice(packet.from, pair.remote) &&
+      sameDevice(packet.to, pair.local),
+  );
+  const session = await signalProtocolStore.loadSession(
+    new QualifiedAddress(
+      pair.local.aci,
+      new Address(pair.remote.aci, pair.remote.device),
+    ),
+  );
+  check(
+    session?.hasCurrentState() &&
+      session.remoteRegistrationId() === pair.remote.registration,
+  );
+  SignalMessage.deserialize(Buffer.from(packet.ciphertext, 'base64'));
+  const id = digest(JSON.stringify(['inbound', pair.receiveGrant, key]));
+  if (!(await rowFor(id))) {
+    await receive(packet, { id, expires: pair.expires });
+  }
+  const committed = await rowFor(id);
+  check(committed);
+  if (committed.bodyDigest) {
+    const messages = await DataReader.getMessagesBySentAt(packet.timestamp);
+    if (
+      !messages.some(
+        (m) =>
+          m.type === 'incoming' &&
+          m.sourceServiceId === packet.from.aci &&
+          m.sourceDevice === packet.from.device &&
+          typeof m.body === 'string' &&
+          digest(m.body) === committed.bodyDigest,
+      )
+    ) {
+      return;
+    }
+  }
+  if (committed.profileDigest) {
+    const conversation = window.ConversationController.get(packet.from.aci);
+    if (!conversation) {
+      return;
+    }
+    const stored = await DataReader.getConversationById(conversation.id);
+    if (
+      !stored?.profileKey ||
+      digest(Buffer.from(stored.profileKey, 'base64')) !==
+        committed.profileDigest
+    ) {
+      return;
+    }
+  }
+  if (committed.receipt) {
+    const conversation = window.ConversationController.get(packet.from.aci);
+    check(conversation, 'Missing locally paired conversation');
+    const done = { Delivered: isDelivered, Read: isRead, Viewed: isViewed }[
+      committed.receipt.state
+    ];
+    const settled = await Promise.all(
+      committed.receipt.timestamps.map(async (timestamp) => {
+        const messages = await DataReader.getMessagesBySentAt(timestamp);
+        return messages.some((m) => {
+          const state = m.sendStateByConversationId?.[conversation.id]?.status;
+          return (
+            m.type === 'outgoing' &&
+            m.conversationId === conversation.id &&
+            state != null &&
+            state !== SendStatus.Skipped &&
+            done(state)
+          );
+        });
+      }),
+    );
+    if (settled.some((result) => !result)) {
+      return;
+    }
+  }
+  await publish(join(root, 'imported', key), marker);
 }

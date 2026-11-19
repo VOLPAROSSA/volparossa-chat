@@ -43,7 +43,10 @@ Each poll reads the current provider inbox. A poll before native import leaves
 the message available. Multiple fetches and a reopen preserve the original
 message row. The sender marks a message delivered only when its normal Signal
 receipt arrives. Recipient-authorized profile updates and native receipt types
-use the same private channel. Unpaired contacts continue to use Signal. A stale
+use the same private channel. Each profile currently retains up to 256 unexpired
+mailbox transaction records, including receipts, and each handoff queue accepts
+up to 256 files. Settled handoffs remain in the private profile. Unpaired
+contacts continue to use Signal. A stale
 or changed pairing, a changed device set, or unsupported paired content produces
 a pending or failed send.
 
@@ -56,6 +59,8 @@ ratchet across replay. Its two real Core stores use authenticated local test
 streams. Verified cross-machine routing, automatic authenticated discovery,
 general multi-device fan-out, groups, calls and interactive pairing remain
 open. The provider fixture and reproducible workflow are public.
+[Source versions, executable hashes and native trial results](../provenance/paired-mailbox-20261119.json) ·
+[Hosted trial](https://github.com/VOLPAROSSA/volparossa-chat/actions/runs/44519772345) ·
 [Core fixture](https://github.com/VOLPAROSSA/volparossa/pull/429) ·
 [Native workflow](../.github/workflows/native-receipts.yml).
 
