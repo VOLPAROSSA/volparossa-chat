@@ -263,6 +263,11 @@ async function importPacket(
       sameDevice(packet.from, pair.remote) &&
       sameDevice(packet.to, pair.local)
   );
+  const previous = await rowFor(id);
+  if (previous?.settled) {
+    await publish(join(root, 'imported', key), marker);
+    return;
+  }
   const session = await signalProtocolStore.loadSession(
     new QualifiedAddress(
       pair.local.aci,
@@ -274,11 +279,6 @@ async function importPacket(
       session.remoteRegistrationId() === pair.remote.registration
   );
   SignalMessage.deserialize(Buffer.from(packet.ciphertext, 'base64'));
-  const previous = await rowFor(id);
-  if (previous?.settled) {
-    await publish(join(root, 'imported', key), marker);
-    return;
-  }
   if (!previous) {
     await receive(packet, { id, expires: pair.expires });
   }

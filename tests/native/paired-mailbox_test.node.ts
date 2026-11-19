@@ -388,13 +388,14 @@ describe('native paired Signal mailbox', function () {
       await phase('offline-send');
       const body = 'Private offline synthetic message.';
       await send(alice, body);
-      const label = (await alice.getWindow())
-        .locator('.ConversationView')
-        .getByText(body, { exact: true });
-      const stamp = await label.evaluate(e =>
-        Number(e.closest('[data-testid]')?.getAttribute('data-testid'))
-      );
-      assert(Number.isSafeInteger(stamp) && stamp > 0);
+      const stamp = await until(async () => inspectNative(a, sql => {
+        const rows = sql.prepare("SELECT sent_at FROM messages WHERE type='outgoing' AND body = $body").all({body});
+        if (!rows.length) return undefined;
+        assert.equal(rows.length, 1);
+        const value = rows[0]?.sent_at;
+        assert(typeof value === 'number' && Number.isSafeInteger(value) && value > 0);
+        return value;
+      }));
       const outgoing = await readPacket(left, stamp);
       assert.equal(outgoing.packet.from.aci, da.aci);
       assert.equal(outgoing.packet.to.aci, db.aci);
