@@ -19,6 +19,8 @@ import time
 
 HEX = re.compile(r'[a-f0-9]{64}\Z')
 PACKET_LIMIT = 32768
+CACHE_FILE = re.compile(r'(?:[0-9a-f]{64}|\.volparossa-(?:owner|index|chunk-next|index-next|replicas|mailbox)-v1)\Z')
+RECEIVE_FILE = re.compile(r'(?:payload|import-token|pending\.pb|confirmed\.json|ack-[a-f0-9]{64}\.json)\Z')
 
 
 def require(condition, message):
@@ -85,12 +87,11 @@ def preserve_unpublished_cache(cache, original):
         cache.rename(original)
     else:
         directory(original)
-        allowed = re.compile(r'(?:[0-9a-f]{64}|\.volparossa-(?:owner|index|chunk-next|index-next|replicas|mailbox)-v1)\Z')
         entries = list(islice(cache.iterdir(), 257))
         require(len(entries) <= 256, 'incomplete preparation exceeds the handoff limit')
         for child in entries:
             info = child.lstat()
-            require(allowed.fullmatch(child.name) and stat.S_ISREG(info.st_mode) and info.st_uid == os.getuid()
+            require(CACHE_FILE.fullmatch(child.name) and stat.S_ISREG(info.st_mode) and info.st_uid == os.getuid()
                     and info.st_nlink == 1 and stat.S_IMODE(info.st_mode) == 0o600,
                     'unexpected entry in incomplete Core preparation')
         for child in entries:
@@ -111,10 +112,6 @@ def packets(directory_path):
             continue
         require(HEX.fullmatch(entry.name), 'unexpected handoff name')
         yield entry
-
-
-CACHE_FILE = re.compile(r'(?:[0-9a-f]{64}|\.volparossa-(?:owner|index|chunk-next|index-next|replicas|mailbox)-v1)\Z')
-RECEIVE_FILE = re.compile(r'(?:payload|import-token|pending\.pb|confirmed\.json|ack-[a-f0-9]{64}\.json)\Z')
 
 
 def check_owned_file(path):
@@ -310,15 +307,15 @@ class Bridge:
 
     def finish_imports(self, completed):
         directory(completed)
-        marker = (self.pair['receiveGrant'] + '\n').encode('ascii')
         for item in completed.iterdir():
             parts = item.name.split('-')
-            require(len(parts) == 2 and all(HEX.fullmatch(part) for part in parts), 'unknown confirmed import')
-            _, key = parts
+            require(len(parts) == 3 and all(HEX.fullmatch(part) for part in parts), 'unknown confirmed import')
+            grant, _, key = parts
+            marker = (grant + '\n').encode('ascii')
             handoff = self.root / 'inbox' / key
             if os.path.lexists(handoff):
                 payload = read(handoff, PACKET_LIMIT)
-                require(sha(payload) == key and json.loads(payload)['grant'] == self.pair['receiveGrant'], 'inbox packet differs')
+                require(sha(payload) == key and json.loads(payload)['grant'] == grant, 'inbox packet differs')
                 remove_matching(handoff, payload, PACKET_LIMIT)
             remove_matching(self.root / 'imported' / key, marker, 128)
             remove_private_tree(item, 'receive')
@@ -352,7 +349,7 @@ class Bridge:
                     'consumer confirmation incomplete')
             # This signed, native-confirmed publication is the durable cleanup
             # boundary. A crash on either side of rename preserves retry state.
-            retired = completed_dir / (item.name + '-' + key)
+            retired = completed_dir / '-'.join((self.pair['receiveGrant'], item.name, key))
             require(not os.path.lexists(retired), 'confirmed handoff already exists')
             item.rename(retired)
             sync_dir(completed_dir)

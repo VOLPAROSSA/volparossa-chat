@@ -167,6 +167,9 @@ class MailboxHandoffTest(unittest.TestCase):
         self.assertTrue(acknowledged)
         self.assertFalse(list((self.bridge.state / 'received').iterdir()))
         self.assertTrue(list((self.bridge.state / 'confirmed').iterdir()))
+        # The former pair's already-confirmed local files can be retired even
+        # when a new valid pair is configured during the interruption.
+        self.bridge.pair['receiveGrant'] = 'dd' * 32
         self.assertEqual(self.bridge.confirm(), 0)
         self.assertEqual(self.bridge.fetch(), 0)
         for name in ('inbox', 'imported', 'transport/confirmed'):
