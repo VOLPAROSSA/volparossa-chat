@@ -29,6 +29,14 @@ OBSERVATIONS = {
     'previous_records_per_profile': 256, 'both_profiles_added_native_records_past_256': True,
     'settled_handoffs_removed': True,
 }
+WORKER_OBSERVATIONS = {
+    'version': 1, 'standalone_desktops': 2, 'mailbox_providers': 2,
+    'receiver_offline_during_deposit': True, 'sender_offline_during_pickup': True,
+    'worker_stopped_before_native_import': True, 'custody_retained_while_worker_stopped': True,
+    'worker_killed_after_pickup': True, 'original_row_delivered_after_restart': True,
+    'original_incoming_row_retained': True, 'paired_stock_submissions': 0,
+    'both_provider_inboxes_empty': True, 'settled_handoffs_removed': True,
+}
 VOLUME_OBSERVATIONS = {
     'version': 1, 'standalone_desktops': 2, 'migrated_fixture_rows': 0,
     'distinct_native_texts': 260, 'recipient_sqlcipher_rows': 260, 'sender_rows_delivered': 260,
@@ -75,7 +83,7 @@ def join(process):
             process.wait(timeout=5)
 
 
-def run_desktops(volume=False):
+def run_desktops(volume=False, worker=False):
     unix = Path('/tmp/.X11-unix')
     unix.mkdir(mode=0o1777, exist_ok=True)
     with subprocess.Popen(['/trial/Xvfb', ':156', '-screen', '0', '1280x1024x24', '-nolisten', 'tcp']) as display:
@@ -84,13 +92,14 @@ def run_desktops(volume=False):
             command = ['node', 'node_modules/mocha/bin/mocha.js', '--forbid-pending', '--fail-zero',
                        '--require', 'ts/test-mock/setup-ci.node.ts', '--grep', '^' + TITLE + '$',
                        '--reporter', 'spec', TARGET]
-            env = os.environ | {'DISPLAY': ':156', 'CHAT_NATIVE_VOLUME': '1' if volume else '0'}
+            env = os.environ | {'DISPLAY': ':156', 'CHAT_NATIVE_VOLUME': '1' if volume else '0',
+                                'CHAT_NATIVE_WORKER': '1' if worker else '0'}
             subprocess.run(command, env=env, timeout=3900 if volume else 275, check=True)
         finally:
             join(display)
 
 
-def run_inside(prepared, volume):
+def run_inside(prepared, volume, worker):
     check(sorted(name for _, name in socket.if_nameindex()) == ['lo'], 'isolated loopback required')
     state = Path('/tmp/r/providers')
     if volume:
@@ -107,13 +116,13 @@ def run_inside(prepared, volume):
             check(config['executable'] == cli and config['socket'] == agent, 'prepared Core binding differs')
         status = subprocess.check_output([cli, '--control-socket', agent, 'content', 'status'], timeout=15)
         check(bool(json.loads(status)['control_relay_peer_id']), 'prepared agent has no active control relay')
-        run_desktops()
+        run_desktops(worker=worker)
         return
     state.mkdir(mode=0o700)
     with subprocess.Popen(['/trial/core/mailbox-provider-pair', str(state)], stdin=subprocess.PIPE) as provider:
         try:
             wait_ready(provider, (state / 'ready').is_file, time.monotonic() + 100)
-            run_desktops()
+            run_desktops(worker=worker)
             check(provider.poll() is None, 'provider stopped during native mailbox trial')
         finally:
             provider.stdin.close()
@@ -143,7 +152,8 @@ def trial(args):
     check(not subprocess.check_output(['git', 'status', '--porcelain'], cwd=ROOT), 'expected clean Chat source')
     build = ROOT / 'build'
     candidate = build / 'signal-backup-candidate'
-    result = build / ('native-mailbox-volume-result.json' if args.volume else 'native-mailbox-result.json')
+    suffix = '-volume' if args.volume else '-worker' if args.worker else ''
+    result = build / f'native-mailbox{suffix}-result.json'
     check(not os.path.lexists(result), 'output already exists')
     fixture = ROOT / 'tests/native/paired-mailbox_test.node.ts'
     bridge = ROOT / 'scripts/signal_mailbox.py'
@@ -179,17 +189,21 @@ def trial(args):
         command = sandbox(private, candidate, node, fixture, TARGET, Path(__file__).resolve(), mounts)
         if args.volume:
             command.append('--volume')
+        elif args.worker:
+            command.append('--worker')
         with (private / 'log').open('xb') as log:
             status = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT, timeout=4000 if args.volume else 400)
         if status.returncode:
             phase = (private / 'phase').read_text() if (private / 'phase').is_file() else 'bootstrap'
             check(phase in {'bootstrap', 'register-a', 'register-b', 'open-before', 'warm-send', 'warm-receive',
                   'warm-reply', 'stock-acknowledgements', 'pair', 'offline-send', 'provider-custody', 'offline-fetch',
-                  'recipient-reopen', 'confirm-native-import', 'peer-receipt', 'sender-reopen', 'complete'},
+                  'recipient-reopen', 'confirm-native-import', 'peer-receipt', 'sender-reopen', 'complete',
+                  'worker-outgoing', 'worker-offline-pickup', 'worker-native-confirmation', 'worker-sender-restart',
+                  'worker-recipient-row', 'worker-handoff-retirement'},
                   'unexpected fixture phase')
             raise ValueError('native mailbox trial failed during ' + phase)
         observed = json.loads((private / 'result.json').read_bytes())
-        expected = VOLUME_OBSERVATIONS if args.volume else OBSERVATIONS
+        expected = VOLUME_OBSERVATIONS if args.volume else WORKER_OBSERVATIONS if args.worker else OBSERVATIONS
         check(json.dumps(observed, sort_keys=True) == json.dumps(expected, sort_keys=True), 'incomplete observations')
     check(subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip() == revision
           and not subprocess.check_output(['git', 'status', '--porcelain'], cwd=ROOT), 'Chat source changed during the trial')
@@ -207,7 +221,9 @@ def trial(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--inside', action='store_true', help=argparse.SUPPRESS)
-    parser.add_argument('--volume', action='store_true', help='exchange 260 native texts across ten signed grant pairs')
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument('--worker', action='store_true', help='exchange an offline message with owner-enabled workers')
+    mode.add_argument('--volume', action='store_true', help='exchange 260 native texts across ten signed grant pairs')
     parser.add_argument('--prepared-providers', action='store_true', help='use the existing Core KVM guest agent inside the native sandbox')
     parser.add_argument('--core-source', type=Path, help='clean checkout of the pinned Core revision with locked dependencies available')
     parser.add_argument('--cargo-target', type=Path, help='reuse compatible Cargo intermediates for the offline build')
@@ -216,7 +232,7 @@ if __name__ == '__main__':
         args = parser.parse_args()
         check(not (args.prepared_providers and args.volume), 'the volume trial provisions its own provider pairs')
         if args.inside:
-            run_inside(args.prepared_providers, args.volume)
+            run_inside(args.prepared_providers, args.volume, args.worker)
         else:
             check(not args.prepared_providers, 'prepared providers require the existing isolated guest sandbox')
             check(args.core_source and args.xvfb, 'provide --core-source and an installed or explicit --xvfb')

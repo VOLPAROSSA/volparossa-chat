@@ -31,14 +31,36 @@ path. `remoteOwner` is the remote Core owner public key in hex. The bridge
 rechecks the invitation digests. The CLI verifies the signatures and performs
 the normal private deposit, fetch and confirmation operations.
 
+To enable continuous transfers on a paired Linux profile, run this foreground
+worker as the profile owner on each Desktop. Set `MAILBOX` to the canonical
+absolute path of that profile’s `volparossa-mailbox` directory.
+
 ```sh
-python3 -B scripts/signal_mailbox.py deposit --mailbox "$SENDER_MAILBOX"
-python3 -B scripts/signal_mailbox.py fetch --mailbox "$RECIPIENT_MAILBOX"
-# Open the recipient's Desktop on its existing profile.
-python3 -B scripts/signal_mailbox.py confirm --mailbox "$RECIPIENT_MAILBOX"
+python3 -B scripts/signal_mailbox.py run --mailbox "$MAILBOX"
 ```
 
-Run the same commands in the opposite direction for native delivery receipts.
+The worker checks for outgoing packets and committed imports every second and
+polls the remote inbox every 30 seconds. Set `--poll-seconds N` to change the
+remote interval. Closing Desktop leaves deposited messages available for later
+import. Ctrl-C or SIGTERM stops the worker after its current operation. Starting
+it again resumes the existing handoffs. Each unavailable operation retries
+independently, backing off to at most one minute.
+
+For automatic startup with a systemd user session, install the user service and
+enable it for the selected profile. Run these commands from this repository.
+
+```sh
+install -Dm700 scripts/signal_mailbox.py "$HOME/.local/libexec/volparossa-chat/signal_mailbox.py"
+install -Dm644 packaging/systemd/volparossa-chat-mailbox@.service "$HOME/.config/systemd/user/volparossa-chat-mailbox@.service"
+unit=$(systemd-escape --path --template=volparossa-chat-mailbox@.service "$MAILBOX")
+systemctl --user daemon-reload
+systemctl --user enable --now "$unit"
+```
+
+Use `systemctl --user disable --now "$unit"` to stop the worker and disable
+automatic startup. The one-shot `deposit`, `fetch` and `confirm` commands
+remain available for manual operation.
+
 Each poll reads the current provider inbox. A poll before native import leaves
 the message available. Multiple fetches and a reopen preserve the original
 message row. The sender marks a message delivered only when its normal Signal
@@ -62,9 +84,11 @@ then refuses ordinary Signal submissions to both paired devices. It closes the
 recipient for deposit and closes the sender for pickup. The test reopens both
 native databases, exercises duplicate pickup and compares the same local
 ratchet across replay. Its two real Core stores use authenticated local test
-streams. Verified cross-machine routing, automatic authenticated discovery,
+streams. A separate protected Core KVM trial sent the native message and delivery receipt through two remote provider agents using two Desktops behind one client agent. [Protected route trial](https://github.com/VOLPAROSSA/volparossa/actions/runs/44538844389).
+
+Automatic authenticated discovery,
 general multi-device fan-out, groups, calls and interactive pairing remain
-open. The migration trial starts both profiles with 256 synthetic records in their
+open. The continuous-transfer trial stops and restarts the recipient worker across native import, kills and restarts the sender worker after pickup, and checks the two original SQLCipher rows and both provider inboxes. The migration trial starts both profiles with 256 synthetic records in their
 previous format, then sends a new real message through the normal composer.
 It reopens both profiles, checks the original row and session after replay,
 and checks the cleared private handoffs. The provider fixture and reproducible

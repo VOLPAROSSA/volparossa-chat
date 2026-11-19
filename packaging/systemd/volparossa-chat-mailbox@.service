@@ -1,0 +1,14 @@
+[Unit]
+Description=VOLPAROSSA paired Chat mailbox at %f
+
+[Service]
+ExecStart=/usr/bin/python3 -B %h/.local/libexec/volparossa-chat/signal_mailbox.py run --mailbox %f
+UMask=0077
+NoNewPrivileges=yes
+KillMode=mixed
+TimeoutStopSec=190
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target
