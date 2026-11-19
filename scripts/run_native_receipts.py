@@ -34,6 +34,36 @@ def native():
                '--require', 'ts/test-mock/setup-ci.node.ts', '--grep', '^' + TITLE + '$', '--reporter', 'spec', FIXTURE])
 
 
+def sandbox(private, candidate, node, fixture, target, driver, mounts=()):
+    """Mount only verified runtimes and one fixture inside a fresh loopback-only Desktop."""
+    for name in ('home', 'config', 'cache', 'data', 'runtime', 'tmp'):
+        (private / name).mkdir(mode=0o700)
+    # Populate a fresh mount namespace with runtime inputs only. Linking, X11 and
+    # every mock-service socket live beneath this private namespace.
+    args = ['bwrap', '--die-with-parent', '--unshare-user', '--unshare-pid', '--unshare-net',
+            '--unshare-ipc', '--cap-drop', 'ALL', '--clearenv']
+    for path in ('/usr', '/lib', '/lib64', '/bin', '/etc'):
+        args.extend(['--ro-bind', path, path])
+    args += ['--dev', '/dev', '--proc', '/proc', '--remount-ro', '/proc',
+             '--tmpfs', '/tmp', '--bind', str(private), '/tmp/r', '--dir', '/run',
+             '--ro-bind', str(node.parent), str(node.parent),
+             '--ro-bind', str(candidate), str(candidate),
+             '--tmpfs', str((candidate / target).parent),
+             '--ro-bind', str(fixture), str(candidate / target),
+             '--remount-ro', str((candidate / target).parent),
+             '--ro-bind', str(driver), '/trial/run.py', '--chdir', str(candidate)]
+    for source, destination in mounts:
+        args += ['--ro-bind', str(source), destination]
+    for k, v in dict(PATH=f'{node}:{candidate}/node_modules/.bin:/usr/bin:/bin',
+                     HOME='/tmp/r/home', XDG_CONFIG_HOME='/tmp/r/config', XDG_CACHE_HOME='/tmp/r/cache',
+                     XDG_DATA_HOME='/tmp/r/data', XDG_RUNTIME_DIR='/tmp/r/runtime', TMPDIR='/tmp/r/tmp',
+                     CI='1', NODE_ENV='production', LANG='C.UTF-8', LC_ALL='C.UTF-8',
+                     PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD='1', CHAT_NATIVE_RESULT='/tmp/r/result.json',
+                     CHAT_NATIVE_PHASE='/tmp/r/phase').items():
+        args.extend(['--setenv', k, v])
+    return args + ['/usr/bin/python3', '-B', '/trial/run.py', '--inside']
+
+
 def trial():
     build = ROOT / 'build'
     candidate = build / 'signal-backup-candidate'
@@ -52,30 +82,7 @@ def trial():
         raise ValueError('candidate receiver does not match its verified source and overlay')
     with tempfile.TemporaryDirectory(prefix='receipt-test-', dir=build) as work:
         private = Path(work)
-        for name in ('home', 'config', 'cache', 'data', 'runtime', 'tmp'):
-            (private / name).mkdir(mode=0o700)
-        # Populate a fresh mount namespace with runtime inputs only. Linking, X11 and
-        # every mock-service socket live beneath this private namespace.
-        args = ['bwrap', '--die-with-parent', '--unshare-user', '--unshare-pid', '--unshare-net',
-                '--unshare-ipc', '--cap-drop', 'ALL', '--clearenv']
-        for path in ('/usr', '/lib', '/lib64', '/bin', '/etc'):
-            args.extend(['--ro-bind', path, path])
-        args += ['--dev', '/dev', '--proc', '/proc', '--remount-ro', '/proc',
-                 '--tmpfs', '/tmp', '--bind', str(private), '/tmp/r', '--dir', '/run',
-                 '--ro-bind', str(node.parent), str(node.parent),
-                 '--ro-bind', str(candidate), str(candidate),
-                 '--tmpfs', str((candidate / FIXTURE).parent),
-                 '--ro-bind', str(fixture), str(candidate / FIXTURE),
-                 '--remount-ro', str((candidate / FIXTURE).parent),
-                 '--ro-bind', str(Path(__file__).resolve()), '/trial/run.py', '--chdir', str(candidate)]
-        for k, v in dict(PATH=f'{node}:{candidate}/node_modules/.bin:/usr/bin:/bin',
-                         HOME='/tmp/r/home', XDG_CONFIG_HOME='/tmp/r/config', XDG_CACHE_HOME='/tmp/r/cache',
-                         XDG_DATA_HOME='/tmp/r/data', XDG_RUNTIME_DIR='/tmp/r/runtime', TMPDIR='/tmp/r/tmp',
-                         CI='1', NODE_ENV='production', LANG='C.UTF-8', LC_ALL='C.UTF-8',
-                         PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD='1', CHAT_NATIVE_RESULT='/tmp/r/result.json',
-                         CHAT_NATIVE_PHASE='/tmp/r/phase').items():
-            args.extend(['--setenv', k, v])
-        args += ['/usr/bin/python3', '-B', '/trial/run.py', '--inside']
+        args = sandbox(private, candidate, node, fixture, FIXTURE, Path(__file__).resolve())
         with (private / 'log').open('xb') as log:
             code = subprocess.run(args, stdout=log, stderr=subprocess.STDOUT, timeout=300, check=False).returncode
         if code:

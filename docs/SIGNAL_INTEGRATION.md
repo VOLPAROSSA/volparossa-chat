@@ -1,6 +1,68 @@
 # Signal / VOLPAROSSA integration contract
 
-**Status: one real native backup round trip passes; decentralized messages and calls remain requirements.** Source versions and primary references are in [UPSTREAM.md](UPSTREAM.md); the [backup connector](BACKUP_CONNECTOR.md) records the exact passing trial and remaining limitations. The goal is to preserve normal Signal while adding authenticated VOLPAROSSA delivery between compatible clients, voice/video calling over VOLPAROSSA and reciprocal storage of encrypted backups. A proxy setting cannot make an unmodified Signal client deliver messages through another messaging network or prove that its native call media uses that proxy.
+**The native backup round trip and a manually paired offline text path work in isolated integration trials.** Source versions and primary references are in [UPSTREAM.md](UPSTREAM.md); the [backup connector](BACKUP_CONNECTOR.md) records the exact passing trial and remaining limitations. The goal is to preserve normal Signal while adding authenticated VOLPAROSSA delivery between compatible clients, voice/video calling over VOLPAROSSA and reciprocal storage of encrypted backups. A proxy setting cannot make an unmodified Signal client deliver messages through another messaging network or prove that its native call media uses that proxy.
+
+## Paired offline text on Linux
+
+The normal composer can use a manually authenticated pairing between two
+existing, single-device Signal sessions. Desktop binds the local and remote ACI,
+device number, registration ID and identity public key to one signed Core
+mailbox invitation in each direction. The native sender commits the ratchet and
+the exact encrypted packet in one SQLCipher transaction. Retrying a pending
+deposit reuses that packet. The recipient uses Signal’s normal message receiver.
+A private import marker for a text requires the saved incoming row, sender,
+device, timestamp and body digest to match. A native receipt requires the
+corresponding outgoing rows to have reached the reported status. Core acknowledges
+both providers only after the bridge sees the marker.
+
+The pairing file and Core configuration live in the profile’s private
+`volparossa-mailbox` directory, mode `0700`, in files of mode `0600`.
+The paired device records in `pair.json` carry `aci`, `device`, `registration`
+and `identity` (hex-encoded Signal public key). The other fields are `version`
+(1), `local`, `remote`, `sendGrant`, `receiveGrant` and `expires` (Unix
+milliseconds). The two grant values are SHA-256 digests of the signed invitation
+files. Independently authenticate both devices and both invitation bindings
+before provisioning this configuration. The native fixture derives the public
+device records from its known local registration service.
+
+`core.json` names the trusted `executable`, local control `socket`, `identity`,
+`passphrase`, `sendInvitation` and `receiveInvitation` by absolute canonical
+path. `remoteOwner` is the remote Core owner public key in hex. The bridge
+rechecks the invitation digests. The CLI verifies the signatures and performs
+the normal private deposit, fetch and confirmation operations.
+
+```sh
+python3 -B scripts/signal_mailbox.py deposit --mailbox "$SENDER_MAILBOX"
+python3 -B scripts/signal_mailbox.py fetch --mailbox "$RECIPIENT_MAILBOX"
+# Open the recipient's Desktop on its existing profile.
+python3 -B scripts/signal_mailbox.py confirm --mailbox "$RECIPIENT_MAILBOX"
+```
+
+Run the same commands in the opposite direction for native delivery receipts.
+Each poll reads the current provider inbox. A poll before native import leaves
+the message available. Multiple fetches and a reopen preserve the original
+message row. The sender marks a message delivered only when its normal Signal
+receipt arrives. Recipient-authorized profile updates and native receipt types
+use the same private channel. Each profile currently retains up to 256 unexpired
+mailbox transaction records, including receipts, and each handoff queue accepts
+up to 256 files. Settled handoffs remain in the private profile. Unpaired
+contacts continue to use Signal. A stale
+or changed pairing, a changed device set, or unsupported paired content produces
+a pending or failed send.
+
+The hosted native trial registers two separate standalone Signal Desktop 8.28.0
+accounts, establishes sessions through the upstream loopback test service and
+then refuses ordinary Signal submissions to both paired devices. It closes the
+recipient for deposit and closes the sender for pickup. The test reopens both
+native databases, exercises duplicate pickup and compares the same local
+ratchet across replay. Its two real Core stores use authenticated local test
+streams. Verified cross-machine routing, automatic authenticated discovery,
+general multi-device fan-out, groups, calls and interactive pairing remain
+open. The provider fixture and reproducible workflow are public.
+[Source versions, executable hashes and native trial results](../provenance/paired-mailbox-20261119.json) ·
+[Hosted trial](https://github.com/VOLPAROSSA/volparossa-chat/actions/runs/44519772345) ·
+[Core fixture](https://github.com/VOLPAROSSA/volparossa/pull/429) ·
+[Native workflow](../.github/workflows/native-receipts.yml).
 
 ## Keep Signal's identities and cryptography
 

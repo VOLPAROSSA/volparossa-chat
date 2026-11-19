@@ -88,8 +88,9 @@ function validate(manifest: Manifest): void {
       required.delete(entry.name);
     } else {
       const parts = entry.name.split('/');
-      ensure(parts.length === 3 && parts[0] === 'files' && MEDIA.test(parts[2]));
-      ensure(parts[1] === parts[2].slice(0, 2) && entry.size > 0);
+      const media = parts[2];
+      ensure(parts.length === 3 && parts[0] === 'files' && media !== undefined && MEDIA.test(media));
+      ensure(parts[1] === media.slice(0, 2) && entry.size > 0);
     }
     total += entry.size;
     ensure(total <= MAX_BYTES);

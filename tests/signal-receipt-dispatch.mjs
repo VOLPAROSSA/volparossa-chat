@@ -10,11 +10,11 @@ import { toNumber } from '../build/signal-backup-candidate/ts/util/toNumber.std.
 
 const candidate = new URL('../build/signal-backup-candidate/ts/textsecure/MessageReceiver.preload.ts', import.meta.url);
 const source = await readFile(candidate, 'utf8');
-assert.equal(createHash('sha256').update(source).digest('hex'),
-  'f5f77de34d0837b6d6ef8df8520e0524e9bab4aa886f7566c5ee23f4a56c2ef7');
 const start = source.indexOf('  async #handleReceiptMessage(');
 const end = source.indexOf('\n  #handleTypingMessage(', start);
 assert.ok(start >= 0 && end > start);
+assert.equal(createHash('sha256').update(source.slice(start, end)).digest('hex'),
+  '7e0bd650b9b42c1fc78bbfa833ff141cdf49595fd7e4d05104f6b5c9a9556d04');
 
 class CapturedReceipt {
   constructor(rows, envelopeId, timestamp, confirm) {

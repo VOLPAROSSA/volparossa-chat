@@ -17,6 +17,14 @@ Contributors can help turn the [proven backup slice](docs/BACKUP_CONNECTOR.md)
 into usable recovery, and join [Signal delivery](docs/SIGNAL_INTEGRATION.md)
 without breaking ordinary conversations or linked devices.
 
+Two explicitly paired, single-device Signal Desktop accounts can now exchange a
+private text while the recipient is offline. The normal composer uses the existing
+Signal session. The recipient picks up the encrypted message from two Core
+mailbox providers, imports it into the native conversation and returns an
+encrypted delivery receipt. The integration trial uses standalone test accounts
+and two signed stores in one isolated Linux environment.
+[Paired mailbox setup, recovery and current limits](docs/SIGNAL_INTEGRATION.md#paired-offline-text-on-linux).
+
 ## Development status
 
 Integration starts with Signal Desktop on Linux. The **native encrypted-backup round trip now passes with distributed fragments and one storage provider offline**: Signal exports and encrypts a snapshot, the original archive is removed, VOLPAROSSA reconstructs it from surviving fragment copies over its protected network, and Signal imports it with message and attachment checks. The [backup connector](docs/BACKUP_CONNECTOR.md#native-fragment-recovery-proof--2026-10-02) records the exact trial and boundaries. This is not yet a complete modified Signal client: decentralized messaging, calling, automatic storage contribution and recovery UX remain unfinished. Existing core messages are not already Signal messages.

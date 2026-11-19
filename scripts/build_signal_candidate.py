@@ -12,7 +12,7 @@ import stage_signal_dependencies as deps
 
 SOURCE_DATE_EPOCH = "1790198897"
 ASSETS = ("build:protobuf", "build:emoji-data", "build:rolldown:prod", "build:compact-locales",
-          "build:styles:prod", "get-expire-time", "build:policy-files")
+          "build:icu-types", "build:styles:prod", "get-expire-time", "build:policy-files", "check:types")
 STEPS = (
     ("types", ("--dir", "packages/types", "run", "build"), 300,
      ("packages/types/dist/index.std.cjs", "packages/types/dist/index.std.mjs")),
@@ -23,7 +23,7 @@ STEPS = (
     ("app-assets", ("exec", "run-s", "--print-label", *ASSETS), 1200,
      ("ts/protobuf/compiled.std.js", "build/emoji-data.json", "bundles/main.js",
       "bundles/preload/main.js", "bundles/workers/sql.js", "build/compact-locales/keys.json",
-      "build/compact-locales/en/values.json", "stylesheets/manifest.css",
+      "build/compact-locales/en/values.json", "build/ICUMessageParams.d.ts", "stylesheets/manifest.css",
       "stylesheets/manifest_bridge.css", "stylesheets/quill.css", "stylesheets/tailwind.css",
       "config/local-production.json", "build/org.signalapp.enable-backups.policy",
       "build/org.signalapp.plaintext-export.policy", "build/org.signalapp.view-aep.policy")),

@@ -1,0 +1,37 @@
+{
+  "both_provider_inboxes_empty": true,
+  "bridge_sha256": "2ba3eaa34c4e763b0ce05db1b76c8ae3116ca5bd6df52fe4fe42a90e1c4e1307",
+  "chat_revision": "37243fe3bf7136ae7ff6f58fcda0502b9b4341c5",
+  "confirm_before_import": 0,
+  "core_cli_sha256": "63adc1ed4ece493012e5d7db13c9940037d327b738ef59633a4df8b0cab57006",
+  "core_fixture_revision": "67ae4b6948f77cd33fd2af719878fc2d9b14ec96",
+  "core_provider_fixture_sha256": "b15af0c4cb349c753ea74ef1b1dc1f30fb82065c2f22d787ed1b4dd25a20d6cb",
+  "delivered_after_sender_restart": true,
+  "fixture_sha256": "901034e01650306fbdc6470c1c2c621a0d2e59ce222af92dac731bd10b5f08d5",
+  "mailbox_providers": 2,
+  "mailbox_transport": "local signed Core streams",
+  "native_network_interfaces": [
+    "lo"
+  ],
+  "native_row_survived_restart": true,
+  "original_signal_network": "isolated Signal test service",
+  "paired_stock_submissions": 0,
+  "private_profiles_removed": true,
+  "provider_stores_removed": true,
+  "receiver_offline_during_deposit": true,
+  "repeat_fetch_before_import": true,
+  "repeat_import_preserved_ratchet": true,
+  "runtime_sha256": {
+    "bundles/preload/main.js": "db2e8600d272710eff6fd0f01f37870c7a365c47788b45fcfd79971801b59367",
+    "bundles/workers/sql.js": "9cf0e8dbf9c4f2177d9c5ded6a0c948e759d64943e40f7f2ddd2373c3cf922bc",
+    "node_modules/@signalapp/libsignal-client/prebuilds/linux-x64/@signalapp+libsignal-client.node": "e24a9e4c701686327d602944de2fc383bccf1b93c371661dd5998f97d8aed7d4",
+    "node_modules/@signalapp/sqlcipher/prebuilds/linux-x64/@signalapp+sqlcipher.node": "47ef6ebf5ed1ecb9a3be3e94b58a01779f5e93b3fd87a2eac440e650bee05cef",
+    "node_modules/electron/dist/electron": "353895c51de01a5871dc0af9cd8bde08bd41fa907402885465569347dfc3c2b2"
+  },
+  "rustc": "rustc 1.89.0 (29483883e 2025-08-04)",
+  "sender_offline_during_pickup": true,
+  "signal_revision": "ef3872cb0249ec939d8aff857568a0e87a6b5075",
+  "standalone_desktops": 2,
+  "stock_messaging_before_pairing": true,
+  "version": 1
+}
