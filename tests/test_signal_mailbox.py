@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: AGPL-3.0-only
 """Offline tests of persistent application handoffs around the Core CLI boundary."""
+import contextlib
+import io
 import json
 from pathlib import Path
 import sys
 import tempfile
+from threading import Event
 import unittest
 from unittest.mock import Mock, patch
 
@@ -24,6 +27,42 @@ class MailboxHandoffTest(unittest.TestCase):
         self.bridge.config = {'receiveInvitation': 'in', 'sendInvitation': 'out', 'remoteOwner': '33' * 32}
         for group in ('outbox', 'custody', 'inbox', 'imported', 'retired'):
             mailbox.directory(self.root / group, True)
+
+    def test_worker_retries_the_failed_direction_while_other_queues_advance(self):
+        now = 0
+        calls = {'confirm': [], 'deposit': [], 'fetch': []}
+        stop = Event()
+
+        def advance(seconds):
+            nonlocal now
+            now += seconds
+            if now >= 10:
+                stop.set()
+
+        def transfer(root, state, operation, pending_only):
+            self.assertEqual((root, state), (self.root, self.bridge.state))
+            self.assertEqual(pending_only, operation != 'fetch')
+            calls[operation].append(now)
+            if operation == 'fetch' and now < 6:
+                raise ValueError('synthetic interruption')
+
+        output = io.StringIO()
+        with patch.object(mailbox.time, 'monotonic', lambda: now), patch.object(stop, 'wait', advance), \
+                patch.object(mailbox, 'transfer', transfer), contextlib.redirect_stdout(output):
+            mailbox.service(self.root, self.bridge.state, 30, stop)
+        self.assertEqual(calls['fetch'], [0, 2, 6])
+        self.assertEqual(calls['confirm'], list(range(10)))
+        self.assertEqual(calls['deposit'], list(range(10)))
+        self.assertEqual([json.loads(line)['state'] for line in output.getvalue().splitlines()],
+                         ['running', 'retrying', 'recovered', 'stopped'])
+
+    def test_duplicate_owner_worker_exits_and_releases_after_stop(self):
+        stop = Event()
+        stop.set()
+        with mailbox.locked(self.bridge.state, '.worker'), self.assertRaises(BlockingIOError):
+            mailbox.service(self.root, self.bridge.state, 30, stop)
+        with contextlib.redirect_stdout(io.StringIO()):
+            mailbox.service(self.root, self.bridge.state, 30, stop)
 
     def packet(self, direction):
         return json.dumps({'grant': self.bridge.pair[direction], 'synthetic': True}).encode()
@@ -122,6 +161,32 @@ class MailboxHandoffTest(unittest.TestCase):
         self.assertFalse(list((self.root / 'custody').iterdir()))
         with mailbox.closing(self.bridge.send_ledger()) as db:
             self.assertEqual(db.execute('SELECT count(*) FROM settled').fetchone(), (270,))
+
+    def test_interrupted_fetch_scratch_is_checked_and_reused(self):
+        staging = mailbox.directory(self.bridge.state / 'fetching', True)
+        packet = mailbox.directory(staging / ('77' * 32), True)
+        mailbox.publish(packet / '.tmpA4b2c6', b'partial Core private write')
+        mailbox.publish(packet / 'payload', b'opaque body')
+        mailbox.publish(packet / 'unknown', b'keep this')
+        self.bridge.cli = Mock()
+        with self.assertRaises(ValueError):
+            self.bridge.fetch()
+        self.bridge.cli.assert_not_called()
+        self.assertTrue((packet / 'unknown').exists())
+        self.assertTrue((packet / 'payload').exists())
+        (packet / 'unknown').unlink()
+
+        def empty_fetch(operation, *args):
+            self.assertEqual(operation, 'fetch')
+            self.assertFalse(staging.exists())
+            self.assertEqual(args[args.index('--output-dir') + 1], staging)
+            mailbox.directory(staging, True)
+            return {'messages_fetched': 0, 'acknowledged_providers_per_message': 0,
+                    'consumer_import_attested': False, 'provider_custody_consumed': False}
+
+        self.bridge.cli.side_effect = empty_fetch
+        self.assertEqual(self.bridge.fetch(), 0)
+        self.assertFalse(staging.exists())
 
     def test_empty_poll_future_arrival_and_native_import_confirmation(self):
         payload = self.packet('receiveGrant')

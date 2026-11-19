@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 import assert from 'node:assert/strict';
-import { writeFile, readFile, mkdir, readdir } from 'node:fs/promises';
+import { writeFile, readFile, mkdir, mkdtemp, readdir } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
+import { createInterface } from 'node:readline';
 import { promisify } from 'node:util';
 import Database from '@signalapp/sqlcipher';
 import { createHash } from 'node:crypto';
@@ -278,6 +279,239 @@ async function observedRow(
     return row.id;
   });
 }
+async function outgoingTimestamp(boot: Bootstrap, body: string) {
+  return until(async () =>
+    inspectNative(boot, sql => {
+      const rows = sql
+        .prepare(
+          "SELECT sent_at FROM messages WHERE type='outgoing' AND body = $body"
+        )
+        .all({ body });
+      if (!rows.length) return undefined;
+      assert.equal(rows.length, 1);
+      const value = rows[0]?.sent_at;
+      assert(
+        typeof value === 'number' && Number.isSafeInteger(value) && value > 0
+      );
+      return value;
+    })
+  );
+}
+
+async function startOwnerWorker(dir: string) {
+  const child = spawn(
+    '/usr/bin/python3',
+    [
+      '-B',
+      '/trial/signal_mailbox.py',
+      'run',
+      '--mailbox',
+      dir,
+      '--poll-seconds',
+      '1',
+    ],
+    { stdio: ['ignore', 'pipe', 'ignore'] }
+  );
+  const exited = new Promise<{
+    code: number | null;
+    signal: NodeJS.Signals | null;
+  }>((resolve, reject) => {
+    child.once('error', reject);
+    child.once('exit', (code, signal) => resolve({ code, signal }));
+  });
+  const lines = createInterface({ input: child.stdout });
+  try {
+    await Promise.race([
+      new Promise<void>((resolve, reject) =>
+        lines.once('line', line => {
+          try {
+            assert.deepEqual(JSON.parse(line), {
+              operation: 'run',
+              state: 'running',
+            });
+            resolve();
+          } catch (error) {
+            reject(error);
+          }
+        })
+      ),
+      exited.then(() => {
+        throw Error('Worker exited before readiness');
+      }),
+    ]);
+  } catch (error) {
+    child.kill();
+    throw error;
+  } finally {
+    lines.close();
+    child.stdout.resume();
+  }
+  return async (signal: NodeJS.Signals = 'SIGTERM') => {
+    if (child.exitCode !== null || child.signalCode !== null) return;
+    child.kill(signal);
+    const result = await exited;
+    if (signal === 'SIGKILL') assert.equal(result.signal, signal);
+    else assert.equal(result.code, 0);
+  };
+}
+
+async function providerInbox(dir: string) {
+  const cfg = JSON.parse(await readFile(join(dir, 'core.json'), 'utf8'));
+  const root = await mkdtemp('/tmp/r/worker-observation-');
+  const { stdout } = await promisify(execFile)(
+    cfg.executable,
+    [
+      '--control-socket',
+      cfg.socket,
+      'content',
+      'mailbox',
+      'fetch',
+      '--invitation',
+      cfg.receiveInvitation,
+      '--identity',
+      cfg.identity,
+      '--passphrase-file',
+      cfg.passphrase,
+      '--output-dir',
+      join(root, 'messages'),
+    ],
+    { timeout: 180000 }
+  );
+  const result = JSON.parse(stdout);
+  assert.equal(result.listed_providers, 2);
+  assert.equal(result.acknowledged_providers_per_message, 0);
+  assert.equal(result.consumer_import_attested, false);
+  const packets: Buffer[] = [];
+  for (const item of result.pending) packets.push(await readFile(item.payload));
+  assert.equal(packets.length, result.messages_fetched);
+  return packets;
+}
+
+async function ownerTransfer(
+  a: Bootstrap,
+  b: Bootstrap,
+  alice: App,
+  da: Device,
+  left: string,
+  right: string
+) {
+  const workers: Array<(signal?: NodeJS.Signals) => Promise<void>> = [];
+  const start = async (dir: string) => {
+    const stop = await startOwnerWorker(dir);
+    workers.push(stop);
+    return stop;
+  };
+  try {
+    await phase('worker-outgoing');
+    const body = 'Offline delivery by an enabled owner worker.';
+    await send(alice, body);
+    const stamp = await outgoingTimestamp(a, body);
+    const original = await readPacket(left, stamp);
+    assert.equal((await providerInbox(right)).length, 0);
+    const stopFirst = await start(left);
+    const senderId = await observedRow(
+      alice,
+      stamp,
+      body,
+      'outgoing',
+      undefined,
+      'Sent'
+    );
+    await alice.close();
+    await stopFirst();
+
+    await phase('worker-offline-pickup');
+    const stopReceiver = await start(right);
+    await until(async () =>
+      (await readdir(join(right, 'inbox'))).includes(original.key)
+        ? true
+        : undefined
+    );
+    assert.deepEqual(
+      await readFile(join(right, 'inbox', original.key)),
+      original.bytes
+    );
+    await stopReceiver();
+    const stillAtProviders = async () =>
+      (await providerInbox(right)).some(packet =>
+        packet.equals(original.bytes)
+      );
+    assert(await stillAtProviders());
+    const recipient = await b.startApp();
+    const incomingId = await observedRow(
+      recipient,
+      stamp,
+      body,
+      'incoming',
+      da
+    );
+    await until(async () =>
+      (await readdir(join(right, 'imported'))).includes(original.key)
+        ? true
+        : undefined
+    );
+    assert(await stillAtProviders());
+
+    await phase('worker-native-confirmation');
+    await start(right);
+    await until(async () =>
+      !(await readdir(join(right, 'inbox'))).includes(original.key)
+        ? true
+        : undefined
+    );
+    assert.equal(await stillAtProviders(), false);
+    await until(
+      async () => ((await providerInbox(left)).length > 0 ? true : undefined),
+      70
+    );
+    const stopInterrupted = await start(left);
+    await until(async () =>
+      (await readdir(join(left, 'inbox'))).length > 0 ? true : undefined
+    );
+    await stopInterrupted('SIGKILL');
+    await start(left);
+    const sender = await a.startApp();
+    await phase('worker-sender-restart');
+    assert.equal(
+      await observedRow(
+        sender,
+        stamp,
+        body,
+        'outgoing',
+        undefined,
+        'Delivered'
+      ),
+      senderId
+    );
+    assert.equal(
+      await observedRow(recipient, stamp, body, 'incoming', da),
+      incomingId
+    );
+    await until(async () => {
+      for (const dir of [left, right]) {
+        for (const name of [
+          'outbox',
+          'custody',
+          'inbox',
+          'imported',
+          'retired',
+          'transport/received',
+        ]) {
+          if ((await readdir(join(dir, name))).length) return undefined;
+        }
+      }
+      return (await providerInbox(left)).length === 0 &&
+        (await providerInbox(right)).length === 0
+        ? true
+        : undefined;
+    }, 75);
+    await sender.close();
+    await recipient.close();
+  } finally {
+    for (const stop of workers.reverse()) await stop();
+  }
+}
+
 async function volumeMessages(
   a: Bootstrap,
   b: Bootstrap,
@@ -569,29 +803,37 @@ describe('native paired Signal mailbox', function () {
       const left = await configure(a, 'a', da, db);
       const right = await configure(b, 'b', db, da);
       await bob.close();
+      if (process.env.CHAT_NATIVE_WORKER === '1') {
+        closed = true;
+        await ownerTransfer(a, b, alice, da, left, right);
+        assert.equal(forbidden, 0);
+        await writeFile(
+          process.env.CHAT_NATIVE_RESULT!,
+          JSON.stringify({
+            version: 1,
+            standalone_desktops: 2,
+            mailbox_providers: 2,
+            receiver_offline_during_deposit: true,
+            sender_offline_during_pickup: true,
+            worker_stopped_before_native_import: true,
+            custody_retained_while_worker_stopped: true,
+            worker_killed_after_pickup: true,
+            original_row_delivered_after_restart: true,
+            original_incoming_row_retained: true,
+            paired_stock_submissions: forbidden,
+            both_provider_inboxes_empty: true,
+            settled_handoffs_removed: true,
+          }),
+          { flag: 'wx', mode: 0o600 }
+        );
+        return;
+      }
       await seedPreviousMailbox(b, right);
       closed = true;
       await phase('offline-send');
       const body = 'Private offline synthetic message.';
       await send(alice, body);
-      const stamp = await until(async () =>
-        inspectNative(a, sql => {
-          const rows = sql
-            .prepare(
-              "SELECT sent_at FROM messages WHERE type='outgoing' AND body = $body"
-            )
-            .all({ body });
-          if (!rows.length) return undefined;
-          assert.equal(rows.length, 1);
-          const value = rows[0]?.sent_at;
-          assert(
-            typeof value === 'number' &&
-              Number.isSafeInteger(value) &&
-              value > 0
-          );
-          return value;
-        })
-      );
+      const stamp = await outgoingTimestamp(a, body);
       const outgoing = await readPacket(left, stamp);
       assert.equal(outgoing.packet.from.aci, da.aci);
       assert.equal(outgoing.packet.to.aci, db.aci);
