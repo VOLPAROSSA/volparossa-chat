@@ -66,26 +66,40 @@ def join(process):
             process.wait(timeout=5)
 
 
-def run_inside():
+def run_desktops():
+    unix = Path('/tmp/.X11-unix')
+    unix.mkdir(mode=0o1777, exist_ok=True)
+    with subprocess.Popen(['/trial/Xvfb', ':156', '-screen', '0', '1280x1024x24', '-nolisten', 'tcp']) as display:
+        try:
+            wait_ready(display, (unix / 'X156').is_socket, time.monotonic() + 10)
+            command = ['node', 'node_modules/mocha/bin/mocha.js', '--forbid-pending', '--fail-zero',
+                       '--require', 'ts/test-mock/setup-ci.node.ts', '--grep', '^' + TITLE + '$',
+                       '--reporter', 'spec', TARGET]
+            subprocess.run(command, env=os.environ | {'DISPLAY': ':156'}, timeout=275, check=True)
+        finally:
+            join(display)
+
+
+def run_inside(prepared):
     check(sorted(name for _, name in socket.if_nameindex()) == ['lo'], 'isolated loopback required')
-    root = Path('/tmp/r')
-    state = root / 'providers'
+    state = Path('/tmp/r/providers')
+    if prepared:
+        cli = '/trial/core/volparossa'
+        agent = '/trial/core/agent.sock'
+        check(Path(agent).is_socket(), 'missing prepared Core agent')
+        for side in ('a', 'b'):
+            config = json.loads((state / side / 'core.json').read_bytes())
+            check(config['executable'] == cli and config['socket'] == agent, 'prepared Core binding differs')
+        status = subprocess.check_output([cli, '--control-socket', agent, 'content', 'status'], timeout=15)
+        check(bool(json.loads(status)['control_relay_peer_id']), 'prepared agent has no active control relay')
+        run_desktops()
+        return
     state.mkdir(mode=0o700)
     with subprocess.Popen(['/trial/core/mailbox-provider-pair', str(state)], stdin=subprocess.PIPE) as provider:
         try:
             wait_ready(provider, (state / 'ready').is_file, time.monotonic() + 100)
-            unix = Path('/tmp/.X11-unix')
-            unix.mkdir(mode=0o1777, exist_ok=True)
-            with subprocess.Popen(['/trial/Xvfb', ':156', '-screen', '0', '1280x1024x24', '-nolisten', 'tcp']) as display:
-                try:
-                    wait_ready(display, (unix / 'X156').is_socket, time.monotonic() + 10)
-                    command = ['node', 'node_modules/mocha/bin/mocha.js', '--forbid-pending', '--fail-zero',
-                               '--require', 'ts/test-mock/setup-ci.node.ts', '--grep', '^' + TITLE + '$',
-                               '--reporter', 'spec', TARGET]
-                    result = subprocess.run(command, env=os.environ | {'DISPLAY': ':156'}, timeout=275)
-                    check(result.returncode == 0 and provider.poll() is None, 'native mailbox trial failed')
-                finally:
-                    join(display)
+            run_desktops()
+            check(provider.poll() is None, 'provider stopped during native mailbox trial')
         finally:
             provider.stdin.close()
             try:
@@ -175,14 +189,16 @@ def trial(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--inside', action='store_true', help=argparse.SUPPRESS)
+    parser.add_argument('--prepared-providers', action='store_true', help='use the existing Core KVM guest agent inside the native sandbox')
     parser.add_argument('--core-source', type=Path, help='clean checkout of the pinned Core revision with locked dependencies available')
     parser.add_argument('--cargo-target', type=Path, help='reuse compatible Cargo intermediates for the offline build')
     parser.add_argument('--xvfb', type=Path, default=shutil.which('Xvfb'))
     try:
         args = parser.parse_args()
         if args.inside:
-            run_inside()
+            run_inside(args.prepared_providers)
         else:
+            check(not args.prepared_providers, 'prepared providers require the existing isolated guest sandbox')
             check(args.core_source and args.xvfb, 'provide --core-source and an installed or explicit --xvfb')
             trial(args)
     except (OSError, ValueError, subprocess.SubprocessError) as error:
