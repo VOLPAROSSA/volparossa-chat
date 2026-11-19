@@ -333,17 +333,25 @@ describe('native paired Signal mailbox', function () {
       const right = await configure(b, 'b', db, da);
       await bob.close();
       closed = true;
-      await phase('offline-send');
+      await phase('offline-compose');
       const body = 'Private offline synthetic message.';
       await send(alice, body);
-      const label = (await alice.getWindow())
-        .locator('.ConversationView')
-        .getByText(body, { exact: true });
-      const stamp = await label.evaluate((e) =>
-        Number(e.closest('[data-testid]')?.getAttribute('data-testid')),
+      await phase('outgoing-row');
+      const stamp = await until(async () =>
+        inspectNative(a, sql => {
+          const rows = sql.prepare(
+            "SELECT sent_at FROM messages WHERE type = 'outgoing' AND body = $body"
+          ).all({ body });
+          if (!rows.length) return undefined;
+          assert.equal(rows.length, 1);
+          const value = rows[0]?.sent_at;
+          assert(typeof value === 'number' && Number.isSafeInteger(value) && value > 0);
+          return value;
+        })
       );
-      assert(Number.isSafeInteger(stamp) && stamp > 0);
+      await phase('private-outbox');
       const outgoing = await readPacket(left, stamp);
+      await phase('outbox-binding');
       assert.equal(outgoing.packet.from.aci, da.aci);
       assert.equal(outgoing.packet.to.aci, db.aci);
       assert(!outgoing.bytes.includes(Buffer.from(body)));

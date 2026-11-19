@@ -167,7 +167,7 @@ def trial(args):
         if status.returncode:
             phase = (private / 'phase').read_text() if (private / 'phase').is_file() else 'bootstrap'
             check(phase in {'bootstrap', 'register-a', 'register-b', 'open-before', 'warm-send', 'warm-receive',
-                  'warm-reply', 'stock-acknowledgements', 'pair', 'offline-send', 'provider-custody', 'offline-fetch',
+                  'warm-reply', 'stock-acknowledgements', 'pair', 'offline-compose', 'outgoing-row', 'private-outbox', 'outbox-binding', 'provider-custody', 'offline-fetch',
                   'recipient-reopen', 'confirm-native-import', 'peer-receipt', 'sender-reopen', 'complete'},
                   'unexpected fixture phase')
             raise ValueError('native mailbox trial failed during ' + phase)
