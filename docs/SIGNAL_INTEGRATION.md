@@ -102,6 +102,16 @@ original rows and the sender's delivery status for every text.
 [Core fixture](https://github.com/VOLPAROSSA/volparossa/pull/429) ·
 [Native workflow](../.github/workflows/native-receipts.yml).
 
+The joint two-provider trial retained the migrated manual Desktop exchange and
+its protected route. Its first run stopped before the background worker could
+start a separate route capture. In the second run the worker reached native
+confirmation after the receiving Desktop imported the original message. The
+full interrupted worker exchange remains open. Both guests confirmed cleanup.
+[First original archive](evidence/signal-mailbox-45512220232.zip) ·
+[Second original archive](evidence/signal-mailbox-45517291030.zip) ·
+[First run](https://github.com/VOLPAROSSA/volparossa/actions/runs/45512220232) ·
+[Second run](https://github.com/VOLPAROSSA/volparossa/actions/runs/45517291030)
+
 ## Keep Signal's identities and cryptography
 
 Signal remains the owner of ACI/PNI identities, device IDs, registration IDs, safety-number/identity-change decisions, protocol sessions, prekeys and message decoding. VOLPAROSSA supplies transport and opaque storage through a narrow local interface; it must not receive Signal identity private keys, session stores, recovery keys or decrypted chat databases. Do not create a second ratchet store for the alternate transport.

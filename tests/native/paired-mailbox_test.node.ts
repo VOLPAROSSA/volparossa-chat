@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 import assert from 'node:assert/strict';
-import { writeFile, readFile, mkdir, mkdtemp, readdir } from 'node:fs/promises';
+import { writeFile, readFile, mkdir, mkdtemp, readdir, rm } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { createInterface } from 'node:readline';
 import { promisify } from 'node:util';
@@ -364,36 +364,48 @@ async function startOwnerWorker(dir: string) {
   };
 }
 
+async function waitForDeliveryReceipt(recipient: App, stamp: number) {
+  for (let i = 0; i < 8; i++) {
+    const event = await recipient.waitForReceipts();
+    if (event.type === 'deliveryReceipt' && event.timestamps.includes(stamp)) return;
+  }
+  throw Error('Native sender did not report the exact delivery receipt');
+}
+
 async function providerInbox(dir: string) {
   const cfg = JSON.parse(await readFile(join(dir, 'core.json'), 'utf8'));
   const root = await mkdtemp('/tmp/r/worker-observation-');
-  const { stdout } = await promisify(execFile)(
-    cfg.executable,
-    [
-      '--control-socket',
-      cfg.socket,
-      'content',
-      'mailbox',
-      'fetch',
-      '--invitation',
-      cfg.receiveInvitation,
-      '--identity',
-      cfg.identity,
-      '--passphrase-file',
-      cfg.passphrase,
-      '--output-dir',
-      join(root, 'messages'),
-    ],
-    { timeout: 180000 }
-  );
-  const result = JSON.parse(stdout);
-  assert.equal(result.listed_providers, 2);
-  assert.equal(result.acknowledged_providers_per_message, 0);
-  assert.equal(result.consumer_import_attested, false);
-  const packets: Buffer[] = [];
-  for (const item of result.pending) packets.push(await readFile(item.payload));
-  assert.equal(packets.length, result.messages_fetched);
-  return packets;
+  try {
+    const { stdout } = await promisify(execFile)(
+      cfg.executable,
+      [
+        '--control-socket',
+        cfg.socket,
+        'content',
+        'mailbox',
+        'fetch',
+        '--invitation',
+        cfg.receiveInvitation,
+        '--identity',
+        cfg.identity,
+        '--passphrase-file',
+        cfg.passphrase,
+        '--output-dir',
+        join(root, 'messages'),
+      ],
+      { timeout: 180000 }
+    );
+    const result = JSON.parse(stdout);
+    assert.equal(result.listed_providers, 2);
+    assert.equal(result.acknowledged_providers_per_message, 0);
+    assert.equal(result.consumer_import_attested, false);
+    const packets: Buffer[] = [];
+    for (const item of result.pending) packets.push(await readFile(item.payload));
+    assert.equal(packets.length, result.messages_fetched);
+    return packets;
+  } finally {
+    await rm(root, { recursive: true });
+  }
 }
 
 async function ownerTransfer(
@@ -462,17 +474,22 @@ async function ownerTransfer(
     assert(await stillAtProviders());
 
     await phase('worker-native-confirmation');
+    const delivered = waitForDeliveryReceipt(recipient, stamp);
+    void delivered.catch(() => undefined);
     await start(right);
     await until(async () =>
       !(await readdir(join(right, 'inbox'))).includes(original.key)
         ? true
         : undefined
     );
+    await phase('worker-confirmed-provider-check');
     assert.equal(await stillAtProviders(), false);
-    await until(
-      async () => ((await providerInbox(left)).length > 0 ? true : undefined),
-      70
-    );
+    await phase('worker-delivery-receipt');
+    // A previously authorized profile update can precede the receipt in the same inbox.
+    // Wait on Signal's event for the original text, then take one independent provider observation.
+    await delivered;
+    assert((await providerInbox(left)).length > 0);
+    await phase('worker-sender-pickup');
     const stopInterrupted = await start(left);
     await until(async () =>
       (await readdir(join(left, 'inbox'))).some(name =>
@@ -481,6 +498,7 @@ async function ownerTransfer(
         ? true
         : undefined
     );
+    await phase('worker-interrupted-restart');
     await stopInterrupted('SIGKILL');
     await start(left);
     const sender = await a.startApp();
@@ -915,19 +933,9 @@ describe('native paired Signal mailbox', function () {
       // A contact can also send its already authorized profile update. Deposit every
       // real packet and wait for the native receipt sender to finish this exact message.
       let receiptSent = false;
-      const deliveryEvent = (async () => {
-        for (let i = 0; i < 8; i++) {
-          const event = await recipient.waitForReceipts();
-          if (
-            event.type === 'deliveryReceipt' &&
-            event.timestamps.includes(ts)
-          ) {
-            receiptSent = true;
-            return;
-          }
-        }
-        throw Error('Native sender did not report the exact delivery receipt');
-      })();
+      const deliveryEvent = waitForDeliveryReceipt(recipient, ts).then(() => {
+        receiptSent = true;
+      });
       void deliveryEvent.catch(() => undefined);
       await until(async () => {
         await command(right, 'deposit');
